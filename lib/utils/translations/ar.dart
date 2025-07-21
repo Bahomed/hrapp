@@ -454,6 +454,8 @@ const Map<String, String> arTranslations = {
   'create_leave_request': 'إنشاء طلب إجازة',
   'edit_letter_request': 'تعديل طلب الرسالة',
   'edit_loan_request': 'تعديل طلب القرض',
+  'edit_leave_request': 'تعديل طلب الإجازة',
+  'edit_permission_request': 'تعديل طلب الإذن',
   
   // Request Descriptions
   'loan_request_description': 'طلب مساعدة مالية',
@@ -462,6 +464,8 @@ const Map<String, String> arTranslations = {
   'leave_request_description': 'طلب إجازة من العمل',
   'edit_letter_request_description': 'تعديل تفاصيل طلب الرسالة',
   'edit_loan_request_description': 'تعديل تفاصيل طلب القرض',
+  'edit_leave_request_description': 'تعديل تفاصيل طلب الإجازة',
+  'edit_permission_request_description': 'تعديل تفاصيل طلب الإذن',
   
   // Form Fields
   'loan_type': 'نوع القرض',
@@ -490,7 +494,7 @@ const Map<String, String> arTranslations = {
   'please_enter_repayment_period': 'يرجى إدخال فترة السداد',
   'please_enter_valid_number': 'يرجى إدخال رقم صحيح',
   'repayment_period_minimum': 'يجب أن تكون فترة السداد شهر واحد على الأقل',
-  'repayment_period_maximum': 'لا يمكن أن تتجاوز فترة السداد 120 شهراً',
+  'repayment_period_maximum': 'لا يمكن أن تتجاوز فترة السداد 24 شهراً',
   'please_provide_purpose': 'يرجى تقديم الغرض',
   'please_provide_reason': 'يرجى تقديم السبب',
   'purpose_minimum_characters': 'يجب أن يكون الغرض 10 أحرف على الأقل',
@@ -508,6 +512,8 @@ const Map<String, String> arTranslations = {
   'submit_leave_request': 'إرسال طلب الإجازة',
   'update_letter_request': 'تحديث طلب الرسالة',
   'update_loan_request': 'تحديث طلب القرض',
+  'update_leave_request': 'تحديث طلب الإجازة',
+  'update_permission_request': 'تحديث طلب الإذن',
   
   // Request Info
   'request_id': 'رقم الطلب',

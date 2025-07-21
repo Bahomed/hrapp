@@ -454,6 +454,8 @@ const Map<String, String> enTranslations = {
   'create_leave_request': 'Create Leave Request',
   'edit_letter_request': 'Edit Letter Request',
   'edit_loan_request': 'Edit Loan Request',
+  'edit_leave_request': 'Edit Leave Request',
+  'edit_permission_request': 'Edit Permission Request',
   
   // Request Descriptions
   'loan_request_description': 'Request financial assistance',
@@ -462,6 +464,8 @@ const Map<String, String> enTranslations = {
   'leave_request_description': 'Request time off from work',
   'edit_letter_request_description': 'Modify your letter request details',
   'edit_loan_request_description': 'Modify your loan request details',
+  'edit_leave_request_description': 'Modify your leave request details',
+  'edit_permission_request_description': 'Modify your permission request details',
   
   // Form Fields
   'loan_type': 'Loan Type',
@@ -490,7 +494,7 @@ const Map<String, String> enTranslations = {
   'please_enter_repayment_period': 'Please enter repayment period',
   'please_enter_valid_number': 'Please enter a valid number',
   'repayment_period_minimum': 'Repayment period must be at least 1 month',
-  'repayment_period_maximum': 'Repayment period cannot exceed 120 months',
+  'repayment_period_maximum': 'Repayment period cannot exceed 24 months',
   'please_provide_purpose': 'Please provide the purpose',
   'please_provide_reason': 'Please provide a reason',
   'purpose_minimum_characters': 'Purpose must be at least 10 characters',
@@ -508,6 +512,8 @@ const Map<String, String> enTranslations = {
   'submit_leave_request': 'Submit Leave Request',
   'update_letter_request': 'Update Letter Request',
   'update_loan_request': 'Update Loan Request',
+  'update_leave_request': 'Update Leave Request',
+  'update_permission_request': 'Update Permission Request',
   
   // Request Info
   'request_id': 'Request ID',
