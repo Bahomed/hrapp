@@ -5,7 +5,10 @@ import '../../utils/app_theme.dart';
 import '../../utils/responsive_utils.dart';
 import '../../services/theme_service.dart';
 import 'attendance_calendar_controller.dart';
+<<<<<<< HEAD
 import 'attendance_detail_screen.dart';
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 
 class AttendanceCalendarScreen extends StatelessWidget {
   const AttendanceCalendarScreen({super.key});
@@ -32,6 +35,7 @@ class AttendanceCalendarScreen extends StatelessWidget {
         iconTheme: IconThemeData(
           color: themeService.getTextPrimaryColor(),
         ),
+<<<<<<< HEAD
         actions: [
           IconButton(
             onPressed: () {
@@ -44,6 +48,8 @@ class AttendanceCalendarScreen extends StatelessWidget {
             tooltip: 'Weekly Attendance',
           ),
         ],
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -227,6 +233,7 @@ class AttendanceCalendarScreen extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+<<<<<<< HEAD
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
@@ -249,6 +256,23 @@ class AttendanceCalendarScreen extends StatelessWidget {
                   color: Colors.white,
                   size: 10,
                 ),
+=======
+          children: [
+            Text(
+              day.day.toString(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isToday || hasData
+                    ? Colors.white
+                    : themeService.getTextPrimaryColor(),
+                fontWeight: hasData ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+            if (hasData && status != 'Present')
+              Icon(
+                status == 'Absent' ? Icons.close : Icons.warning,
+                color: Colors.white,
+                size: 12,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
               ),
           ],
         ),

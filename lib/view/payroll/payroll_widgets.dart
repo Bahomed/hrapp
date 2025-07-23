@@ -5,8 +5,12 @@ import 'package:injazat_hr_app/data/remote/response/payroll_summary_response.dar
 import 'package:injazat_hr_app/utils/app_theme.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
 import 'package:injazat_hr_app/view/payroll/payroll_controller.dart';
+<<<<<<< HEAD
 import 'package:injazat_hr_app/widgets/saudi_riyal_display.dart';
 import '../../../services/theme_service.dart';
+=======
+import 'package:saudi_riyal_symbol/saudi_riyal_symbol.dart';
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 
 class PayrollStatusChip extends StatelessWidget {
   final String status;
@@ -15,10 +19,13 @@ class PayrollStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
     final isSmallScreen = screenWidth < 400;
     
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     Color backgroundColor;
     Color textColor;
     String text;
@@ -33,26 +40,39 @@ class PayrollStatusChip extends StatelessWidget {
         icon = Icons.check_circle_outline;
         break;
       case 'pending':
+<<<<<<< HEAD
         backgroundColor = AppTheme.warningColor.withOpacity(0.1);
+=======
+        backgroundColor = AppTheme.warningColor.withOpacity( 0.1);
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         textColor = AppTheme.warningColor;
         text = 'Pending';
         icon = Icons.schedule;
         break;
       case 'failed':
       case 'rejected':
+<<<<<<< HEAD
         backgroundColor = AppTheme.errorColor.withOpacity(0.1);
+=======
+        backgroundColor = AppTheme.errorColor.withOpacity( 0.1);
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         textColor = AppTheme.errorColor;
         text = 'Failed';
         icon = Icons.error_outline;
         break;
       default:
+<<<<<<< HEAD
         backgroundColor = AppTheme.textSecondary.withOpacity(0.1);
+=======
+        backgroundColor = AppTheme.textSecondary.withOpacity( 0.1);
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         textColor = AppTheme.textSecondary;
         text = 'Unknown';
         icon = Icons.circle;
     }
 
     return Container(
+<<<<<<< HEAD
       padding: EdgeInsets.symmetric(
         horizontal: isTablet ? 12 : (isSmallScreen ? 8 : 10),
         vertical: isTablet ? 8 : (isSmallScreen ? 6 : 7),
@@ -60,21 +80,36 @@ class PayrollStatusChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(isTablet ? 20 : 16),
+=======
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+<<<<<<< HEAD
           Icon(
             icon, 
             size: isTablet ? 16 : (isSmallScreen ? 12 : 14), 
             color: textColor,
           ),
           SizedBox(width: isTablet ? 6 : (isSmallScreen ? 4 : 5)),
+=======
+          Icon(icon, size: 16, color: textColor),
+          const SizedBox(width: 6),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           Text(
             text,
             style: TextStyle(
               color: textColor,
+<<<<<<< HEAD
               fontSize: isTablet ? 14 : (isSmallScreen ? 11 : 12),
+=======
+              fontSize: 14,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -92,12 +127,18 @@ class PayrollCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PayrollController>();
+<<<<<<< HEAD
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
     final isSmallScreen = screenWidth < 400;
 
     return Container(
       margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
+=======
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -106,6 +147,7 @@ class PayrollCard extends StatelessWidget {
           child: ScreenThemes.buildPayrollCard(
             context: context,
             child: Column(
+<<<<<<< HEAD
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Row - Stack on very small screens
@@ -407,12 +449,156 @@ class PayrollCard extends StatelessWidget {
                 ],
               ],
             ),
+=======
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      record.period, // Using period as formattedPeriod
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${record.month} ${record.year}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PayrollStatusChip(status: record.status),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Amount Section
+          Row(
+            children: [
+              Expanded(
+                child: _buildAmountCard(
+                  context,
+                  'Gross Pay',
+                  SaudiCurrencySymbol(
+                    price: record.totalBenefits,
+                    priceStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    symbolFontSize: 14,
+                  ),
+                  AppTheme.successColor,
+                  AppTheme.successColor.withOpacity( 0.1),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAmountCard(
+                  context,
+                  'Deductions',
+                  SaudiCurrencySymbol(
+                    price: record.totalDeductions,
+                    priceStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    symbolFontSize: 14,
+                  ),
+                  AppTheme.errorColor,
+                  AppTheme.errorColor.withOpacity( 0.1),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAmountCard(
+                  context,
+                  'Net Pay',
+                  SaudiCurrencySymbol(
+                    price: record.netSalary,
+                    priceStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    symbolFontSize: 14,
+                  ),
+                  AppTheme.getActionColor('payroll'),
+                  AppTheme.getActionColor('payroll').withOpacity( 0.1),
+                ),
+              ),
+            ],
+          ),
+
+          if (record.status.toLowerCase() == 'processed') ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.6),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Paid on ${record.paymentDate}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.6),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.visibility_outlined,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.6),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Tap to view details',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.6),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ] else if (record.status.toLowerCase() == 'pending') ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: AppTheme.warningColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Expected payment: ${record.paymentDate}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.warningColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+            ),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           ),
         ),
       ),
     );
   }
 
+<<<<<<< HEAD
   Widget _buildAmountCard(
     BuildContext context, 
     String title, 
@@ -436,16 +622,33 @@ class PayrollCard extends StatelessWidget {
         crossAxisAlignment: isNetPay && !isTablet 
           ? CrossAxisAlignment.center 
           : CrossAxisAlignment.start,
+=======
+  Widget _buildAmountCard(BuildContext context, String title, Widget amount, Color textColor, Color backgroundColor) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         children: [
           Text(
             title,
             style: TextStyle(
+<<<<<<< HEAD
               fontSize: isTablet ? 10 : 9,
               color: textColor.withOpacity(0.8),
+=======
+              fontSize: 10,
+              color: textColor.withOpacity( 0.8),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
             textAlign: isNetPay && !isTablet 
               ? TextAlign.center 
               : TextAlign.start,
@@ -454,12 +657,18 @@ class PayrollCard extends StatelessWidget {
           Flexible(
             child: amount,
           ),
+=======
+          ),
+          const SizedBox(height: 4),
+          amount,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         ],
       ),
     );
   }
 }
 
+<<<<<<< HEAD
 class PayrollSummaryTable extends StatelessWidget {
   final RxList<PayrollSummaryItem> summaryItems;
 
@@ -481,12 +690,36 @@ class PayrollSummaryTable extends StatelessWidget {
                 : AppTheme.getActionColor('payroll').withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
+=======
+class PayrollSummaryCard extends StatelessWidget {
+  final PayrollSummaryResponseData summary;
+
+  const PayrollSummaryCard({super.key, required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.getActionColor('payroll'), AppTheme.getActionColor('payroll').withOpacity( 0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.getActionColor('payroll').withOpacity( 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+<<<<<<< HEAD
           Padding(
             padding: EdgeInsets.all(isTablet ? 20 : 16),
             child: Column(
@@ -671,6 +904,93 @@ class PayrollSummaryTable extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: ThemeService.instance.getTextSecondaryColor(),
               ),
+=======
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Year to Date Summary',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity( 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${summary.totalPayslips} payslips',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryItem(
+                  'Gross Earnings',
+                  SaudiCurrencySymbol(
+                    price: summary.totalGrossEarnings,
+                    priceStyle: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w700),
+                    symbolFontSize: 16,
+                    symbolFontColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSummaryItem(
+                  'Total Deductions',
+                  SaudiCurrencySymbol(
+                    price: summary.totalDeductions,
+                    priceStyle: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w700),
+                    symbolFontSize: 16,
+                    symbolFontColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity( 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Net Earnings',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SaudiCurrencySymbol(
+                  price: summary.netEarnings,
+                  priceStyle: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
+                  symbolFontSize: 20,
+                  symbolFontColor: Colors.white,
+                ),
+              ],
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
             ),
           ),
         ],
@@ -678,6 +998,7 @@ class PayrollSummaryTable extends StatelessWidget {
     );
   }
 
+<<<<<<< HEAD
   Widget _buildTableRow(PayrollSummaryItem item) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -855,6 +1176,66 @@ class PayrollSummaryTable extends StatelessWidget {
               color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.8),
               fontWeight: FontWeight.w500,
             ),
+=======
+  Widget _buildSummaryItem(String title, Widget amount) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity( 0.8),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        amount,
+      ],
+    );
+  }
+}
+
+class EmptyPayrollState extends StatelessWidget {
+  final String message;
+
+  const EmptyPayrollState({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 64,
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.4),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity( 0.7),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              final controller = Get.find<PayrollController>();
+              controller.refreshPayrollData();
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.getActionColor('payroll'),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           ),
         ],
       ),
@@ -868,6 +1249,7 @@ class PayrollYearSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PayrollController>();
+<<<<<<< HEAD
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
     final isSmallScreen = screenWidth < 400;
@@ -924,5 +1306,55 @@ class PayrollYearSelector extends StatelessWidget {
         ),
       ),
     ));
+=======
+
+    return Obx(() => GestureDetector(
+          onTap: controller.showYearPicker,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 100),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppTheme.getActionColor('payroll')),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.getActionColor('payroll').withOpacity( 0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 14,
+                  color: AppTheme.getActionColor('payroll'),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    controller.selectedYear.value,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.getActionColor('payroll'),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 14,
+                  color: AppTheme.getActionColor('payroll'),
+                ),
+              ],
+            ),
+          ),
+        ));
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   }
 }

@@ -61,7 +61,10 @@ class ThemeWidgets {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 Text(title, style: AppTheme.bodyLarge),
                 if (subtitle != null) ...[
                   const SizedBox(height: AppTheme.spacingXSmall),

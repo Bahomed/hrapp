@@ -340,7 +340,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
+<<<<<<< HEAD
           color: themeService.getSurfaceColor(),
+=======
+          color: themeService.getCardColor(),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SingleChildScrollView(

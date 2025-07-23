@@ -138,8 +138,11 @@ class ScheduleTemplate {
   final String id;
   final String name;
   final String description;
+<<<<<<< HEAD
   final String gracePeriod;
   final String overtime;
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   final WorkSchedule workSchedule;
   final bool isDefault;
   final DateTime createdAt;
@@ -148,9 +151,13 @@ class ScheduleTemplate {
   ScheduleTemplate({
     required this.id,
     required this.name,
+<<<<<<< HEAD
     this.description = '',
     required this.gracePeriod,
     required this.overtime,
+=======
+    required this.description,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     required this.workSchedule,
     required this.isDefault,
     required this.createdAt,
@@ -162,8 +169,11 @@ class ScheduleTemplate {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
+<<<<<<< HEAD
       gracePeriod: json['grace_period'] ?? '0',
       overtime: json['overtime'] ?? 'N',
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       workSchedule: WorkSchedule.fromJson(json['work_schedule'] ?? {}),
       isDefault: json['is_default'] ?? false,
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
@@ -176,8 +186,11 @@ class ScheduleTemplate {
       'id': id,
       'name': name,
       'description': description,
+<<<<<<< HEAD
       'grace_period': gracePeriod,
       'overtime': overtime,
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       'work_schedule': workSchedule.toJson(),
       'is_default': isDefault,
       'created_at': createdAt.toIso8601String(),

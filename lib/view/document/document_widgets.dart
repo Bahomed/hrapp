@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/remote/response/document_response.dart';
 import '../../services/theme_service.dart';
+<<<<<<< HEAD
 import '../../utils/app_theme.dart';
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 import 'document_controller.dart';
 
 class DocumentStatusChip extends StatelessWidget {
@@ -89,13 +92,18 @@ class DocumentCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Material(
+<<<<<<< HEAD
         color: Colors.transparent,
+=======
+        //color: Colors.transparent,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         child: InkWell(
           onTap: () => controller.viewDocumentDetails(document),
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
+<<<<<<< HEAD
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -107,6 +115,23 @@ class DocumentCard extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
+=======
+              color: ThemeService.instance.getCardColor(),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeService.instance.isDarkMode 
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: Border.all(
+                color: ThemeService.instance.getDividerColor(),
+                width: 1,
+              ),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,6 +357,7 @@ class DocumentGridCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+<<<<<<< HEAD
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
@@ -343,6 +369,23 @@ class DocumentGridCard extends StatelessWidget {
                 offset: const Offset(0, 2),
               ),
             ],
+=======
+            color: ThemeService.instance.getCardColor(),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: ThemeService.instance.isDarkMode 
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: Border.all(
+              color: ThemeService.instance.getDividerColor(),
+              width: 1,
+            ),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,6 +487,7 @@ class DocumentSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: ThemeService.instance.getCardColor(),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -453,6 +497,17 @@ class DocumentSummaryCard extends StatelessWidget {
                 : AppTheme.getActionColor('payroll').withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
+=======
+        gradient: ThemeService.instance.isDarkMode 
+            ? ThemeService.instance.getVioletGradient()
+            : ThemeService.instance.getBlueGradient(),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ThemeService.instance.getPrimaryColor().withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           ),
         ],
       ),
@@ -786,7 +841,11 @@ class DocumentDetailBottomSheet extends StatelessWidget {
       height: Get.height * 0.9,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: ThemeService.instance.getSurfaceColor(),
+=======
+        color: ThemeService.instance.getCardColor(),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(

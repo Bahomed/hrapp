@@ -8,7 +8,10 @@ import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
 import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
 import '../../../services/theme_service.dart';
+<<<<<<< HEAD
 import '../../../widgets/saudi_riyal_display.dart';
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 
 import '../request_controller.dart'; // Fixed import
 
@@ -177,9 +180,15 @@ class LeaveRequestCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
       Text(
+<<<<<<< HEAD
       '${request.startDate} To ${request.endDate}',
         style: TextStyle(
           fontSize: 14,
+=======
+      '${request.startDate} - ${request.endDate}',
+        style: TextStyle(
+          fontSize: 18,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           fontWeight: FontWeight.w600,
           color: ThemeService.instance.getTextPrimaryColor(),
         ),
@@ -280,6 +289,7 @@ class LeaveRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+<<<<<<< HEAD
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       'Rejected: ${_formatDate(request.approvedDate!)}',
@@ -289,6 +299,8 @@ class LeaveRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 ],
               ),
               Row(
@@ -375,13 +387,21 @@ class PermissionRequestCard extends StatelessWidget {
           Row(
             children: [
               RequestTag(
+<<<<<<< HEAD
                 text: _formatTimeDisplay(request.fromTime),
+=======
+                text: request.fromTime,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 textColor: ThemeService.instance.getActionColor('profile'),
                 backgroundColor: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.1),
               ),
               const SizedBox(width: 12),
               RequestTag(
+<<<<<<< HEAD
                 text: _formatTimeDisplay(request.toTime),
+=======
+                text: request.toTime,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 textColor: ThemeService.instance.getWarningColor(),
                 backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
               ),
@@ -411,6 +431,7 @@ class PermissionRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+<<<<<<< HEAD
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       'Rejected: ${_formatDate(request.approvedDate!)}',
@@ -420,6 +441,8 @@ class PermissionRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 ],
               ),
               Row(
@@ -478,15 +501,24 @@ class LoanRequestCard extends StatelessWidget {
                       TextSpan(
                         text: 'Loan Type: ',
                         style: TextStyle(
+<<<<<<< HEAD
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
+=======
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
                       ),
                       TextSpan(
                         text: request.loanType,
                         style: TextStyle(
+<<<<<<< HEAD
                           fontSize: 16,
+=======
+                          fontSize: 18,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                           fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
@@ -507,7 +539,11 @@ class LoanRequestCard extends StatelessWidget {
                   text: 'Purpose: ',
                   style: TextStyle(
                     fontSize: 16,
+<<<<<<< HEAD
                     fontWeight: FontWeight.w400,
+=======
+                    fontWeight: FontWeight.w600,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
@@ -528,6 +564,7 @@ class LoanRequestCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
+<<<<<<< HEAD
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
@@ -542,6 +579,12 @@ class LoanRequestCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+=======
+              RequestTag(
+                text: request.amount,
+                textColor: ThemeService.instance.getSuccessColor(),
+                backgroundColor: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
               ),
               const SizedBox(width: 12),
               RequestTag(
@@ -575,6 +618,7 @@ class LoanRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+<<<<<<< HEAD
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       'Rejected: ${_formatDate(request.approvedDate!)}',
@@ -584,6 +628,8 @@ class LoanRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 ],
               ),
               Row(
@@ -644,15 +690,24 @@ class LetterRequestCard extends StatelessWidget {
                       TextSpan(
                         text: 'Letter Type: ',
                         style: TextStyle(
+<<<<<<< HEAD
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
+=======
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
                       ),
                       TextSpan(
                         text: request.letterType,
                         style: TextStyle(
+<<<<<<< HEAD
                           fontSize: 16,
+=======
+                          fontSize: 18,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                           fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
@@ -673,15 +728,24 @@ class LetterRequestCard extends StatelessWidget {
                 TextSpan(
                   text: 'Reason: ',
                   style: TextStyle(
+<<<<<<< HEAD
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
+=======
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
                 TextSpan(
                   text: request.reason,
                   style: TextStyle(
+<<<<<<< HEAD
                     fontSize: 16,
+=======
+                    fontSize: 18,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     fontWeight: FontWeight.w400,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
@@ -714,6 +778,7 @@ class LetterRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+<<<<<<< HEAD
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       'Rejected: ${_formatDate(request.approvedDate!)}',
@@ -723,6 +788,8 @@ class LetterRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                 ],
               ),
               Row(
@@ -948,6 +1015,7 @@ int _calculateDays(String startDateString, String endDateString) {
   } catch (e) {
     return 1;
   }
+<<<<<<< HEAD
 }
 
 String _formatTimeDisplay(String timeString) {
@@ -990,4 +1058,6 @@ String _formatTimeDisplay(String timeString) {
     // Return original string if any error occurs
     return timeString;
   }
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 }

@@ -241,13 +241,21 @@ class ProfileScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
+<<<<<<< HEAD
                   Icons.mobile_friendly_outlined ,
+=======
+                  Icons.business,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                   size: ResponsiveUtils.responsiveIconSize(context, mobile: 14, tablet: 16, desktop: 18),
                   color: themeService.getSuccessColor(),
                 ),
                 SizedBox(width: ResponsiveUtils.responsiveWidth(context, 2)),
                 Text(
+<<<<<<< HEAD
                   controller.userMobile,
+=======
+                  controller.userDepartment,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                   style: TextStyle(
                     fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
                     color: themeService.getSuccessColor(),
@@ -302,8 +310,13 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildQuickInfoCard(
                   context,
+<<<<<<< HEAD
                   'Report To',
                   controller.userReportToEmployee,
+=======
+                  'Position',
+                  controller.userPosition,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                   Icons.work,
                   const Color(0xFF9C27B0),
                 ),

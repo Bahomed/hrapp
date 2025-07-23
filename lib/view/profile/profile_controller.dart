@@ -125,6 +125,7 @@ class ProfileController extends GetxController {
         department: currentUser.department,
         section: currentUser.section,
         localCountry: currentUser.localCountry,
+<<<<<<< HEAD
         localCity: currentUser.localCity,
         homeCountry: currentUser.homeCountry,
         homeCity: currentUser.homeCity,
@@ -132,6 +133,13 @@ class ProfileController extends GetxController {
         permanentAddress: permanentAddressController.text.trim(),
         token: currentUser.token,
         reportToEmployee: currentUser.reportToEmployee,
+=======
+        homeCountry: currentUser.homeCountry,
+        currentAddress: currentAddressController.text.trim(),
+        permanentAddress: permanentAddressController.text.trim(),
+        token: currentUser.token,
+        appPassword: currentUser.appPassword,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       );
 
       // Call API to update profile
@@ -188,14 +196,21 @@ class ProfileController extends GetxController {
   String get userPlaceOfBirth => userData.value?.placeOfBirth ?? 'N/A';
   String get userPassportNo => userData.value?.passportNo ?? 'N/A';
   String get userLocalCountry => userData.value?.localCountry ?? 'N/A';
+<<<<<<< HEAD
   String get userLocalCity=> userData.value?.localCity ?? 'N/A';
   String get userHomeCountry => userData.value?.homeCountry ?? 'N/A';
   String get userHomeCity => userData.value?.homeCity?? 'N/A';
+=======
+  String get userHomeCountry => userData.value?.homeCountry ?? 'N/A';
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   String get userCurrentAddress => userData.value?.currentAddress ?? 'N/A';
   String get userPermanentAddress => userData.value?.permanentAddress ?? 'N/A';
   String get userImage => userData.value?.image ?? '';
   String get userPreferredLang => userData.value?.preferredLang ?? 'N/A';
+<<<<<<< HEAD
   String get userReportToEmployee=> userData.value?.reportToEmployee?? 'N/A';
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 
   // Profile sections for organized display
   List<ProfileSection> get profileSections {
@@ -243,9 +258,13 @@ class ProfileController extends GetxController {
           ProfileItem('Current Address', userCurrentAddress, isEditable: true),
           ProfileItem('Permanent Address', userPermanentAddress, isEditable: true),
           ProfileItem('Local Country', userLocalCountry),
+<<<<<<< HEAD
           ProfileItem('Local City', userLocalCity),
           ProfileItem('Home Country', userHomeCountry),
           ProfileItem('Home City', userHomeCity),
+=======
+          ProfileItem('Home Country', userHomeCountry),
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         ],
       ),
       ProfileSection(

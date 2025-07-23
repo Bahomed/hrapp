@@ -136,7 +136,13 @@ class Preferences {
   Future<void> saveLoginSession(login_response.Data userData, String token) async {
     await saveUserData(userData);
     await saveToken(token);
+<<<<<<< HEAD
 
+=======
+    if (userData.appPassword != null) {
+      await saveAppPassword(userData.appPassword!);
+    }
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   }
 
   Future<void> clearLoginSession() async {

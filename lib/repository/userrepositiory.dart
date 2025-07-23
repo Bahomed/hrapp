@@ -10,6 +10,7 @@ class UserRepositiory {
   final Preferences preferences = Preferences();
 
 
+<<<<<<< HEAD
   // Update user language preference and refresh all user data
   Future<login_response.LoginResponse> updateUserLanguage(String languageCode) async {
     final token = await preferences.getToken();
@@ -20,11 +21,23 @@ class UserRepositiory {
       // Fetch user data with new language locale
       var getUserResponse = await dioClient.post(
         getUserUrl,
+=======
+  // Update user language preference
+  Future<login_response.LoginResponse> updateUserLanguage(String languageCode) async {
+    final token = await preferences.getToken();
+    final workspaceUrl = await preferences.getWorkspaceUrl();
+    final apiUrl = '$workspaceUrl/api/get-user-detail';
+    
+    try {
+      var response = await dioClient.post(
+        apiUrl,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         {'locale': languageCode},
         {},
         {'Authorization': 'Bearer $token'}
       );
       
+<<<<<<< HEAD
       if (getUserResponse.data != null) {
         var loginResponse = login_response.LoginResponse.fromJson(getUserResponse.data);
         
@@ -40,10 +53,19 @@ class UserRepositiory {
             currentUser.preferredLang = languageCode;
             await preferences.saveUserData(currentUser);
           }
+=======
+      if (response.data != null) {
+        var loginResponse = login_response.LoginResponse.fromJson(response.data);
+        
+        // Update preferences with new user data if available
+        if (loginResponse.data != null) {
+          await preferences.saveUserData(loginResponse.data!);
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
         }
         
         return loginResponse;
       } else {
+<<<<<<< HEAD
         throw Exception("No user data received from server");
       }
     } on DioException catch (e) {
@@ -57,6 +79,15 @@ class UserRepositiory {
       // Parse and return error response if possible
       if (e.response?.data != null) {
         try {
+=======
+        throw Exception("No data received from server");
+      }
+    } on DioException catch (e) {
+      // Handle HTTP errors and convert response to LoginResponse if possible
+      if (e.response?.data != null) {
+        try {
+          // Try to parse error response as LoginResponse
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
           var errorResponse = login_response.LoginResponse.fromJson(e.response!.data);
           return errorResponse;
         } catch (parseError) {
@@ -66,12 +97,15 @@ class UserRepositiory {
         throw exceptionHandler(e);
       }
     } catch (e) {
+<<<<<<< HEAD
       // Final fallback: Update local user data
       final currentUser = await preferences.getUserData();
       if (currentUser != null) {
         currentUser.preferredLang = languageCode;
         await preferences.saveUserData(currentUser);
       }
+=======
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
       rethrow;
     }
   }

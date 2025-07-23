@@ -114,6 +114,7 @@ class Data {
   String? department;
   String? section;
   String? localCountry;
+<<<<<<< HEAD
   String? localCity;
   String? homeCountry;
   String? homeCity;
@@ -121,6 +122,13 @@ class Data {
   String? permanentAddress;
   String? token;
   String? reportToEmployee;
+=======
+  String? homeCountry;
+  String? currentAddress;
+  String? permanentAddress;
+  String? token;
+  String? appPassword;
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   FaceData? faceData;
 
   Data({
@@ -144,6 +152,7 @@ class Data {
     this.department,
     this.section,
     this.localCountry,
+<<<<<<< HEAD
     this.localCity,
     this.homeCountry,
     this.homeCity,
@@ -151,6 +160,13 @@ class Data {
     this.permanentAddress,
     this.token,
     this.reportToEmployee,
+=======
+    this.homeCountry,
+    this.currentAddress,
+    this.permanentAddress,
+    this.token,
+    this.appPassword,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     this.faceData,
   });
 
@@ -165,7 +181,11 @@ class Data {
     gender: json["gender"] ?? "",
     email: json["email"] ?? "",
     preferredLang: json["preferred_lang"] ?? "",
+<<<<<<< HEAD
     age: json["age"] != null ? int.tryParse(json["age"].toString()) : null,
+=======
+    age: json["age"],
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     civilStatus: json["civil_status"] ?? "",
     nationality: json["nationality"] ?? "",
     placeOfBirth: json["place_of_birth"] ?? "",
@@ -175,6 +195,7 @@ class Data {
     department: json["department"] ?? "",
     section: json["section"] ?? "",
     localCountry: json["local_country"] ?? "",
+<<<<<<< HEAD
     localCity: json["local_city"] ?? "",
     homeCountry: json["home_country"] ?? "",
     homeCity: json["home_city"] ?? "",
@@ -182,6 +203,13 @@ class Data {
     permanentAddress: json["permanent_address"] ?? "",
     token: json["token"] ?? "",
     reportToEmployee: json["report_to_employee"] ?? "",
+=======
+    homeCountry: json["home_country"] ?? "",
+    currentAddress: json["current_address"] ?? "",
+    permanentAddress: json["permanent_address"] ?? "",
+    token: json["token"] ?? "",
+    appPassword: json["app_password"] ?? "",
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     faceData: json["face_data"] != null ? FaceData.fromJson(json["face_data"]) : null,
   );
 
@@ -206,6 +234,7 @@ class Data {
     "department": department,
     "section": section,
     "local_country": localCountry,
+<<<<<<< HEAD
     "local_city": localCity,
     "home_country": homeCountry,
     "home_city": homeCity,
@@ -213,6 +242,13 @@ class Data {
     "permanent_address": permanentAddress,
     "token": token,
     "report_to_employee": reportToEmployee,
+=======
+    "home_country": homeCountry,
+    "current_address": currentAddress,
+    "permanent_address": permanentAddress,
+    "token": token,
+    "app_password": appPassword,
+>>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
     "face_data": faceData?.toJson(),
   };
 }
