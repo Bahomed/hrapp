@@ -5,6 +5,7 @@ import '../../utils/app_theme.dart';
 import '../../utils/responsive_utils.dart';
 import '../../services/theme_service.dart';
 import 'attendance_calendar_controller.dart';
+import 'attendance_detail_screen.dart';
 
 class AttendanceCalendarScreen extends StatelessWidget {
   const AttendanceCalendarScreen({super.key});
@@ -31,6 +32,18 @@ class AttendanceCalendarScreen extends StatelessWidget {
         iconTheme: IconThemeData(
           color: themeService.getTextPrimaryColor(),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(() => const AttendanceDetailScreen());
+            },
+            icon: Icon(
+              Icons.table_chart,
+              color: themeService.getPrimaryColor(),
+            ),
+            tooltip: 'Weekly Attendance',
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -214,21 +227,28 @@ class AttendanceCalendarScreen extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              day.day.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isToday || hasData
-                    ? Colors.white
-                    : themeService.getTextPrimaryColor(),
-                fontWeight: hasData ? FontWeight.w600 : FontWeight.normal,
+            Flexible(
+              child: Text(
+                day.day.toString(),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: isToday || hasData
+                      ? Colors.white
+                      : themeService.getTextPrimaryColor(),
+                  fontWeight: hasData ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 12,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (hasData && status != 'Present')
-              Icon(
-                status == 'Absent' ? Icons.close : Icons.warning,
-                color: Colors.white,
-                size: 12,
+              Flexible(
+                child: Icon(
+                  status == 'Absent' ? Icons.close : Icons.warning,
+                  color: Colors.white,
+                  size: 10,
+                ),
               ),
           ],
         ),

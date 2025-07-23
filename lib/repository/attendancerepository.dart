@@ -7,6 +7,7 @@ import 'dart:math';
 import '../data/remote/dio_client/dio_client.dart';
 import '../data/remote/response/saveemployeeattendanceresponse.dart';
 import '../data/remote/response/attendance_response.dart';
+import '../data/remote/response/weekly_attendance_response.dart';
 import '../utils/exceptionhandler.dart';
 
 class AttendanceRepository {
@@ -228,6 +229,31 @@ class AttendanceRepository {
       throw exceptionHandler(e);
     } catch (e) {
       print('General error in attendance API: $e');
+      rethrow;
+    }
+  }
+
+  /// Get weekly attendance data between dates
+  Future<WeeklyAttendanceResponse> getWeeklyAttendance({
+    required String startDate,
+    required String endDate,
+  }) async {
+    final token = await preferences.getToken();
+    final workspaceUrl = await preferences.getWorkspaceUrl();
+    
+    try {
+      final apiUrl = '$workspaceUrl/api/attendance/between-dates/$startDate/$endDate';
+      
+      final response = await dioclient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {},
+      );
+      
+      return WeeklyAttendanceResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw exceptionHandler(e);
+    } catch (e) {
       rethrow;
     }
   }

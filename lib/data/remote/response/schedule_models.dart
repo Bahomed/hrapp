@@ -138,6 +138,8 @@ class ScheduleTemplate {
   final String id;
   final String name;
   final String description;
+  final String gracePeriod;
+  final String overtime;
   final WorkSchedule workSchedule;
   final bool isDefault;
   final DateTime createdAt;
@@ -146,7 +148,9 @@ class ScheduleTemplate {
   ScheduleTemplate({
     required this.id,
     required this.name,
-    required this.description,
+    this.description = '',
+    required this.gracePeriod,
+    required this.overtime,
     required this.workSchedule,
     required this.isDefault,
     required this.createdAt,
@@ -158,6 +162,8 @@ class ScheduleTemplate {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
+      gracePeriod: json['grace_period'] ?? '0',
+      overtime: json['overtime'] ?? 'N',
       workSchedule: WorkSchedule.fromJson(json['work_schedule'] ?? {}),
       isDefault: json['is_default'] ?? false,
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
@@ -170,6 +176,8 @@ class ScheduleTemplate {
       'id': id,
       'name': name,
       'description': description,
+      'grace_period': gracePeriod,
+      'overtime': overtime,
       'work_schedule': workSchedule.toJson(),
       'is_default': isDefault,
       'created_at': createdAt.toIso8601String(),
