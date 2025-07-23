@@ -778,23 +778,16 @@ class AppTheme {
                 padding: const EdgeInsets.all(spacingMedium),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-<<<<<<< HEAD
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
-=======
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(spacingSmall),
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                       decoration: BoxDecoration(
                         color: (isSelected ? Colors.white : buttonColor).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(borderRadiusSmall),
                       ),
                       child: Icon(
                         icon,
-<<<<<<< HEAD
                         size: 20,
                         color: isSelected ? Colors.white : buttonColor,
                       ),
@@ -812,21 +805,6 @@ class AppTheme {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                       ),
-=======
-                        size: 24,
-                        color: isSelected ? Colors.white : buttonColor,
-                      ),
-                    ),
-                    const SizedBox(height: spacingMedium),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : textColor,
-                      ),
-                      textAlign: TextAlign.center,
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     ),
                   ],
                 ),
@@ -837,8 +815,4 @@ class AppTheme {
       },
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604

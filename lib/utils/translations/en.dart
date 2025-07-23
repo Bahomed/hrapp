@@ -454,11 +454,8 @@ const Map<String, String> enTranslations = {
   'create_leave_request': 'Create Leave Request',
   'edit_letter_request': 'Edit Letter Request',
   'edit_loan_request': 'Edit Loan Request',
-<<<<<<< HEAD
   'edit_leave_request': 'Edit Leave Request',
   'edit_permission_request': 'Edit Permission Request',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Request Descriptions
   'loan_request_description': 'Request financial assistance',
@@ -467,11 +464,8 @@ const Map<String, String> enTranslations = {
   'leave_request_description': 'Request time off from work',
   'edit_letter_request_description': 'Modify your letter request details',
   'edit_loan_request_description': 'Modify your loan request details',
-<<<<<<< HEAD
   'edit_leave_request_description': 'Modify your leave request details',
   'edit_permission_request_description': 'Modify your permission request details',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Form Fields
   'loan_type': 'Loan Type',
@@ -500,11 +494,7 @@ const Map<String, String> enTranslations = {
   'please_enter_repayment_period': 'Please enter repayment period',
   'please_enter_valid_number': 'Please enter a valid number',
   'repayment_period_minimum': 'Repayment period must be at least 1 month',
-<<<<<<< HEAD
   'repayment_period_maximum': 'Repayment period cannot exceed 24 months',
-=======
-  'repayment_period_maximum': 'Repayment period cannot exceed 120 months',
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   'please_provide_purpose': 'Please provide the purpose',
   'please_provide_reason': 'Please provide a reason',
   'purpose_minimum_characters': 'Purpose must be at least 10 characters',
@@ -512,16 +502,11 @@ const Map<String, String> enTranslations = {
   'please_select_start_date': 'Please select start date',
   'please_select_end_date': 'Please select end date',
   'end_date_after_start_date': 'End date must be after start date',
-<<<<<<< HEAD
   'invalid_date_format': 'Invalid date format',
   'please_select_from_time': 'Please select from time',
   'please_select_to_time': 'Please select to time',
   'to_time_after_from_time': 'To time must be after from time',
   'invalid_time_format': 'Invalid time format',
-=======
-  'please_select_from_time': 'Please select from time',
-  'please_select_to_time': 'Please select to time',
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Submit Buttons
   'submit_loan_request': 'Submit Loan Request',
@@ -530,11 +515,8 @@ const Map<String, String> enTranslations = {
   'submit_leave_request': 'Submit Leave Request',
   'update_letter_request': 'Update Letter Request',
   'update_loan_request': 'Update Loan Request',
-<<<<<<< HEAD
   'update_leave_request': 'Update Leave Request',
   'update_permission_request': 'Update Permission Request',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Request Info
   'request_id': 'Request ID',

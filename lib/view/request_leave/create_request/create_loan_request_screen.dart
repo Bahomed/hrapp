@@ -151,11 +151,7 @@ class CreateLoanRequestScreen extends StatelessWidget {
                   if (months < 1) {
                     return tr('repayment_period_minimum');
                   }
-<<<<<<< HEAD
                   if (months > 24) {
-=======
-                  if (months > 120) {
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     return tr('repayment_period_maximum');
                   }
                   return null;

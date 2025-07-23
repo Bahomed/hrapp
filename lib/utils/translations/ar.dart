@@ -454,11 +454,8 @@ const Map<String, String> arTranslations = {
   'create_leave_request': 'إنشاء طلب إجازة',
   'edit_letter_request': 'تعديل طلب الرسالة',
   'edit_loan_request': 'تعديل طلب القرض',
-<<<<<<< HEAD
   'edit_leave_request': 'تعديل طلب الإجازة',
   'edit_permission_request': 'تعديل طلب الإذن',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Request Descriptions
   'loan_request_description': 'طلب مساعدة مالية',
@@ -467,11 +464,8 @@ const Map<String, String> arTranslations = {
   'leave_request_description': 'طلب إجازة من العمل',
   'edit_letter_request_description': 'تعديل تفاصيل طلب الرسالة',
   'edit_loan_request_description': 'تعديل تفاصيل طلب القرض',
-<<<<<<< HEAD
   'edit_leave_request_description': 'تعديل تفاصيل طلب الإجازة',
   'edit_permission_request_description': 'تعديل تفاصيل طلب الإذن',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Form Fields
   'loan_type': 'نوع القرض',
@@ -500,11 +494,7 @@ const Map<String, String> arTranslations = {
   'please_enter_repayment_period': 'يرجى إدخال فترة السداد',
   'please_enter_valid_number': 'يرجى إدخال رقم صحيح',
   'repayment_period_minimum': 'يجب أن تكون فترة السداد شهر واحد على الأقل',
-<<<<<<< HEAD
   'repayment_period_maximum': 'لا يمكن أن تتجاوز فترة السداد 24 شهراً',
-=======
-  'repayment_period_maximum': 'لا يمكن أن تتجاوز فترة السداد 120 شهراً',
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   'please_provide_purpose': 'يرجى تقديم الغرض',
   'please_provide_reason': 'يرجى تقديم السبب',
   'purpose_minimum_characters': 'يجب أن يكون الغرض 10 أحرف على الأقل',
@@ -512,16 +502,11 @@ const Map<String, String> arTranslations = {
   'please_select_start_date': 'يرجى اختيار تاريخ البداية',
   'please_select_end_date': 'يرجى اختيار تاريخ النهاية',
   'end_date_after_start_date': 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية',
-<<<<<<< HEAD
   'invalid_date_format': 'تنسيق التاريخ غير صحيح',
   'please_select_from_time': 'يرجى اختيار الوقت من',
   'please_select_to_time': 'يرجى اختيار الوقت إلى',
   'to_time_after_from_time': 'يجب أن يكون الوقت إلى بعد الوقت من',
   'invalid_time_format': 'تنسيق الوقت غير صحيح',
-=======
-  'please_select_from_time': 'يرجى اختيار الوقت من',
-  'please_select_to_time': 'يرجى اختيار الوقت إلى',
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Submit Buttons
   'submit_loan_request': 'إرسال طلب القرض',
@@ -530,11 +515,8 @@ const Map<String, String> arTranslations = {
   'submit_leave_request': 'إرسال طلب الإجازة',
   'update_letter_request': 'تحديث طلب الرسالة',
   'update_loan_request': 'تحديث طلب القرض',
-<<<<<<< HEAD
   'update_leave_request': 'تحديث طلب الإجازة',
   'update_permission_request': 'تحديث طلب الإذن',
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
   
   // Request Info
   'request_id': 'رقم الطلب',

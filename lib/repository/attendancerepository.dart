@@ -7,10 +7,7 @@ import 'dart:math';
 import '../data/remote/dio_client/dio_client.dart';
 import '../data/remote/response/saveemployeeattendanceresponse.dart';
 import '../data/remote/response/attendance_response.dart';
-<<<<<<< HEAD
 import '../data/remote/response/weekly_attendance_response.dart';
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 import '../utils/exceptionhandler.dart';
 
 class AttendanceRepository {
@@ -235,7 +232,6 @@ class AttendanceRepository {
       rethrow;
     }
   }
-<<<<<<< HEAD
 
   /// Get weekly attendance data between dates
   Future<WeeklyAttendanceResponse> getWeeklyAttendance({
@@ -261,6 +257,4 @@ class AttendanceRepository {
       rethrow;
     }
   }
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 }

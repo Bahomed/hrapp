@@ -133,7 +133,6 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_to_time');
                   }
-<<<<<<< HEAD
                   if (fromTimeController.text.isNotEmpty && value.isNotEmpty) {
                     try {
                       final fromTime = _parseTime(fromTimeController.text);
@@ -150,8 +149,6 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                       return tr('invalid_time_format');
                     }
                   }
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                   return null;
                 },
               ),
@@ -403,7 +400,6 @@ class CreatePermissionRequestScreen extends StatelessWidget {
       ],
     );
   }
-<<<<<<< HEAD
 
   TimeOfDay? _parseTime(String timeString) {
     try {
@@ -440,6 +436,4 @@ class CreatePermissionRequestScreen extends StatelessWidget {
     }
     return null;
   }
-=======
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
 }

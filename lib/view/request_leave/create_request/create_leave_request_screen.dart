@@ -135,7 +135,6 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                     return tr('please_select_end_date');
                   }
                   if (startDateController.text.isNotEmpty && value.isNotEmpty) {
-<<<<<<< HEAD
                     try {
                       final startDate = DateTime.parse(startDateController.text);
                       final endDate = DateTime.parse(value);
@@ -144,12 +143,6 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                       }
                     } catch (e) {
                       return tr('invalid_date_format');
-=======
-                    final startDate = DateTime.parse(startDateController.text);
-                    final endDate = DateTime.parse(value);
-                    if (endDate.isBefore(startDate)) {
-                      return tr('end_date_after_start_date');
->>>>>>> 9b93ad055ddc8208dd97b5fb9b2690abb6194604
                     }
                   }
                   return null;
