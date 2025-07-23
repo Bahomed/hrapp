@@ -10,37 +10,53 @@ class UserRepositiory {
   final Preferences preferences = Preferences();
 
 
-  // Update user language preference
+  // Update user language preference and refresh all user data
   Future<login_response.LoginResponse> updateUserLanguage(String languageCode) async {
     final token = await preferences.getToken();
     final workspaceUrl = await preferences.getWorkspaceUrl();
-    final apiUrl = '$workspaceUrl/api/get-user-detail';
+    final getUserUrl = '$workspaceUrl/api/get-user-detail';
     
     try {
-      var response = await dioClient.post(
-        apiUrl,
+      // Fetch user data with new language locale
+      var getUserResponse = await dioClient.post(
+        getUserUrl,
         {'locale': languageCode},
         {},
         {'Authorization': 'Bearer $token'}
       );
       
-      if (response.data != null) {
-        var loginResponse = login_response.LoginResponse.fromJson(response.data);
+      if (getUserResponse.data != null) {
+        var loginResponse = login_response.LoginResponse.fromJson(getUserResponse.data);
         
-        // Update preferences with new user data if available
+        // Save the complete updated user data including employee name, etc.
         if (loginResponse.data != null) {
+          // Update the preferredLang field to match the requested language
+
           await preferences.saveUserData(loginResponse.data!);
+        } else {
+          // Fallback: Update only language in existing local data
+          final currentUser = await preferences.getUserData();
+          if (currentUser != null) {
+            currentUser.preferredLang = languageCode;
+            await preferences.saveUserData(currentUser);
+          }
         }
         
         return loginResponse;
       } else {
-        throw Exception("No data received from server");
+        throw Exception("No user data received from server");
       }
     } on DioException catch (e) {
-      // Handle HTTP errors and convert response to LoginResponse if possible
+      // If API fails, update local user data with new language
+      final currentUser = await preferences.getUserData();
+      if (currentUser != null) {
+        currentUser.preferredLang = languageCode;
+        await preferences.saveUserData(currentUser);
+      }
+      
+      // Parse and return error response if possible
       if (e.response?.data != null) {
         try {
-          // Try to parse error response as LoginResponse
           var errorResponse = login_response.LoginResponse.fromJson(e.response!.data);
           return errorResponse;
         } catch (parseError) {
@@ -50,6 +66,12 @@ class UserRepositiory {
         throw exceptionHandler(e);
       }
     } catch (e) {
+      // Final fallback: Update local user data
+      final currentUser = await preferences.getUserData();
+      if (currentUser != null) {
+        currentUser.preferredLang = languageCode;
+        await preferences.saveUserData(currentUser);
+      }
       rethrow;
     }
   }

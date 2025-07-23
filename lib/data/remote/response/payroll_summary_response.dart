@@ -1,6 +1,6 @@
 class PayrollSummaryResponse {
   final bool success;
-  final PayrollSummaryResponseData data;
+  final List<PayrollSummaryItem> data;
   final String message;
 
   PayrollSummaryResponse({
@@ -10,33 +10,43 @@ class PayrollSummaryResponse {
   });
 
   factory PayrollSummaryResponse.fromJson(Map<String, dynamic> json) {
+    var dataList = <PayrollSummaryItem>[];
+    if (json['data'] != null) {
+      dataList = (json['data'] as List)
+          .map((item) => PayrollSummaryItem.fromJson(item))
+          .toList();
+    }
+
     return PayrollSummaryResponse(
       success: json['success'],
-      data: PayrollSummaryResponseData.fromJson(json['data']),
+      data: dataList,
       message: json['message'],
     );
   }
 }
 
-class PayrollSummaryResponseData {
-  final double totalGrossEarnings;
+class PayrollSummaryItem {
+  final String month;
+  final String monthYearId;
+  final double totalEarnings;
   final double totalDeductions;
-  final int totalPayslips;
-  final double netEarnings;
+  final double netPay;
 
-  PayrollSummaryResponseData({
-    required this.totalGrossEarnings,
+  PayrollSummaryItem({
+    required this.month,
+    required this.monthYearId,
+    required this.totalEarnings,
     required this.totalDeductions,
-    required this.totalPayslips,
-    required this.netEarnings,
+    required this.netPay,
   });
 
-  factory PayrollSummaryResponseData.fromJson(Map<String, dynamic> json) {
-    return PayrollSummaryResponseData(
-      totalGrossEarnings: double.parse(json['total_gross_earnings'].toString()),
-      totalDeductions: double.parse(json['total_deductions'].toString()),
-      totalPayslips: int.parse(json['total_payslips'].toString()),
-      netEarnings: double.parse(json['net_earnings'].toString()),
+  factory PayrollSummaryItem.fromJson(Map<String, dynamic> json) {
+    return PayrollSummaryItem(
+      month: json['month'] ?? '',
+      monthYearId: json['month_year_id'] ?? '',
+      totalEarnings: double.tryParse(json['total_earnings'].toString()) ?? 0.0,
+      totalDeductions: double.tryParse(json['total_deductions'].toString()) ?? 0.0,
+      netPay: double.tryParse(json['net_pay'].toString()) ?? 0.0,
     );
   }
 }

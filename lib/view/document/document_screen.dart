@@ -49,10 +49,6 @@ class DocumentScreen extends StatelessWidget {
           color: ThemeService.instance.getPrimaryColor(),
           child: CustomScrollView(
             slivers: [
-              // Search Bar
-              const SliverToBoxAdapter(
-                child: DocumentSearchBar(),
-              ),
 
               // Summary Section
               SliverToBoxAdapter(
@@ -65,10 +61,29 @@ class DocumentScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       const DocumentCategoryTabs(),
                       const SizedBox(height: 20),
-                      ThemeWidgets.buildSectionHeader(
-                        title: tr('document_list'),
-                        subtitle: '${controller.documents.length} files',
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${tr('document_list')} (${controller.documents.length} files)',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                    color: ThemeService.instance.getTextPrimaryColor(),
+                                  ),
+                                ),
+                                // Add more widgets here if needed
+                              ],
+                            ),
+                          ),
+
+                        ],
                       ),
+
                       const SizedBox(height: 16),
                     ],
                   ),

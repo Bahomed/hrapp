@@ -133,6 +133,22 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_to_time');
                   }
+                  if (fromTimeController.text.isNotEmpty && value.isNotEmpty) {
+                    try {
+                      final fromTime = _parseTime(fromTimeController.text);
+                      final toTime = _parseTime(value);
+                      if (fromTime != null && toTime != null) {
+                        // Convert times to minutes for comparison
+                        final fromMinutes = fromTime.hour * 60 + fromTime.minute;
+                        final toMinutes = toTime.hour * 60 + toTime.minute;
+                        if (toMinutes <= fromMinutes) {
+                          return tr('to_time_after_from_time');
+                        }
+                      }
+                    } catch (e) {
+                      return tr('invalid_time_format');
+                    }
+                  }
                   return null;
                 },
               ),
@@ -383,5 +399,41 @@ class CreatePermissionRequestScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  TimeOfDay? _parseTime(String timeString) {
+    try {
+      // Handle different time formats: "2:30 PM", "14:30", etc.
+      timeString = timeString.trim();
+      
+      // Check if it's 12-hour format with AM/PM
+      if (timeString.contains('AM') || timeString.contains('PM')) {
+        final isAM = timeString.contains('AM');
+        final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)'), '');
+        final parts = timePart.split(':');
+        
+        if (parts.length == 2) {
+          int hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          
+          // Convert to 24-hour format
+          if (!isAM && hour != 12) hour += 12;
+          if (isAM && hour == 12) hour = 0;
+          
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+      } else {
+        // 24-hour format
+        final parts = timeString.split(':');
+        if (parts.length == 2) {
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+    } catch (e) {
+      // Return null if parsing fails
+    }
+    return null;
   }
 }

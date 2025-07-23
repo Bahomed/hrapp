@@ -502,8 +502,11 @@ const Map<String, String> enTranslations = {
   'please_select_start_date': 'Please select start date',
   'please_select_end_date': 'Please select end date',
   'end_date_after_start_date': 'End date must be after start date',
+  'invalid_date_format': 'Invalid date format',
   'please_select_from_time': 'Please select from time',
   'please_select_to_time': 'Please select to time',
+  'to_time_after_from_time': 'To time must be after from time',
+  'invalid_time_format': 'Invalid time format',
   
   // Submit Buttons
   'submit_loan_request': 'Submit Loan Request',

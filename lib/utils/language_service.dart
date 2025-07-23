@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:injazat_hr_app/utils/translations/en.dart';
 import 'package:injazat_hr_app/utils/translations/ar.dart';
 import 'package:injazat_hr_app/repository/userrepositiory.dart';
+import 'package:injazat_hr_app/view/home_screen/homescreen_controller.dart';
 
 class LanguageService extends GetxController {
   static LanguageService get instance => Get.find<LanguageService>();
@@ -59,6 +60,15 @@ class LanguageService extends GetxController {
           // Update GetX locale
           Get.updateLocale(currentLocale.value);
           
+          // Refresh home screen user data after successful language change
+          try {
+            final homeController = Get.find<HomeScreenController>();
+            await homeController.refreshUserData();
+          } catch (e) {
+            // HomeScreenController not found, continue normally
+            print('HomeScreenController not found: $e');
+          }
+          
           // Update text direction for Arabic
           if (languageCode == 'ar') {
             Get.forceAppUpdate();
@@ -79,6 +89,15 @@ class LanguageService extends GetxController {
         
         // Update GetX locale
         Get.updateLocale(currentLocale.value);
+        
+        // Even in fallback case, try to refresh user data to show updated language preference
+        try {
+          final homeController = Get.find<HomeScreenController>();
+          await homeController.refreshUserData();
+        } catch (e) {
+          // HomeScreenController not found, continue normally
+          print('HomeScreenController not found: $e');
+        }
         
         // Update text direction for Arabic
         if (languageCode == 'ar') {

@@ -34,7 +34,7 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
     {'name': 'All', 'key': 'all', 'color': getFilterColor('all')},
     {'name': 'Active', 'key': 'active', 'color': getFilterColor('active')},
     {'name': 'Expired', 'key': 'expired', 'color': getFilterColor('expired')},
-    {'name': 'Pending', 'key': 'pending', 'color': getFilterColor('pending')},
+
   ];
 
   @override

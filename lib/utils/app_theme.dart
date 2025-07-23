@@ -778,28 +778,33 @@ class AppTheme {
                 padding: const EdgeInsets.all(spacingMedium),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(spacingSmall),
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: (isSelected ? Colors.white : buttonColor).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(borderRadiusSmall),
                       ),
                       child: Icon(
                         icon,
-                        size: 24,
+                        size: 20,
                         color: isSelected ? Colors.white : buttonColor,
                       ),
                     ),
-                    const SizedBox(height: spacingMedium),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : textColor,
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected ? Colors.white : textColor,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

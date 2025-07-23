@@ -49,31 +49,34 @@ class HomeScreen extends StatelessWidget {
               padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 6, tablet: 8, desktop: 12),
               child: Row(
                 children: [
-                  // User Avatar with better styling
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(ResponsiveUtils.responsiveWidth(context, 12)),
-                      child: Obx(() => model.userImage.value.isNotEmpty
-                          ? Image.network(
-                        model.userImage.value,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const CustomImage(size: 50);
-                        },
-                        fit: BoxFit.cover,
-                        width: ResponsiveUtils.responsiveWidth(context, 12),
-                        height: ResponsiveUtils.responsiveWidth(context, 12),
-                      )
-                          : CustomImage(size: ResponsiveUtils.responsiveWidth(context, 12))),
+                  // User Avatar with better styling and tap functionality
+                  GestureDetector(
+                    onTap: () => model.goToProfileScreen(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(ResponsiveUtils.responsiveWidth(context, 12)),
+                        child: Obx(() => model.userImage.value.isNotEmpty
+                            ? Image.network(
+                          model.userImage.value,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const CustomImage(size: 50);
+                          },
+                          fit: BoxFit.cover,
+                          width: ResponsiveUtils.responsiveWidth(context, 12),
+                          height: ResponsiveUtils.responsiveWidth(context, 12),
+                        )
+                            : CustomImage(size: ResponsiveUtils.responsiveWidth(context, 12))),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -108,6 +111,8 @@ class HomeScreen extends StatelessWidget {
             ),
             actions: [
               // Theme toggle with better padding
+
+
               Padding(
                 padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
                 child: IconButton(
@@ -120,55 +125,9 @@ class HomeScreen extends StatelessWidget {
                   tooltip: tr('theme'),
                 ),
               ),
-              
-              // Notification with badge - improved styling
-              Padding(
-                padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
-                child: Stack(
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        model.goToNotificationScreen();
-                      },
-                      icon: Icon(
-                        Icons.notifications_outlined,
-                        color: Theme.of(context).iconTheme.color,
-                        size: ResponsiveUtils.responsiveIconSize(context, mobile: 20, tablet: 22, desktop: 24),
-                      ),
-                      tooltip: tr('notifications'),
-                    ),
-                    // Notification badge
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.error,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: const Text(
-                          '9+',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Settings Icon with better styling
               Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
                 child: IconButton(
                   onPressed: () {
                     model.goToSettingsScreen();

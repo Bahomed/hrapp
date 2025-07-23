@@ -61,7 +61,6 @@ dependencies:
   network_info_plus: ^6.1.4
   geocoding: ^4.0.0
   file_picker: ^10.2.0
-  saudi_riyal_symbol: ^0.0.7
   open_file: ^3.5.0
   share_plus: ^7.2.2
   google_mlkit_face_detection: ^0.12.0
@@ -117,6 +116,9 @@ flutter:
     - family: google_sans
       fonts:
         - asset: assets/fonts/google_sans.ttf
+    - family: saudi_riyal
+      fonts:
+        - asset: assets/fonts/saudi_riyal.ttf
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

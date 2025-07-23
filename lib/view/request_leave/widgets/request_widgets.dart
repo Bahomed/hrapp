@@ -8,6 +8,7 @@ import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
 import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
 import '../../../services/theme_service.dart';
+import '../../../widgets/saudi_riyal_display.dart';
 
 import '../request_controller.dart'; // Fixed import
 
@@ -176,9 +177,9 @@ class LeaveRequestCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
       Text(
-      '${request.startDate} - ${request.endDate}',
+      '${request.startDate} To ${request.endDate}',
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: ThemeService.instance.getTextPrimaryColor(),
         ),
@@ -279,6 +280,15 @@ class LeaveRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getErrorColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                 ],
               ),
               Row(
@@ -365,13 +375,13 @@ class PermissionRequestCard extends StatelessWidget {
           Row(
             children: [
               RequestTag(
-                text: request.fromTime,
+                text: _formatTimeDisplay(request.fromTime),
                 textColor: ThemeService.instance.getActionColor('profile'),
                 backgroundColor: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.1),
               ),
               const SizedBox(width: 12),
               RequestTag(
-                text: request.toTime,
+                text: _formatTimeDisplay(request.toTime),
                 textColor: ThemeService.instance.getWarningColor(),
                 backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
               ),
@@ -398,6 +408,15 @@ class PermissionRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getErrorColor(),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -459,15 +478,15 @@ class LoanRequestCard extends StatelessWidget {
                       TextSpan(
                         text: 'Loan Type: ',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
                       ),
                       TextSpan(
                         text: request.loanType,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
@@ -488,7 +507,7 @@ class LoanRequestCard extends StatelessWidget {
                   text: 'Purpose: ',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
@@ -509,10 +528,20 @@ class LoanRequestCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              RequestTag(
-                text: request.amount,
-                textColor: ThemeService.instance.getSuccessColor(),
-                backgroundColor: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: SaudiRiyalDisplay(
+                  amount: double.tryParse(request.amount) ?? 0.0,
+                  style: TextStyle(
+                    color: ThemeService.instance.getSuccessColor(),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               RequestTag(
@@ -543,6 +572,15 @@ class LoanRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getErrorColor(),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -606,15 +644,15 @@ class LetterRequestCard extends StatelessWidget {
                       TextSpan(
                         text: 'Letter Type: ',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
                       ),
                       TextSpan(
                         text: request.letterType,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: ThemeService.instance.getTextPrimaryColor(),
                         ),
@@ -635,15 +673,15 @@ class LetterRequestCard extends StatelessWidget {
                 TextSpan(
                   text: 'Reason: ',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
                 TextSpan(
                   text: request.reason,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w400,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
@@ -673,6 +711,15 @@ class LetterRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getErrorColor(),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -900,5 +947,47 @@ int _calculateDays(String startDateString, String endDateString) {
     return endDate.difference(startDate).inDays + 1;
   } catch (e) {
     return 1;
+  }
+}
+
+String _formatTimeDisplay(String timeString) {
+  try {
+    // Handle different time formats and remove seconds
+    timeString = timeString.trim();
+    
+    // If it contains AM/PM (12-hour format)
+    if (timeString.contains('AM') || timeString.contains('PM')) {
+      final isAM = timeString.contains('AM');
+      final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)'), '');
+      final parts = timePart.split(':');
+      
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        
+        // Format as HH:MM AM/PM without seconds
+        final formattedHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        final formattedMinute = minute.toString().padLeft(2, '0');
+        return '$formattedHour:$formattedMinute ${isAM ? 'AM' : 'PM'}';
+      }
+    } else {
+      // 24-hour format or contains seconds
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        
+        // Format as HH:MM in 24-hour format without seconds
+        final formattedHour = hour.toString().padLeft(2, '0');
+        final formattedMinute = minute.toString().padLeft(2, '0');
+        return '$formattedHour:$formattedMinute';
+      }
+    }
+    
+    // If parsing fails, return original string
+    return timeString;
+  } catch (e) {
+    // Return original string if any error occurs
+    return timeString;
   }
 }

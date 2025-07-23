@@ -125,11 +125,13 @@ class ProfileController extends GetxController {
         department: currentUser.department,
         section: currentUser.section,
         localCountry: currentUser.localCountry,
+        localCity: currentUser.localCity,
         homeCountry: currentUser.homeCountry,
+        homeCity: currentUser.homeCity,
         currentAddress: currentAddressController.text.trim(),
         permanentAddress: permanentAddressController.text.trim(),
         token: currentUser.token,
-        appPassword: currentUser.appPassword,
+        reportToEmployee: currentUser.reportToEmployee,
       );
 
       // Call API to update profile
@@ -186,11 +188,14 @@ class ProfileController extends GetxController {
   String get userPlaceOfBirth => userData.value?.placeOfBirth ?? 'N/A';
   String get userPassportNo => userData.value?.passportNo ?? 'N/A';
   String get userLocalCountry => userData.value?.localCountry ?? 'N/A';
+  String get userLocalCity=> userData.value?.localCity ?? 'N/A';
   String get userHomeCountry => userData.value?.homeCountry ?? 'N/A';
+  String get userHomeCity => userData.value?.homeCity?? 'N/A';
   String get userCurrentAddress => userData.value?.currentAddress ?? 'N/A';
   String get userPermanentAddress => userData.value?.permanentAddress ?? 'N/A';
   String get userImage => userData.value?.image ?? '';
   String get userPreferredLang => userData.value?.preferredLang ?? 'N/A';
+  String get userReportToEmployee=> userData.value?.reportToEmployee?? 'N/A';
 
   // Profile sections for organized display
   List<ProfileSection> get profileSections {
@@ -238,7 +243,9 @@ class ProfileController extends GetxController {
           ProfileItem('Current Address', userCurrentAddress, isEditable: true),
           ProfileItem('Permanent Address', userPermanentAddress, isEditable: true),
           ProfileItem('Local Country', userLocalCountry),
+          ProfileItem('Local City', userLocalCity),
           ProfileItem('Home Country', userHomeCountry),
+          ProfileItem('Home City', userHomeCity),
         ],
       ),
       ProfileSection(

@@ -502,8 +502,11 @@ const Map<String, String> arTranslations = {
   'please_select_start_date': 'يرجى اختيار تاريخ البداية',
   'please_select_end_date': 'يرجى اختيار تاريخ النهاية',
   'end_date_after_start_date': 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية',
+  'invalid_date_format': 'تنسيق التاريخ غير صحيح',
   'please_select_from_time': 'يرجى اختيار الوقت من',
   'please_select_to_time': 'يرجى اختيار الوقت إلى',
+  'to_time_after_from_time': 'يجب أن يكون الوقت إلى بعد الوقت من',
+  'invalid_time_format': 'تنسيق الوقت غير صحيح',
   
   // Submit Buttons
   'submit_loan_request': 'إرسال طلب القرض',

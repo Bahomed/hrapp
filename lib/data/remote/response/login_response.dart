@@ -114,11 +114,13 @@ class Data {
   String? department;
   String? section;
   String? localCountry;
+  String? localCity;
   String? homeCountry;
+  String? homeCity;
   String? currentAddress;
   String? permanentAddress;
   String? token;
-  String? appPassword;
+  String? reportToEmployee;
   FaceData? faceData;
 
   Data({
@@ -142,11 +144,13 @@ class Data {
     this.department,
     this.section,
     this.localCountry,
+    this.localCity,
     this.homeCountry,
+    this.homeCity,
     this.currentAddress,
     this.permanentAddress,
     this.token,
-    this.appPassword,
+    this.reportToEmployee,
     this.faceData,
   });
 
@@ -161,7 +165,7 @@ class Data {
     gender: json["gender"] ?? "",
     email: json["email"] ?? "",
     preferredLang: json["preferred_lang"] ?? "",
-    age: json["age"],
+    age: json["age"] != null ? int.tryParse(json["age"].toString()) : null,
     civilStatus: json["civil_status"] ?? "",
     nationality: json["nationality"] ?? "",
     placeOfBirth: json["place_of_birth"] ?? "",
@@ -171,11 +175,13 @@ class Data {
     department: json["department"] ?? "",
     section: json["section"] ?? "",
     localCountry: json["local_country"] ?? "",
+    localCity: json["local_city"] ?? "",
     homeCountry: json["home_country"] ?? "",
+    homeCity: json["home_city"] ?? "",
     currentAddress: json["current_address"] ?? "",
     permanentAddress: json["permanent_address"] ?? "",
     token: json["token"] ?? "",
-    appPassword: json["app_password"] ?? "",
+    reportToEmployee: json["report_to_employee"] ?? "",
     faceData: json["face_data"] != null ? FaceData.fromJson(json["face_data"]) : null,
   );
 
@@ -200,11 +206,13 @@ class Data {
     "department": department,
     "section": section,
     "local_country": localCountry,
+    "local_city": localCity,
     "home_country": homeCountry,
+    "home_city": homeCity,
     "current_address": currentAddress,
     "permanent_address": permanentAddress,
     "token": token,
-    "app_password": appPassword,
+    "report_to_employee": reportToEmployee,
     "face_data": faceData?.toJson(),
   };
 }
