@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 import '../../data/local/preferences.dart';
 import '../../data/remote/response/login_response.dart';
 import '../../repository/logoutrepository.dart';
 import '../../repository/userrepositiory.dart';
 import '../login_screen/login_screen.dart';
 import '../../services/theme_service.dart';
-import '../attendancescreen/attendancecontroller.dart';
 import '../document/document_controller.dart';
 import '../payroll/payroll_controller.dart';
 import '../request_leave/request_controller.dart';
@@ -62,10 +62,10 @@ class ProfileController extends GetxController {
         userData.value = user;
         _populateControllers();
       } else {
-        _showErrorSnackbar('No user data found');
+        _showErrorSnackbar(tr('no_user_data_found'));
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading profile: $e');
+      _showErrorSnackbar(tr('error_loading_profile') + ': $e');
     } finally {
       isLoading.value = false;
     }
@@ -99,7 +99,7 @@ class ProfileController extends GetxController {
       
       final currentUser = userData.value;
       if (currentUser == null) {
-        _showErrorSnackbar('No user data available');
+        _showErrorSnackbar(tr('no_user_data_available'));
         return;
       }
 
@@ -154,14 +154,14 @@ class ProfileController extends GetxController {
         }
         
         isEditing.value = false;
-        _showSuccessSnackbar('Profile updated successfully');
+        _showSuccessSnackbar(tr('profile_updated_successfully'));
       } else {
         // API returned error
         throw Exception(response.message);
       }
       
     } catch (e) {
-      _showErrorSnackbar('Error saving profile: $e');
+      _showErrorSnackbar(tr('error_saving_profile') + ': $e');
     } finally {
       isLoading.value = false;
     }
@@ -173,87 +173,87 @@ class ProfileController extends GetxController {
   }
 
   // Helper methods for getting user info
-  String get userName => userData.value?.employeeName ?? 'N/A';
-  String get userEmail => userData.value?.email ?? 'N/A';
-  String get userMobile => userData.value?.mobileNo ?? 'N/A';
-  String get userEmployeeNo => userData.value?.employeeNo ?? 'N/A';
-  String get userIqamaNo => userData.value?.iqamaNo ?? 'N/A';
-  String get userPosition => userData.value?.position ?? 'N/A';
-  String get userDepartment => userData.value?.department ?? 'N/A';
-  String get userSection => userData.value?.section ?? 'N/A';
-  String get userGender => userData.value?.gender ?? 'N/A';
-  String get userNationality => userData.value?.nationality ?? 'N/A';
-  String get userAge => userData.value?.age?.toString() ?? 'N/A';
-  String get userCivilStatus => userData.value?.civilStatus ?? 'N/A';
-  String get userPlaceOfBirth => userData.value?.placeOfBirth ?? 'N/A';
-  String get userPassportNo => userData.value?.passportNo ?? 'N/A';
-  String get userLocalCountry => userData.value?.localCountry ?? 'N/A';
-  String get userLocalCity=> userData.value?.localCity ?? 'N/A';
-  String get userHomeCountry => userData.value?.homeCountry ?? 'N/A';
-  String get userHomeCity => userData.value?.homeCity?? 'N/A';
-  String get userCurrentAddress => userData.value?.currentAddress ?? 'N/A';
-  String get userPermanentAddress => userData.value?.permanentAddress ?? 'N/A';
+  String get userName => userData.value?.employeeName ?? tr('n_a');
+  String get userEmail => userData.value?.email ?? tr('n_a');
+  String get userMobile => userData.value?.mobileNo ?? tr('n_a');
+  String get userEmployeeNo => userData.value?.employeeNo ?? tr('n_a');
+  String get userIqamaNo => userData.value?.iqamaNo ?? tr('n_a');
+  String get userPosition => userData.value?.position ?? tr('n_a');
+  String get userDepartment => userData.value?.department ?? tr('n_a');
+  String get userSection => userData.value?.section ?? tr('n_a');
+  String get userGender => userData.value?.gender ?? tr('n_a');
+  String get userNationality => userData.value?.nationality ?? tr('n_a');
+  String get userAge => userData.value?.age?.toString() ?? tr('n_a');
+  String get userCivilStatus => userData.value?.civilStatus ?? tr('n_a');
+  String get userPlaceOfBirth => userData.value?.placeOfBirth ?? tr('n_a');
+  String get userPassportNo => userData.value?.passportNo ?? tr('n_a');
+  String get userLocalCountry => userData.value?.localCountry ?? tr('n_a');
+  String get userLocalCity=> userData.value?.localCity ?? tr('n_a');
+  String get userHomeCountry => userData.value?.homeCountry ?? tr('n_a');
+  String get userHomeCity => userData.value?.homeCity?? tr('n_a');
+  String get userCurrentAddress => userData.value?.currentAddress ?? tr('n_a');
+  String get userPermanentAddress => userData.value?.permanentAddress ?? tr('n_a');
   String get userImage => userData.value?.image ?? '';
-  String get userPreferredLang => userData.value?.preferredLang ?? 'N/A';
-  String get userReportToEmployee=> userData.value?.reportToEmployee?? 'N/A';
+  String get userPreferredLang => userData.value?.preferredLang ?? tr('n_a');
+  String get userReportToEmployee=> userData.value?.reportToEmployee?? tr('n_a');
 
   // Profile sections for organized display
   List<ProfileSection> get profileSections {
     return [
       ProfileSection(
-        title: 'Personal Information',
+        title: tr('personal_information'),
         icon: Icons.person,
         color: const Color(0xFF42A5F5),
         items: [
-          ProfileItem('Employee Name', userName, isEditable: false),
-          ProfileItem('Employee No', userEmployeeNo),
-          ProfileItem('Email', userEmail, isEditable: true),
-          ProfileItem('Mobile', userMobile, isEditable: true),
-          ProfileItem('Gender', userGender),
-          ProfileItem('Age', userAge),
-          ProfileItem('Civil Status', userCivilStatus),
-          ProfileItem('Nationality', userNationality),
-          ProfileItem('Place of Birth', userPlaceOfBirth),
+          ProfileItem(tr('employee_name'), userName, isEditable: false),
+          ProfileItem(tr('employee_no'), userEmployeeNo),
+          ProfileItem(tr('email'), userEmail, isEditable: true),
+          ProfileItem(tr('mobile'), userMobile, isEditable: true),
+          ProfileItem(tr('gender'), userGender),
+          ProfileItem(tr('age'), userAge),
+          ProfileItem(tr('civil_status'), userCivilStatus),
+          ProfileItem(tr('nationality'), userNationality),
+          ProfileItem(tr('place_of_birth'), userPlaceOfBirth),
         ],
       ),
       ProfileSection(
-        title: 'Work Information',
+        title: tr('work_information'),
         icon: Icons.work,
         color: const Color(0xFF4CAF50),
         items: [
-          ProfileItem('Position', userPosition),
-          ProfileItem('Department', userDepartment),
-          ProfileItem('Section', userSection),
+          ProfileItem(tr('position'), userPosition),
+          ProfileItem(tr('department'), userDepartment),
+          ProfileItem(tr('section'), userSection),
         ],
       ),
       ProfileSection(
-        title: 'Identification',
+        title: tr('identification'),
         icon: Icons.badge,
         color: const Color(0xFFFF9800),
         items: [
-          ProfileItem('Iqama No', userIqamaNo),
-          ProfileItem('Passport No', userPassportNo),
+          ProfileItem(tr('iqama_no'), userIqamaNo),
+          ProfileItem(tr('passport_no'), userPassportNo),
         ],
       ),
       ProfileSection(
-        title: 'Address Information',
+        title: tr('address_information'),
         icon: Icons.location_on,
         color: const Color(0xFF9C27B0),
         items: [
-          ProfileItem('Current Address', userCurrentAddress, isEditable: true),
-          ProfileItem('Permanent Address', userPermanentAddress, isEditable: true),
-          ProfileItem('Local Country', userLocalCountry),
-          ProfileItem('Local City', userLocalCity),
-          ProfileItem('Home Country', userHomeCountry),
-          ProfileItem('Home City', userHomeCity),
+          ProfileItem(tr('current_address'), userCurrentAddress, isEditable: true),
+          ProfileItem(tr('permanent_address'), userPermanentAddress, isEditable: true),
+          ProfileItem(tr('local_country'), userLocalCountry),
+          ProfileItem(tr('local_city'), userLocalCity),
+          ProfileItem(tr('home_country'), userHomeCountry),
+          ProfileItem(tr('home_city'), userHomeCity),
         ],
       ),
       ProfileSection(
-        title: 'Preferences',
+        title: tr('preferences'),
         icon: Icons.settings,
         color: const Color(0xFF607D8B),
         items: [
-          ProfileItem('Preferred Language', userPreferredLang),
+          ProfileItem(tr('preferred_language'), userPreferredLang),
         ],
       ),
     ];
@@ -264,19 +264,19 @@ class ProfileController extends GetxController {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(tr('logout')),
+        content: Text(tr('are_you_sure_logout')),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+            child: Text(tr('cancel'), style: TextStyle(color: Colors.grey[600])),
           ),
           TextButton(
             onPressed: () async {
               Get.back();
               await _performLogout();
             },
-            child: const Text('Logout', style: TextStyle(color: Color(0xFFF44336))),
+            child: Text(tr('logout'), style: const TextStyle(color: Color(0xFFF44336))),
           ),
         ],
       ),
@@ -300,7 +300,7 @@ class ProfileController extends GetxController {
       // Clear ALL local data and reset all controllers
       await _clearAllAppData();
       
-      _showSuccessSnackbar('Logged out successfully');
+      _showSuccessSnackbar(tr('logged_out_successfully'));
       
       // Navigate to login screen and clear all routes
       Get.offAll(() => LoginScreen());
@@ -311,7 +311,7 @@ class ProfileController extends GetxController {
       } catch (clearError) {
         print('Error clearing app data: $clearError');
       }
-      _showErrorSnackbar('Logout completed with errors: $e');
+      _showErrorSnackbar(tr('logout_completed_with_errors') + ': $e');
       Get.offAll(() => LoginScreen());
     } finally {
       isLoading.value = false;
@@ -341,11 +341,7 @@ class ProfileController extends GetxController {
         Get.delete<ProfileController>(force: true);
       }
       
-      // Reset attendance controllers
-      if (Get.isRegistered<AttendanceController>()) {
-        Get.delete<AttendanceController>(force: true);
-      }
-      
+
       // Reset document controller
       if (Get.isRegistered<DocumentController>()) {
         Get.delete<DocumentController>(force: true);

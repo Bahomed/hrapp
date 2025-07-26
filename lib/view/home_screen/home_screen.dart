@@ -95,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         Obx(() => Text(
-                          model.userName.value.isNotEmpty ? model.userName.value : 'User',
+                          model.userName.value.isNotEmpty ? model.userName.value : tr('user'),
                           style: TextStyle(
                             fontSize: 18,
                             color: Theme.of(context).textTheme.titleLarge?.color,

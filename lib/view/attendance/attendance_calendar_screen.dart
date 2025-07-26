@@ -29,21 +29,7 @@ class AttendanceCalendarScreen extends StatelessWidget {
         backgroundColor: themeService.getCardColor(),
         foregroundColor: themeService.getTextPrimaryColor(),
         elevation: 0,
-        iconTheme: IconThemeData(
-          color: themeService.getTextPrimaryColor(),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Get.to(() => const AttendanceDetailScreen());
-            },
-            icon: Icon(
-              Icons.table_chart,
-              color: themeService.getPrimaryColor(),
-            ),
-            tooltip: 'Weekly Attendance',
-          ),
-        ],
+
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -155,7 +141,7 @@ class AttendanceCalendarScreen extends StatelessWidget {
         children: [
           // Week day headers
           Row(
-            children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            children: [tr('sun'), tr('mon'), tr('tue'), tr('wed'), tr('thu'), tr('fri'), tr('sat')]
                 .map((day) => Expanded(
               child: Center(
                 child: Text(

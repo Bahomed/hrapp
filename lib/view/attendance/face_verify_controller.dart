@@ -8,6 +8,7 @@ import 'package:injazat_hr_app/repository/attendancerepository.dart';
 import 'package:injazat_hr_app/utils/alertbox.dart';
 import 'package:injazat_hr_app/utils/list_extensions.dart';
 import 'package:injazat_hr_app/utils/location_service.dart';
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -34,7 +35,7 @@ class FaceVerifyController extends GetxController {
     userName = Get.arguments["username"] ?? "";
     attendanceType = Get.arguments["attendanceType"] ?? "clock_in";
     
-    statusMessage.value = "Position your face in the camera";
+    statusMessage.value = tr('position_your_face_camera');
     await getImageFromCamera();
     super.onInit();
   }
@@ -55,10 +56,10 @@ class FaceVerifyController extends GetxController {
 
     } catch (e) {
       verificationState.value = VerificationState.failed;
-      statusMessage.value = "Something went wrong";
+      statusMessage.value = tr('something_went_wrong');
       showLottieDialog(
-          "Verification Failed",
-          "Something went wrong. Please try again.",
+          tr('verification_failed'),
+          tr('something_went_wrong_try_again'),
           AlertType.error,
           "assets/raw/error.json");
       

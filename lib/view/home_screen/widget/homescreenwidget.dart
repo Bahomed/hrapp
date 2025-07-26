@@ -45,7 +45,7 @@ class HomeScreenWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      model.userName.value.isNotEmpty ? model.userName.value : 'User',
+                      model.userName.value.isNotEmpty ? model.userName.value : tr('user'),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w600,
@@ -101,6 +101,7 @@ class HomeScreenWidget extends StatelessWidget {
 
   // Header section with profile and notifications
   Widget _buildHeader() {
+    final model = Get.find<HomeScreenController>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -136,14 +137,14 @@ class HomeScreenWidget extends StatelessWidget {
                     color: Colors.grey[600],
                   ),
                 ),
-                const Text(
-                  'Sarah',
+                Obx(() => Text(
+                  model.userName.value.isNotEmpty ? model.userName.value : tr('user'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
-                ),
+                )),
               ],
             ),
           ],
@@ -311,7 +312,7 @@ class HomeScreenWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Oct 16, 2020 - Oct 18, 2020',
+                  tr('oct_16_18_2020'),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Container(
@@ -335,7 +336,7 @@ class HomeScreenWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Going on a vacation',
+              tr('going_on_vacation'),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           const SizedBox(height: 16),
@@ -352,9 +353,9 @@ class HomeScreenWidget extends StatelessWidget {
                     bottomLeft: Radius.circular(4),
                   ),
                 ),
-                child: const Text(
-                  'Annual leave',
-                  style: TextStyle(
+                child: Text(
+                  tr('annual_leave'),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.secondaryColor,
                     fontWeight: FontWeight.w500,
@@ -373,9 +374,9 @@ class HomeScreenWidget extends StatelessWidget {
                     bottomLeft: Radius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Pending',
-                  style: TextStyle(
+                child: Text(
+                  tr('pending'),
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.warningColor, // Yellow warning color
                     fontWeight: FontWeight.w600,

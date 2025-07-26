@@ -198,7 +198,7 @@ class DocumentUploadScreen extends StatelessWidget {
         children: [
           // Form Title
           Text(
-            'Document Details',
+            tr('document_details'),
             style: TextStyle(
               fontSize: ResponsiveUtils.responsiveFontSize(
                   context,
@@ -713,7 +713,7 @@ class DocumentUploadScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  fileName.isNotEmpty ? fileName : 'Tap to select file',
+                  fileName.isNotEmpty ? fileName : tr('tap_to_select_file'),
                   style: TextStyle(
                     color: fileName.isNotEmpty
                         ? themeService.getSuccessColor()
@@ -725,7 +725,7 @@ class DocumentUploadScreen extends StatelessWidget {
                 if (fileName.isEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'PDF, DOC, DOCX, JPG, PNG (Max 10MB)',
+                    tr('pdf_doc_supported_formats'),
                     style: TextStyle(
                       color: themeService.getTextSecondaryColor(),
                       fontSize: 12,
@@ -850,7 +850,7 @@ class DocumentUploadScreen extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Uploading Document...',
+                tr('uploading_document'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -869,7 +869,7 @@ class DocumentUploadScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please wait while we upload your document...',
+            tr('please_wait_upload'),
             style: TextStyle(
               fontSize: 13,
               color: themeService.getTextSecondaryColor(),

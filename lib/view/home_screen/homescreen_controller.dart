@@ -1,5 +1,4 @@
 import 'package:injazat_hr_app/utils/alertbox.dart';
-import 'package:injazat_hr_app/view/attendancescreen/attendancescreen.dart';
 import 'package:injazat_hr_app/view/attendance/attendance_detail_screen.dart';
 import 'package:injazat_hr_app/view/attendance/attendance_calendar_screen.dart';
 import 'package:injazat_hr_app/view/holidayscreen/holiday_screen.dart';
@@ -95,21 +94,11 @@ class HomeScreenController extends SuperController {
     const NotificationScreen()
   ];
 
-  void onCheckInClicked() {
-    Get.to(const AttendanceScreen(), arguments: {"mode": 0});
-  }
 
-  void onCheckOutClicked() {
-    Get.to(const AttendanceScreen(), arguments: {"mode": 1});
-  }
 
-  void onBreakInClicked() {
-    Get.to(const AttendanceScreen(), arguments: {"mode": 2});
-  }
 
-  void onBreakOutClicked() {
-    Get.to(const AttendanceScreen(), arguments: {"mode": 3});
-  }
+
+
 
   void goToProfileScreen() {
     Get.to(const ProfileScreen());
@@ -123,7 +112,7 @@ class HomeScreenController extends SuperController {
   }
 
   void goToAttendanceDetailScreen() {
-    Get.to(const AttendanceCalendarScreen());
+    Get.to(const AttendanceDetailScreen());
   }
 
   void goToSettingsScreen() {

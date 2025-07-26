@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -71,8 +72,48 @@ class LocationService {
         
         if (connectivityResult.contains(ConnectivityResult.wifi)) {
           final info = NetworkInfo();
-          wifiSSID = await info.getWifiName();
-          wifiBSSID = await info.getWifiBSSID();
+          
+          // For iOS, we need to request location permission first
+          if (Platform.isIOS) {
+            LocationPermission wifiPermission = await Geolocator.checkPermission();
+            if (wifiPermission == LocationPermission.denied) {
+              wifiPermission = await Geolocator.requestPermission();
+            }
+            
+            if (wifiPermission == LocationPermission.whileInUse || 
+                wifiPermission == LocationPermission.always) {
+              try {
+                wifiSSID = await info.getWifiName();
+                wifiBSSID = await info.getWifiBSSID();
+                
+                // iOS may still return null due to entitlements requiring Apple approval
+                if (wifiSSID == null || wifiBSSID == null) {
+                  print('WiFi info requires Apple entitlement approval - using IP-based location verification');
+                  // Use IP address as alternative verification method
+                  wifiSSID = 'WiFi Entitlement Pending';
+                  wifiBSSID = 'Using IP Verification';
+                }
+              } catch (e) {
+                print('Error getting WiFi info on iOS: $e');
+                wifiSSID = 'WiFi Access Error';
+                wifiBSSID = 'WiFi Access Error';
+              }
+            } else {
+              print('Location permission required for WiFi info on iOS');
+              wifiSSID = 'Location Permission Required';
+              wifiBSSID = 'Location Permission Required';
+            }
+          } else {
+            // For Android, direct access should work
+            try {
+              wifiSSID = await info.getWifiName();
+              wifiBSSID = await info.getWifiBSSID();
+            } catch (e) {
+              print('Error getting WiFi info on Android: $e');
+              wifiSSID = 'WiFi Access Error';
+              wifiBSSID = 'WiFi Access Error';
+            }
+          }
           
           // Clean up WiFi SSID (remove quotes if present)
           if (wifiSSID != null && wifiSSID.startsWith('"') && wifiSSID.endsWith('"')) {

@@ -4,6 +4,7 @@ import 'package:injazat_hr_app/utils/translation_helper.dart';
 import '../../services/theme_service.dart';
 import '../../data/remote/response/schedule_models.dart';
 import '../schedule/schedule_controller.dart';
+import 'attendance_calendar_screen.dart';
 import 'weekly_attendance_controller.dart';
 import 'widgets/weekly_attendance_table.dart';
 
@@ -40,7 +41,7 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeService.getTextPrimaryColor()),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(),
         ),
         title: Text(
           tr('attendance_detail'),
@@ -50,6 +51,23 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        foregroundColor: themeService.getTextPrimaryColor(),
+
+        iconTheme: IconThemeData(
+          color: themeService.getTextPrimaryColor(),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(() => const AttendanceCalendarScreen());
+            },
+            icon: Icon(
+              Icons.table_chart,
+              color: themeService.getPrimaryColor(),
+            ),
+            tooltip: 'Weekly Attendance',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

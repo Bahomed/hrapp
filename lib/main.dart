@@ -16,7 +16,6 @@ void main() async {
   // Initialize services
   await initLanguageService();
   Get.put(ThemeService());
-  WidgetsFlutterBinding.ensureInitialized();
   cameras = await availableCameras();
   runApp(const MyApp());
 }

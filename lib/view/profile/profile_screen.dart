@@ -384,7 +384,7 @@ class ProfileScreen extends StatelessWidget {
                   )
                 : Icon(Icons.save, color: themeService.getSilver()),
             label: Text(
-              controller.isLoading.value ? 'Saving...' : 'Save Changes',
+              controller.isLoading.value ? tr('saving') : tr('save_changes'),
               style: TextStyle(
                 color: themeService.getSilver(),
                 fontWeight: FontWeight.w600,
@@ -406,7 +406,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: controller.isLoading.value ? null : controller.toggleEditMode,
             icon: Icon(Icons.cancel, color: themeService.getErrorColor()),
             label: Text(
-              'Cancel',
+              tr('cancel'),
               style: TextStyle(
                 color: themeService.getErrorColor(),
                 fontWeight: FontWeight.w600,
@@ -533,7 +533,7 @@ class ProfileScreen extends StatelessWidget {
             TextField(
               controller: textController,
               decoration: InputDecoration(
-                hintText: 'Enter ${item.label.toLowerCase()}',
+                hintText: trParams('enter_field', {'field': item.label.toLowerCase()}),
                 hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -561,7 +561,7 @@ class ProfileScreen extends StatelessWidget {
                 border: Border.all(color: themeService.getDividerColor()),
               ),
               child: Text(
-                item.value.isEmpty ? 'Not specified' : item.value,
+                item.value.isEmpty ? tr('not_specified') : item.value,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

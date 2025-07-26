@@ -48,7 +48,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
   double? _currentLng;
   String? _wifiSSID;
   String? _wifiBSSID;
-  String _locationStatus = "Getting location data...";
+  String _locationStatus = tr('getting_location_data');
   bool _isLocationLoading = true;
   bool _hasLocationPermission = false;
   bool _isConnectedToWifi = false;
@@ -113,7 +113,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
       }
     } catch (e) {
       setState(() {
-        _attendanceStatusError = 'Failed to load attendance status: ${e.toString()}';
+        _attendanceStatusError = '${tr('failed_to_load_attendance_data')}: ${e.toString()}';
         _isLoadingAttendanceStatus = false;
       });
       print('Error loading attendance status: $e');
@@ -151,8 +151,46 @@ class _ClockingScreenState extends State<ClockingScreen> {
       if (_isConnectedToWifi) {
         // Get real WiFi information using network_info_plus
         final info = NetworkInfo();
-        final wifiName = await info.getWifiName();       // SSID
-        final wifiBSSID = await info.getWifiBSSID();     // BSSID
+        String? wifiName;
+        String? wifiBSSID;
+        
+        // For iOS, check if we have location permission for WiFi access
+        if (Platform.isIOS) {
+          LocationPermission wifiPermission = await Geolocator.checkPermission();
+          if (wifiPermission == LocationPermission.whileInUse || 
+              wifiPermission == LocationPermission.always) {
+            try {
+              wifiName = await info.getWifiName();       // SSID
+              wifiBSSID = await info.getWifiBSSID();     // BSSID
+              
+              // iOS may still return null due to entitlements or developer account restrictions
+              if (wifiName == null || wifiBSSID == null) {
+                print('WiFi info null - may require paid Apple Developer account for WiFi entitlements');
+                wifiName = wifiName ?? 'Entitlement Required';
+                wifiBSSID = wifiBSSID ?? 'Entitlement Required';
+              }
+            } catch (e) {
+              print('Error getting WiFi info on iOS: $e');
+              wifiName = 'WiFi Access Error';
+              wifiBSSID = 'WiFi Access Error';
+            }
+          } else {
+            print('Location permission required for WiFi info on iOS');
+            wifiName = 'Location Permission Required';
+            wifiBSSID = 'Location Permission Required';
+          }
+        } else {
+          // For Android, direct access should work
+          try {
+            wifiName = await info.getWifiName();       // SSID
+            wifiBSSID = await info.getWifiBSSID();     // BSSID
+          } catch (e) {
+            print('Error getting WiFi info on Android: $e');
+            wifiName = 'WiFi Access Error';
+            wifiBSSID = 'WiFi Access Error';
+          }
+        }
+        
         final wifiIP = await info.getWifiIP();           // IP Address
         final wifiGatewayIP = await info.getWifiGatewayIP();
 
@@ -162,8 +200,8 @@ class _ClockingScreenState extends State<ClockingScreen> {
         print('Gateway IP: $wifiGatewayIP');
 
         setState(() {
-          _wifiSSID = wifiName ?? "Connected to WiFi";
-          _wifiBSSID = wifiBSSID ?? "Unknown BSSID";
+          _wifiSSID = wifiName ?? tr('connected_to_wifi');
+          _wifiBSSID = wifiBSSID ?? tr('unknown_bssid');
         });
       } else {
         setState(() {
@@ -195,12 +233,12 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
         setState(() {
           _street = '${place.street ?? ''} ${place.subThoroughfare ?? ''}'.trim();
-          if (_street!.isEmpty) _street = place.thoroughfare ?? 'Unknown Street';
+          if (_street!.isEmpty) _street = place.thoroughfare ?? tr('unknown_street');
 
-          _city = place.locality ?? place.subAdministrativeArea ?? 'Unknown City';
-          _state = place.administrativeArea ?? 'Unknown State';
-          _country = place.country ?? 'Unknown Country';
-          _postalCode = place.postalCode ?? 'Unknown Postal Code';
+          _city = place.locality ?? place.subAdministrativeArea ?? tr('unknown_city');
+          _state = place.administrativeArea ?? tr('unknown_state');
+          _country = place.country ?? tr('unknown_country');
+          _postalCode = place.postalCode ?? tr('unknown_postal_code');
           _isGeocodingLoading = false;
         });
 
@@ -214,11 +252,11 @@ class _ClockingScreenState extends State<ClockingScreen> {
     } catch (e) {
       print('Geocoding error: $e');
       setState(() {
-        _street = 'Address not available';
-        _city = 'City not available';
-        _state = 'State not available';
-        _country = 'Country not available';
-        _postalCode = 'Postal code not available';
+        _street = tr('address_not_available');
+        _city = tr('city_not_available');
+        _state = tr('state_not_available');
+        _country = tr('country_not_available');
+        _postalCode = tr('postal_code_not_available');
         _isGeocodingLoading = false;
       });
     }
@@ -256,13 +294,13 @@ class _ClockingScreenState extends State<ClockingScreen> {
         setState(() {
           _isLocationLoading = false;
           _hasLocationPermission = false;
-          _locationStatus = "Location permission denied";
+          _locationStatus = tr('location_permission_denied');
         });
       }
     } catch (e) {
       setState(() {
         _isLocationLoading = false;
-        _locationStatus = "Error requesting location permission: $e";
+        _locationStatus = '${tr('error_requesting_location_permission')}: $e';
       });
     }
   }
@@ -276,7 +314,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
     try {
       setState(() {
         _isLocationLoading = true;
-        _locationStatus = "Getting location...";
+        _locationStatus = tr('getting_location');
       });
 
       // Check if location services are enabled
@@ -284,7 +322,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
       if (!serviceEnabled) {
         setState(() {
           _isLocationLoading = false;
-          _locationStatus = "Location services are disabled. Please enable GPS.";
+          _locationStatus = tr('location_services_disabled');
         });
         return;
       }
@@ -332,7 +370,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                     ],
                   ),
                   child: Text(
-                    'Current Location\n${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}',
+                    '${tr('current_location')}\n${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -364,23 +402,23 @@ class _ClockingScreenState extends State<ClockingScreen> {
     } on TimeoutException catch (e) {
       setState(() {
         _isLocationLoading = false;
-        _locationStatus = "Location request timed out. Please try again.";
+        _locationStatus = tr('location_request_timed_out');
       });
     } on LocationServiceDisabledException catch (e) {
       setState(() {
         _isLocationLoading = false;
-        _locationStatus = "Location services are disabled. Please enable GPS.";
+        _locationStatus = tr('location_services_disabled');
       });
     } on PermissionDeniedException catch (e) {
       setState(() {
         _isLocationLoading = false;
         _hasLocationPermission = false;
-        _locationStatus = "Location permission denied.";
+        _locationStatus = tr('location_permission_denied');
       });
     } catch (e) {
       setState(() {
         _isLocationLoading = false;
-        _locationStatus = "Failed to get location: ${e.toString()}";
+        _locationStatus = tr('failed_to_get_location') + ': ${e.toString()}';
       });
     }
   }
@@ -389,31 +427,31 @@ class _ClockingScreenState extends State<ClockingScreen> {
     List<String> statusParts = [];
 
     if (_currentLat != null && _currentLng != null) {
-      statusParts.add("Latitude: ${_currentLat!.toStringAsFixed(6)}");
-      statusParts.add("Longitude: ${_currentLng!.toStringAsFixed(6)}");
+      statusParts.add('${tr('latitude')}: ${_currentLat!.toStringAsFixed(6)}');
+      statusParts.add('${tr('longitude')}: ${_currentLng!.toStringAsFixed(6)}');
 
       // Add accuracy information if available
-      statusParts.add("GPS Location Retrieved");
+      statusParts.add(tr('gps_location_retrieved'));
     }
 
     // Add WiFi status if connected
     if (_wifiSSID != null && _wifiSSID!.isNotEmpty) {
-      statusParts.add("WiFi: $_wifiSSID");
+      statusParts.add('${tr('wifi')}: $_wifiSSID');
     }
 
     // Add BSSID if available
     if (_wifiBSSID != null && _wifiBSSID!.isNotEmpty) {
-      statusParts.add("BSSID: $_wifiBSSID");
+      statusParts.add('${tr('bssid')}: $_wifiBSSID');
     }
 
-    return statusParts.isEmpty ? "Location data not available" : statusParts.join("\n");
+    return statusParts.isEmpty ? tr('location_data_not_available') : statusParts.join('\n');
   }
 
   Future<bool> _isValidWorkLocation() async {
     if (_currentLat == null || _currentLng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Unable to determine current location'),
+          content: Text(tr('unable_to_determine_location')),
           backgroundColor: ThemeService.instance.getErrorColor(),
         ),
       );
@@ -470,7 +508,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Clocking',
+          tr('clocking'),
           style: TextStyle(
             color: themeService.getTextPrimaryColor(),
             fontSize: 20,
@@ -516,7 +554,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Getting your GPS location...',
+                          tr('getting_gps_location'),
                           style: TextStyle(
                             fontSize: 16,
                             color: themeService.getTextSecondaryColor(),
@@ -524,7 +562,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'This may take a few moments',
+                          tr('location_may_take_moments'),
                           style: TextStyle(
                             fontSize: 12,
                             color: themeService.getTextSecondaryColor(),
@@ -545,7 +583,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Location Permission Required',
+                          tr('location_permission_required'),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -554,7 +592,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Please enable location permission to view the map',
+                          tr('enable_location_permission'),
                           style: TextStyle(
                             fontSize: 14,
                             color: themeService.getTextSecondaryColor(),
@@ -568,7 +606,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             backgroundColor: themeService.getPrimaryColor(),
                             foregroundColor: themeService.getSilver(),
                           ),
-                          child: const Text('Enable Location'),
+                          child: Text(tr('enable_location')),
                         ),
                       ],
                     ),
@@ -599,7 +637,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             backgroundColor: themeService.getPrimaryColor(),
                             foregroundColor: themeService.getSilver(),
                           ),
-                          child: const Text('Retry GPS'),
+                          child: Text(tr('retry_gps')),
                         ),
                       ],
                     ),
@@ -1259,26 +1297,33 @@ class _ClockingScreenState extends State<ClockingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDisabled 
-                    ? themeService.getTextSecondaryColor()
-                    : (isActive ? themeService.getSilver() : themeService.getTextPrimaryColor()),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDisabled 
+                      ? themeService.getTextSecondaryColor()
+                      : (isActive ? themeService.getSilver() : themeService.getTextPrimaryColor()),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDisabled 
-                    ? themeService.getTextSecondaryColor()
-                    : (isActive ? themeService.getSilver() : themeService.getTextSecondaryColor()),
+            Flexible(
+              child: Text(
+                time,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled 
+                      ? themeService.getTextSecondaryColor()
+                      : (isActive ? themeService.getSilver() : themeService.getTextSecondaryColor()),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

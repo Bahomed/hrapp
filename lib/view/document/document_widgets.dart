@@ -467,20 +467,20 @@ class DocumentSummaryCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: ThemeService.instance.getGradientTextColor(),
+                  color: ThemeService.instance.getTextPrimaryColor(),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: ThemeService.instance.getGradientTextColor().withValues(alpha: 0.2),
+                  color: ThemeService.instance.getTextPrimaryColor().withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${summary.totalDocuments} docs',
                   style: TextStyle(
                     fontSize: 12,
-                    color: ThemeService.instance.getGradientTextColor(),
+                    color: ThemeService.instance.getTextPrimaryColor(),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -521,13 +521,13 @@ class DocumentSummaryCard extends StatelessWidget {
   Widget _buildSummaryItem(String title, String count, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: ThemeService.instance.getGradientTextColor(), size: 24),
+        Icon(icon, color: ThemeService.instance.getTextPrimaryColor(), size: 24),
         const SizedBox(height: 8),
         Text(
           count,
           style: TextStyle(
             fontSize: 20,
-            color: ThemeService.instance.getGradientTextColor(),
+            color: ThemeService.instance.getTextPrimaryColor(),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -535,7 +535,7 @@ class DocumentSummaryCard extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 12,
-            color: ThemeService.instance.getGradientTextColor().withValues(alpha: 0.8),
+            color: ThemeService.instance.getTextPrimaryColor().withValues(alpha: 0.8),
             fontWeight: FontWeight.w500,
           ),
         ),
