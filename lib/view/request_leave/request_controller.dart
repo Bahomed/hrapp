@@ -19,19 +19,21 @@ import 'package:injazat_hr_app/view/request_leave/create_request/edit_loan_reque
 import 'package:injazat_hr_app/view/request_leave/create_request/edit_permission_request_screen.dart';
 import 'package:injazat_hr_app/view/request_leave/create_request/edit_leave_request_screen.dart';
 
+import '../../utils/translation_helper.dart';
+
 class RequestController extends GetxController with GetTickerProviderStateMixin {
   final RequestRepository _requestRepository = RequestRepository();
 
   // Reactive variables
-  final RxString selectedFilter = 'All'.obs;
+  final RxString selectedFilter = 'all'.obs;
   final RxBool isLoading = false.obs;
-  
+
   // Original lists (all data from API)
   final RxList<LeaveRequest> _allLeaveRequests = <LeaveRequest>[].obs;
   final RxList<PermissionRequest> _allPermissionRequests = <PermissionRequest>[].obs;
   final RxList<LoanRequest> _allLoanRequests = <LoanRequest>[].obs;
   final RxList<LetterRequest> _allLetterRequests = <LetterRequest>[].obs;
-  
+
   // Filtered lists (displayed to user)
   final RxList<LeaveRequest> leaveRequests = <LeaveRequest>[].obs;
   final RxList<PermissionRequest> permissionRequests = <PermissionRequest>[].obs;
@@ -42,18 +44,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxList<RequestTypeOption> loanTypes = <RequestTypeOption>[].obs;
   final RxList<RequestTypeOption> letterTypes = <RequestTypeOption>[].obs;
   final RxBool isLoadingTypes = false.obs; // Added missing variable
-  
+
   // Pagination variables for year-based loading - separate for each request type
   final RxBool isLoadingMoreLeave = false.obs;
   final RxBool isLoadingMorePermission = false.obs;
   final RxBool isLoadingMoreLoan = false.obs;
   final RxBool isLoadingMoreLetter = false.obs;
-  
+
   final RxList<int> loadedYearsLeave = <int>[].obs;
   final RxList<int> loadedYearsPermission = <int>[].obs;
   final RxList<int> loadedYearsLoan = <int>[].obs;
   final RxList<int> loadedYearsLetter = <int>[].obs;
-  
+
   final RxBool hasMoreDataLeave = true.obs;
   final RxBool hasMoreDataPermission = true.obs;
   final RxBool hasMoreDataLoan = true.obs;
@@ -64,10 +66,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   // Filter configuration
   List<Map<String, dynamic>> get filters => [
-    {'name': 'All', 'color': getFilterColor('all')},
-    {'name': 'Approved', 'color': getFilterColor('approved')},
-    {'name': 'Rejected', 'color': getFilterColor('rejected')},
-    {'name': 'For-Approval', 'color': getFilterColor('pending')},
+    {'name': tr('all'), 'key': 'all', 'color': getFilterColor('all')},
+    {'name': tr('approved'), 'key': 'Approved', 'color': getFilterColor('approved')},
+    {'name': tr('rejected'), 'key': 'Rejected', 'color': getFilterColor('rejected')},
+    {'name': tr('for_approval'), 'key': 'For-Approval', 'color': getFilterColor('pending')},
   ];
 
   @override
@@ -79,23 +81,23 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     loadAllRequestTypes(); // Load types on init
 
   }
-  
+
   // Initialize pagination with current year - separate for each request type
   void initializePagination() {
     final currentYear = DateTime.now().year;
-    
+
     loadedYearsLeave.clear();
     loadedYearsLeave.add(currentYear);
     hasMoreDataLeave.value = true;
-    
+
     loadedYearsPermission.clear();
     loadedYearsPermission.add(currentYear);
     hasMoreDataPermission.value = true;
-    
+
     loadedYearsLoan.clear();
     loadedYearsLoan.add(currentYear);
     hasMoreDataLoan.value = true;
-    
+
     loadedYearsLetter.clear();
     loadedYearsLetter.add(currentYear);
     hasMoreDataLetter.value = true;
@@ -134,10 +136,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         leaveTypes.value = response.data;
       } else {
-        _showErrorSnackbar('Failed to load leave types: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_leave_types')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading leave types: $e');
+      _showErrorSnackbar('${tr('error_loading_leave_types')}: $e');
     }
   }
 
@@ -147,10 +149,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         loanTypes.value = response.data;
       } else {
-        _showErrorSnackbar('Failed to load loan types: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_loan_types')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading loan types: $e');
+      _showErrorSnackbar('${tr('error_loading_loan_types')}: $e');
     }
   }
 
@@ -160,10 +162,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         letterTypes.value = response.data;
       } else {
-        _showErrorSnackbar('Failed to load letter types: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_letter_types')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading letter types: $e');
+      _showErrorSnackbar('${tr('error_loading_letter_types')}: $e');
     }
   }
 
@@ -173,7 +175,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     try {
       isLoading.value = true;
       print('[RequestController] Loading leave requests for current year');
-      
+
       final response = await _requestRepository.getLeaveRequests(
         status: null, // Load all data, filter client-side
         year: DateTime.now().year,
@@ -189,11 +191,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         print('[RequestController] Leave requests loaded successfully: ${_allLeaveRequests.length} total, ${leaveRequests.length} filtered');
       } else {
         print('[RequestController] Failed to load leave requests: ${response.message}');
-        _showErrorSnackbar('Failed to load leave requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_leave_requests')}: ${response.message}');
       }
     } catch (e) {
       print('[RequestController] Error loading leave requests: $e');
-      _showErrorSnackbar('Error loading leave requests: $e');
+      _showErrorSnackbar('${tr('error_loading_leave_requests')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -211,10 +213,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         _allPermissionRequests.value = response.data; // Store all data
         _filterPermissionRequests(); // Apply current filter
       } else {
-        _showErrorSnackbar('Failed to load permission requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_permission_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading permission requests: $e');
+      _showErrorSnackbar('${tr('error_loading_permission_requests')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -232,10 +234,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         _allLoanRequests.value = response.data; // Store all data
         _filterLoanRequests(); // Apply current filter
       } else {
-        _showErrorSnackbar('Failed to load loan requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_loan_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading loan requests: $e');
+      _showErrorSnackbar('${tr('error_loading_loan_requests')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -253,22 +255,22 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         _allLetterRequests.value = response.data; // Store all data
         _filterLetterRequests(); // Apply current filter
       } else {
-        _showErrorSnackbar('Failed to load letter requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_letter_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading letter requests: $e');
+      _showErrorSnackbar('${tr('error_loading_letter_requests')}: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
   // Filter methods - now using client-side filtering
-  void changeFilter(String filter) {
-    selectedFilter.value = filter;
+  void changeFilter(String filterKey) {
+    selectedFilter.value = filterKey;
     // Filter existing data instead of calling API
     _filterAllRequests();
   }
-  
+
   // Client-side filtering methods
   void _filterAllRequests() {
     _filterLeaveRequests();
@@ -276,56 +278,60 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     _filterLoanRequests();
     _filterLetterRequests();
   }
-  
+
   void _filterLeaveRequests() {
-    if (selectedFilter.value == 'All') {
+    if (selectedFilter.value == 'all') {
       leaveRequests.value = List.from(_allLeaveRequests);
     } else {
+      final statusToFilter = selectedFilter.value;
       leaveRequests.value = _allLeaveRequests.where((request) {
-        return request.status.toLowerCase() == selectedFilter.value.toLowerCase();
-      }).toList();
-    }
-  }
-  
-  void _filterPermissionRequests() {
-    if (selectedFilter.value == 'All') {
-      permissionRequests.value = List.from(_allPermissionRequests);
-    } else {
-      permissionRequests.value = _allPermissionRequests.where((request) {
-        return request.status?.toLowerCase() == selectedFilter.value.toLowerCase();
-      }).toList();
-    }
-  }
-  
-  void _filterLoanRequests() {
-    if (selectedFilter.value == 'All') {
-      loanRequests.value = List.from(_allLoanRequests);
-    } else {
-      loanRequests.value = _allLoanRequests.where((request) {
-        return request.status?.toLowerCase() == selectedFilter.value.toLowerCase();
-      }).toList();
-    }
-  }
-  
-  void _filterLetterRequests() {
-    if (selectedFilter.value == 'All') {
-      letterRequests.value = List.from(_allLetterRequests);
-    } else {
-      letterRequests.value = _allLetterRequests.where((request) {
-        return request.status?.toLowerCase() == selectedFilter.value.toLowerCase();
+        return request.status.toLowerCase() == statusToFilter.toLowerCase();
       }).toList();
     }
   }
 
-  IconData getFilterIcon(String filterName) {
-    switch (filterName) {
-      case 'All':
+  void _filterPermissionRequests() {
+    if (selectedFilter.value == 'all') {
+      permissionRequests.value = List.from(_allPermissionRequests);
+    } else {
+      final statusToFilter = selectedFilter.value == 'for-approval' ? 'pending' : selectedFilter.value;
+      permissionRequests.value = _allPermissionRequests.where((request) {
+        return request.status?.toLowerCase() == statusToFilter.toLowerCase();
+      }).toList();
+    }
+  }
+
+  void _filterLoanRequests() {
+    if (selectedFilter.value == 'all') {
+      loanRequests.value = List.from(_allLoanRequests);
+    } else {
+      final statusToFilter = selectedFilter.value == 'for-approval' ? 'pending' : selectedFilter.value;
+      loanRequests.value = _allLoanRequests.where((request) {
+        return request.status?.toLowerCase() == statusToFilter.toLowerCase();
+      }).toList();
+    }
+  }
+
+  void _filterLetterRequests() {
+    if (selectedFilter.value == 'all') {
+      letterRequests.value = List.from(_allLetterRequests);
+    } else {
+      final statusToFilter = selectedFilter.value == 'for-approval' ? 'pending' : selectedFilter.value;
+      letterRequests.value = _allLetterRequests.where((request) {
+        return request.status?.toLowerCase() == statusToFilter.toLowerCase();
+      }).toList();
+    }
+  }
+
+  IconData getFilterIcon(String filterKey) {
+    switch (filterKey) {
+      case 'all':
         return Icons.list;
-      case 'Approved':
+      case 'approved':
         return Icons.check_circle;
-      case 'Rejected':
+      case 'rejected':
         return Icons.cancel;
-      case 'For-Approval':
+      case 'for-approval':
         return Icons.schedule;
       default:
         return Icons.circle;
@@ -335,7 +341,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   // Request creation methods
   void showRequestTypeDialog() {
     final themeService = Get.find<ThemeService>();
-    
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -357,7 +363,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
             ),
             const SizedBox(height: 20),
             Text(
-              'Create New Request',
+              tr('create_new_request'),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -367,8 +373,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
             const SizedBox(height: 20),
             _buildRequestTypeOption(
               icon: Icons.calendar_today,
-              title: 'Leave Request',
-              subtitle: 'Request time off work',
+              title: tr('leave_request'),
+              subtitle: tr('request_time_off_work'),
               color: themeService.getActionColor('requests'),
               onTap: () {
                 Get.back();
@@ -378,8 +384,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
             const SizedBox(height: 12),
             _buildRequestTypeOption(
               icon: Icons.badge_outlined,
-              title: 'Permission Request',
-              subtitle: 'Request work permissions',
+              title: tr('permission_request'),
+              subtitle: tr('request_work_permissions'),
               color: themeService.getActionColor('profile'),
               onTap: () {
                 Get.back();
@@ -389,8 +395,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
             const SizedBox(height: 12),
             _buildRequestTypeOption(
               icon: Icons.account_balance_wallet,
-              title: 'Loan Request',
-              subtitle: 'Request financial loan',
+              title: tr('loan_request'),
+              subtitle: tr('request_financial_loan'),
               color: themeService.getSuccessColor(),
               onTap: () {
                 Get.back();
@@ -400,8 +406,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
             const SizedBox(height: 12),
             _buildRequestTypeOption(
               icon: Icons.description,
-              title: 'Letter Request',
-              subtitle: 'Request official documents',
+              title: tr('letter_request'),
+              subtitle: tr('request_official_documents'),
               color: themeService.getActionColor('documents'),
               onTap: () {
                 Get.back();
@@ -424,7 +430,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     required VoidCallback onTap,
   }) {
     final themeService = Get.find<ThemeService>();
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -500,19 +506,19 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Request'),
-        content: const Text('Are you sure you want to delete this leave request?'),
+        title: Text(tr('delete_request')),
+        content: Text(tr('confirm_delete_leave_request')),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () async {
               Get.back();
               await _deleteLeaveRequest(request.id);
             },
-            child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
           ),
         ],
       ),
@@ -526,18 +532,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Deleted',
-          'Request deleted successfully',
+          tr('deleted'),
+          tr('request_deleted_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
         );
         loadLeaveRequests();
       } else {
-        _showErrorSnackbar('Failed to delete request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_delete_request')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error deleting request: $e');
+      _showErrorSnackbar('${tr('error_deleting_request')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -545,8 +551,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void viewLeaveRequestDetails(LeaveRequest request) {
     Get.snackbar(
-      'View Details',
-      'View: ${request.reason}',
+      tr('view_details'),
+      '${tr('view_leave_request')}: ${request.reason}',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getTextSecondaryColor(),
       colorText: Colors.white,
@@ -563,8 +569,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Permission Request'),
-        content: const Text('Are you sure you want to delete this permission request?'),
+        title: Text(tr('delete_permission_request')),
+        content: Text(tr('confirm_delete_permission_request')),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -589,18 +595,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Deleted',
-          'Permission request deleted successfully',
+          tr('deleted'),
+          tr('permission_request_deleted_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
         );
         loadPermissionRequests();
       } else {
-        _showErrorSnackbar('Failed to delete permission request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_delete_permission_request')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error deleting permission request: $e');
+      _showErrorSnackbar('${tr('error_deleting_permission_request')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -608,8 +614,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void viewPermissionDetails(PermissionRequest request) {
     Get.snackbar(
-      'View Permission Details',
-      'View: ${request.purpose}',
+      tr('view_permission_details'),
+      '${tr('view_permission')}: ${request.purpose}',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getTextSecondaryColor(),
       colorText: Colors.white,
@@ -625,8 +631,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Loan Request'),
-        content: const Text('Are you sure you want to delete this loan request?'),
+        title: Text(tr('delete_loan_request')),
+        content: Text(tr('confirm_delete_loan_request')),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -651,18 +657,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Deleted',
-          'Loan request deleted successfully',
+          tr('deleted'),
+          tr('loan_request_deleted_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
         );
         loadLoanRequests();
       } else {
-        _showErrorSnackbar('Failed to delete loan request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_delete_loan_request')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error deleting loan request: $e');
+      _showErrorSnackbar('${tr('error_deleting_loan_request')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -670,8 +676,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void viewLoanDetails(LoanRequest request) {
     Get.snackbar(
-      'View Loan Details',
-      'View: ${request.loanType}',
+      tr('view_loan_details'),
+      '${tr('view_loan')}: ${request.loanType}',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getTextSecondaryColor(),
       colorText: Colors.white,
@@ -687,8 +693,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Letter Request'),
-        content: const Text('Are you sure you want to delete this letter request?'),
+        title: Text(tr('delete_letter_request')),
+        content: Text(tr('confirm_delete_letter_request')),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -713,18 +719,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Deleted',
-          'Letter request deleted successfully',
+          tr('deleted'),
+          tr('letter_request_deleted_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
         );
         loadLetterRequests();
       } else {
-        _showErrorSnackbar('Failed to delete letter request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_delete_letter_request')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error deleting letter request: $e');
+      _showErrorSnackbar('${tr('error_deleting_letter_request')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -732,8 +738,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void viewLetterDetails(LetterRequest request) {
     Get.snackbar(
-      'View Letter Details',
-      'View: ${request.reason}',
+      tr('view_letter_details'),
+      '${tr('view_letter')}: ${request.reason}',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getTextSecondaryColor(),
       colorText: Colors.white,
@@ -742,8 +748,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   Future<void> downloadLetter(LetterRequest request) async {
     Get.snackbar(
-      'Downloading',
-      'Downloading ${request.reason}...',
+      tr('downloading_letter'),
+      '${tr('downloading_letter')} ${request.reason}...',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getActionColor('requests'),
       colorText: Colors.white,
@@ -756,18 +762,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success && response.data != null) {
         Get.snackbar(
-          'Success',
-          'Letter downloaded: ${response.data!.filename}',
+          tr('success'),
+          '${tr('letter_downloaded')}: ${response.data!.filename}',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
         );
         // TODO: Handle file download with response.data.downloadUrl
       } else {
-        _showErrorSnackbar('Failed to download letter: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_download_letter')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error downloading letter: $e');
+      _showErrorSnackbar('${tr('error_downloading_letter')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -791,8 +797,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Leave request created successfully',
+          tr('success'),
+          tr('leave_request_created_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -801,11 +807,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLeaveRequests(); // Refresh the list
         return true;
       } else {
-        _showErrorSnackbar('Failed to create leave request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_create_leave_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error creating leave request: $e');
+      _showErrorSnackbar('${tr('error_creating_leave_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -826,8 +832,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Permission request created successfully',
+          tr('success'),
+          tr('permission_request_created_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -836,11 +842,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadPermissionRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to create permission request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_create_permission_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error creating permission request: $e');
+      _showErrorSnackbar('${tr('error_creating_permission_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -864,8 +870,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Loan request created successfully',
+          tr('success'),
+          tr('loan_request_created_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -874,11 +880,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLoanRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to create loan request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_create_loan_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error creating loan request: $e');
+      _showErrorSnackbar('${tr('error_creating_loan_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -904,8 +910,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Loan request updated successfully',
+          tr('success'),
+          tr('loan_request_updated_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -914,11 +920,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLoanRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to update loan request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_update_loan_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error updating loan request: $e');
+      _showErrorSnackbar('${tr('error_updating_loan_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -938,8 +944,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Letter request created successfully',
+          tr('success'),
+          tr('letter_request_created_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -948,11 +954,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLetterRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to create letter request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_create_letter_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error creating letter request: $e');
+      _showErrorSnackbar('${tr('error_creating_letter_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -974,8 +980,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Letter request updated successfully',
+          tr('success'),
+          tr('letter_request_updated_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -984,11 +990,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLetterRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to update letter request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_update_letter_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error updating letter request: $e');
+      _showErrorSnackbar('${tr('error_updating_letter_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -1014,8 +1020,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Leave request updated successfully',
+          tr('success'),
+          tr('leave_request_updated_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -1024,11 +1030,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadLeaveRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to update leave request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_update_leave_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error updating leave request: $e');
+      _showErrorSnackbar('${tr('error_updating_leave_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -1052,8 +1058,8 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
       if (response.success) {
         Get.snackbar(
-          'Success',
-          'Permission request updated successfully',
+          tr('success'),
+          tr('permission_request_updated_successfully'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -1062,11 +1068,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         loadPermissionRequests();
         return true;
       } else {
-        _showErrorSnackbar('Failed to update permission request: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_update_permission_request')}: ${response.message}');
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('Error updating permission request: $e');
+      _showErrorSnackbar('${tr('error_updating_permission_request')}: $e');
       return false;
     } finally {
       isLoading.value = false;
@@ -1081,7 +1087,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   // Helper method for error messages
   void _showErrorSnackbar(String message) {
     Get.snackbar(
-      'Error',
+      tr('error'),
       message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: ThemeService.instance.getErrorColor(),
@@ -1116,22 +1122,22 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         return themeService.getTextSecondaryColor();
     }
   }
-  
+
   // Load more methods for pagination - separate for each request type
   Future<void> loadMoreLeaveRequests() async {
     if (isLoadingMoreLeave.value || !hasMoreDataLeave.value) return;
-    
+
     try {
       isLoadingMoreLeave.value = true;
-      
+
       // Ensure loadedYearsLeave is not empty before accessing .last
       if (loadedYearsLeave.isEmpty) {
         loadedYearsLeave.add(DateTime.now().year);
       }
-      
+
       final nextYear = loadedYearsLeave.last - 1;
       loadedYearsLeave.add(nextYear);
-      
+
       final response = await _requestRepository.getLeaveRequests(
         status: null, // Load all data, filter client-side
         year: nextYear,
@@ -1141,20 +1147,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         // Add new data to _all list and refilter
         final currentAllData = List<LeaveRequest>.from(_allLeaveRequests);
         final newData = response.data;
-        
+
         final combinedAllData = [...currentAllData, ...newData];
         _allLeaveRequests.value = combinedAllData;
         _filterLeaveRequests(); // Apply current filter
-        
+
         // Stop loading more after 3 years or if no more data
        //  if (newData.isEmpty) {
          //  hasMoreDataLeave.value = false;
       //  }
       } else {
-        _showErrorSnackbar('Failed to load more leave requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_more_leave_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading more leave requests: $e');
+      _showErrorSnackbar('${tr('error_loading_more_leave_requests')}: $e');
     } finally {
       isLoadingMoreLeave.value = false;
     }
@@ -1162,18 +1168,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   Future<void> loadMorePermissionRequests() async {
     if (isLoadingMorePermission.value || !hasMoreDataPermission.value) return;
-    
+
     try {
       isLoadingMorePermission.value = true;
-      
+
       // Ensure loadedYearsPermission is not empty before accessing .last
       if (loadedYearsPermission.isEmpty) {
         loadedYearsPermission.add(DateTime.now().year);
       }
-      
+
       final nextYear = loadedYearsPermission.last - 1;
       loadedYearsPermission.add(nextYear);
-      
+
       final response = await _requestRepository.getPermissionRequests(
         status: null, // Load all data, filter client-side
         year: nextYear,
@@ -1182,20 +1188,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         final currentAllData = List<PermissionRequest>.from(_allPermissionRequests);
         final newData = response.data;
-        
+
         final combinedAllData = [...currentAllData, ...newData];
         _allPermissionRequests.value = combinedAllData;
         _filterPermissionRequests(); // Apply current filter
-        
+
         // Stop loading more after 3 years or if no more data
        // if (newData.isEmpty) {
        //   hasMoreDataPermission.value = false;
         //}
       } else {
-        _showErrorSnackbar('Failed to load more permission requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_more_permission_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading more permission requests: $e');
+      _showErrorSnackbar('${tr('error_loading_more_permission_requests')}: $e');
     } finally {
       isLoadingMorePermission.value = false;
     }
@@ -1203,18 +1209,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   Future<void> loadMoreLoanRequests() async {
     if (isLoadingMoreLoan.value || !hasMoreDataLoan.value) return;
-    
+
     try {
       isLoadingMoreLoan.value = true;
-      
+
       // Ensure loadedYearsLoan is not empty before accessing .last
       if (loadedYearsLoan.isEmpty) {
         loadedYearsLoan.add(DateTime.now().year);
       }
-      
+
       final nextYear = loadedYearsLoan.last - 1;
       loadedYearsLoan.add(nextYear);
-      
+
       final response = await _requestRepository.getLoanRequests(
         status: null, // Load all data, filter client-side
         year: nextYear,
@@ -1223,20 +1229,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         final currentAllData = List<LoanRequest>.from(_allLoanRequests);
         final newData = response.data;
-        
+
         final combinedAllData = [...currentAllData, ...newData];
         _allLoanRequests.value = combinedAllData;
         _filterLoanRequests(); // Apply current filter
-        
+
         // Stop loading more after 3 years or if no more data
        // if (loadedYearsLoan.length >= 3 || newData.isEmpty) {
          // hasMoreDataLoan.value = false;
         //}
       } else {
-        _showErrorSnackbar('Failed to load more loan requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_more_loan_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading more loan requests: $e');
+      _showErrorSnackbar('${tr('error_loading_more_loan_requests')}: $e');
     } finally {
       isLoadingMoreLoan.value = false;
     }
@@ -1244,18 +1250,18 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   Future<void> loadMoreLetterRequests() async {
     if (isLoadingMoreLetter.value || !hasMoreDataLetter.value) return;
-    
+
     try {
       isLoadingMoreLetter.value = true;
-      
+
       // Ensure loadedYearsLetter is not empty before accessing .last
       if (loadedYearsLetter.isEmpty) {
         loadedYearsLetter.add(DateTime.now().year);
       }
-      
+
       final nextYear = loadedYearsLetter.last - 1;
       loadedYearsLetter.add(nextYear);
-      
+
       final response = await _requestRepository.getLetterRequests(
         status: null, // Load all data, filter client-side
         year: nextYear,
@@ -1264,20 +1270,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       if (response.success) {
         final currentAllData = List<LetterRequest>.from(_allLetterRequests);
         final newData = response.data;
-        
+
         final combinedAllData = [...currentAllData, ...newData];
         _allLetterRequests.value = combinedAllData;
         _filterLetterRequests(); // Apply current filter
-        
+
         // Stop loading more after 3 years or if no more data
        // if (loadedYearsLetter.length >= 3 || newData.isEmpty) {
          // hasMoreDataLetter.value = false;
         //}
       } else {
-        _showErrorSnackbar('Failed to load more letter requests: ${response.message}');
+        _showErrorSnackbar('${tr('failed_to_load_more_letter_requests')}: ${response.message}');
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading more letter requests: $e');
+      _showErrorSnackbar('${tr('error_loading_more_letter_requests')}: $e');
     } finally {
       isLoadingMoreLetter.value = false;
     }

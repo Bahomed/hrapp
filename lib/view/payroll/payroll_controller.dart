@@ -8,6 +8,7 @@ import '../../repository/payroll_repository.dart';
 import '../../data/remote/response/payroll_records_response.dart';
 import '../../data/remote/response/payroll_summary_response.dart';
 import '../../services/theme_service.dart';
+import '../../utils/translation_helper.dart';
 import '../../widgets/saudi_riyal_display.dart';
 
 class PayrollController extends GetxController {
@@ -50,7 +51,7 @@ class PayrollController extends GetxController {
       ]);
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to initialize payroll data: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -73,7 +74,7 @@ class PayrollController extends GetxController {
         payrollRecords.value = response.data;
       } else {
         Get.snackbar(
-          'Error',
+          tr('error'),
           response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _themeService.getErrorColor(),
@@ -82,7 +83,7 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to load payroll records: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -102,7 +103,7 @@ class PayrollController extends GetxController {
         payrollSummary.value = response.data;
       } else {
         Get.snackbar(
-          'Error',
+          tr('error'),
           response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _themeService.getErrorColor(),
@@ -111,7 +112,7 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to load payroll summary: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -136,7 +137,7 @@ class PayrollController extends GetxController {
         payrollRecords.value = response.data;
       } else {
         Get.snackbar(
-          'Error',
+          tr('error'),
           response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _themeService.getErrorColor(),
@@ -145,7 +146,7 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to load payroll records for year $year: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -204,7 +205,7 @@ class PayrollController extends GetxController {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Payslip Details',
+                      tr('payslip_details'),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -248,7 +249,7 @@ class PayrollController extends GetxController {
                     const SizedBox(height: 30),
 
                     // Net Pay Section
-                    _buildNetPaySection('Net Pay',record.netSalary,_themeService.getSecondaryColor()),
+                    _buildNetPaySection(tr('net_pay'),record.netSalary,_themeService.getSecondaryColor()),
                   ],
                 ),
               ),
@@ -274,25 +275,25 @@ class PayrollController extends GetxController {
       case 'processed':
         backgroundColor = _themeService.getStatusBackgroundColor('processed');
         textColor = _themeService.getStatusColor('processed');
-        text = 'Processed';
+        text = tr('processed');
         icon = Icons.check_circle_outline;
         break;
       case 'pending':
         backgroundColor = _themeService.getStatusBackgroundColor('pending');
         textColor = _themeService.getStatusColor('pending');
-        text = 'Pending';
+        text = tr('pending');
         icon = Icons.schedule;
         break;
       case 'failed':
         backgroundColor = _themeService.getStatusBackgroundColor('failed');
         textColor = _themeService.getStatusColor('failed');
-        text = 'Failed';
+        text = tr('failed');
         icon = Icons.error_outline;
         break;
       default:
         backgroundColor = _themeService.getStatusBackgroundColor('draft');
         textColor = _themeService.getStatusColor('draft');
-        text = 'Unknown';
+        text = tr('unknown');
         icon = Icons.circle;
     }
 
@@ -325,19 +326,19 @@ class PayrollController extends GetxController {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildNetPaySection(
-          'Gross Pay',
+          tr('gross_pay'),
           record.totalBenefits,
           _themeService.getSecondaryColor(),
         ),
         const SizedBox(height: 16),
         _buildNetPaySection(
-          'Deductions',
+          tr('deductions'),
           record.totalDeductions,
           _themeService.getErrorColor(),
         ),
         const SizedBox(height: 16),
         _buildNetPaySection(
-          'Net Pay',
+          tr('net_pay'),
           record.netSalary,
           _themeService.getSecondaryColor(),
         ),
@@ -351,7 +352,7 @@ class PayrollController extends GetxController {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Benefits',
+          tr('benefits'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -364,8 +365,10 @@ class PayrollController extends GetxController {
               item.description,
               SaudiRiyalDisplay(
                 amount: item.amount,
-                style: const TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _themeService.getTextPrimaryColor()),
               ),
               _themeService.getSuccessColor(),
             )),
@@ -378,7 +381,7 @@ class PayrollController extends GetxController {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Deductions',
+          tr('deductions'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -391,8 +394,10 @@ class PayrollController extends GetxController {
               item.description,
               SaudiRiyalDisplay(
                 amount: item.amount,
-                style: const TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _themeService.getTextPrimaryColor()),
               ),
               _themeService.getErrorColor(),
             )),
@@ -404,10 +409,10 @@ class PayrollController extends GetxController {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -424,9 +429,10 @@ class PayrollController extends GetxController {
           ),
           SaudiRiyalDisplay(
             amount: amount,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
+              color: _themeService.getTextPrimaryColor(),
             ),
           ),
         ],
@@ -461,9 +467,9 @@ class PayrollController extends GetxController {
       child: ElevatedButton.icon(
         onPressed: () => downloadPayslip(record.id),
         icon: const Icon(Icons.download, color: Colors.white),
-        label: const Text(
-          'Download',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        label: Text(
+          tr('download'),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: _themeService.getSecondaryColor(),
@@ -481,8 +487,8 @@ class PayrollController extends GetxController {
     Get.back(); // Close bottom sheet
 
     Get.snackbar(
-      'Downloading',
-      'Downloading payslip...',
+      tr('downloading'),
+      tr('downloading_payslip'),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: _themeService.getSecondaryColor(),
       colorText: Colors.white,
@@ -511,7 +517,7 @@ class PayrollController extends GetxController {
 
         if (result.type == ResultType.done) {
           Get.snackbar(
-            'Success',
+            tr('success'),
             'Payslip opened: ${response.data.filename}',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: _themeService.getSuccessColor(),
@@ -519,7 +525,7 @@ class PayrollController extends GetxController {
           );
         } else {
           Get.snackbar(
-            'Info',
+            tr('info'),
             'PDF saved but could not open automatically: ${response.data
                 .filename}',
             snackPosition: SnackPosition.BOTTOM,
@@ -530,7 +536,7 @@ class PayrollController extends GetxController {
         }
       } else {
         Get.snackbar(
-          'Error',
+          tr('error'),
           response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _themeService.getErrorColor(),
@@ -539,7 +545,7 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to download payslip: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -573,9 +579,9 @@ class PayrollController extends GetxController {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Select Year',
-              style: TextStyle(
+            Text(
+              tr('select_year'),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
@@ -624,7 +630,7 @@ class PayrollController extends GetxController {
         await loadPayrollSummary(selectedYear.value);
       } else {
         Get.snackbar(
-          'Error',
+          tr('error'),
           response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _themeService.getErrorColor(),
@@ -633,7 +639,7 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        tr('error'),
         'Failed to refresh data: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
@@ -648,7 +654,12 @@ class PayrollController extends GetxController {
   Widget formatCurrency(double amount) {
     return SaudiRiyalDisplay(
       amount: amount,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: _themeService.getTextPrimaryColor(),
+      )
+
     );
   }
 

@@ -51,11 +51,6 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        foregroundColor: themeService.getTextPrimaryColor(),
-
-        iconTheme: IconThemeData(
-          color: themeService.getTextPrimaryColor(),
-        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -65,17 +60,14 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
               Icons.table_chart,
               color: themeService.getPrimaryColor(),
             ),
-            tooltip: 'Weekly Attendance',
+            tooltip: tr('weekly_attendance'),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Schedule Templates Section
             _buildCompactScheduleSection(),
-
-            // Weekly Attendance Table
             Container(
               margin: const EdgeInsets.all(16),
               child: Obx(() => WeeklyAttendanceTable(
@@ -99,20 +91,18 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-
           // Full Schedule Cards with Horizontal Scroll
           Obx(() {
             if (scheduleController.isLoading.value) {
-              return _buildLoadingCard();
+              return _buildLoadingCard(); // You can keep this as-is or adjust its height if needed
             }
 
             if (scheduleController.availableSchedules.isEmpty) {
-              return _buildEmptyCard();
+              return _buildEmptyCard(); // Same here
             }
 
             return SizedBox(
-              height: 170,
+              height: MediaQuery.of(Get.context!).size.height * 0.2, // Responsive height (~38% of screen)
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -120,7 +110,7 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
                 itemBuilder: (context, index) {
                   final schedule = scheduleController.availableSchedules[index];
                   return Container(
-                    width: 300,
+                    width: MediaQuery.of(context).size.width * 0.9,
                     margin: const EdgeInsets.only(right: 12),
                     child: _buildScheduleCard(schedule, scheduleController, index),
                   );
@@ -133,8 +123,6 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
     );
   }
 
-
-
   Widget _buildLoadingCard() {
     final themeService = ThemeService.instance;
     return Container(
@@ -142,33 +130,16 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       decoration: BoxDecoration(
         color: themeService.getCardColor(),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: themeService.getTextPrimaryColor().withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: themeService.getVioletStart(),
-              ),
-            ),
+            CircularProgressIndicator(strokeWidth: 2, color: themeService.getVioletStart()),
             const SizedBox(height: 6),
             Text(
-              'Loading...',
-              style: TextStyle(
-                fontSize: 9,
-                color: themeService.getTextSecondaryColor(),
-              ),
+              tr('loading'),
+              style: TextStyle(fontSize: 9, color: themeService.getTextSecondaryColor()),
             ),
           ],
         ),
@@ -183,30 +154,16 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       decoration: BoxDecoration(
         color: themeService.getCardColor(),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: themeService.getTextPrimaryColor().withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.schedule,
-              size: 48,
-              color: themeService.getTextSecondaryColor().withValues(alpha: 0.6),
-            ),
+            Icon(Icons.schedule, size: 48, color: themeService.getTextSecondaryColor()),
             const SizedBox(height: 12),
             Text(
-              'No schedules available',
-              style: TextStyle(
-                fontSize: 14,
-                color: themeService.getTextSecondaryColor(),
-              ),
+              tr('no_schedules_available'),
+              style: TextStyle(fontSize: 14, color: themeService.getTextSecondaryColor()),
             ),
           ],
         ),
@@ -223,116 +180,91 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
         color: themeService.getCardColor(),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected
-              ? themeService.getVioletStart()
-              : themeService.getDividerColor(),
+          color: isSelected ? themeService.getVioletStart() : themeService.getDividerColor(),
           width: isSelected ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: themeService.getTextPrimaryColor().withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () => controller.selectScheduleTemplate(index),
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Row - Single Line
+                // Header
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? themeService.getVioletStart().withValues(alpha: 0.1)
-                            : themeService.getTextSecondaryColor().withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-
-
-                    ),
-                    const SizedBox(width: 10),
+                    const Icon(Icons.calendar_today, size: 14),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         schedule.name,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: isSelected
-                              ? themeService.getVioletStart()
-                              : themeService.getTextPrimaryColor(),
+                          color: themeService.getVioletStart(),
                         ),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.timer, size: 14, color: themeService.getWarningColor()),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Grace: ${schedule.gracePeriod}min',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: themeService.getWarningColor(),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          schedule.overtime == 'Y' ? Icons.trending_up : Icons.trending_down,
-                          size: 14,
-                          color: schedule.overtime == 'Y' ? themeService.getSuccessColor() : themeService.getErrorColor(),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'OT: ${schedule.overtime == 'Y' ? 'Yes' : 'No'}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: schedule.overtime == 'Y' ? themeService.getSuccessColor() : themeService.getErrorColor(),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
-                // Combined Time Display
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: themeService.getVioletStart().withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time, size: 14, color: themeService.getVioletStart()),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          '${schedule.workSchedule.formattedStartTime} - ${schedule.workSchedule.formattedEndTime}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: themeService.getVioletStart(),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                // Grace + OT
+                Row(
+                  children: [
+                    Icon(Icons.timer, size: 14, color: themeService.getWarningColor()),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${tr('grace')}: ${schedule.gracePeriod}${tr('minutes')}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: themeService.getWarningColor(),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      schedule.overtime == 'Y' ? Icons.trending_up : Icons.trending_down,
+                      size: 14,
+                      color: schedule.overtime == 'Y'
+                          ? themeService.getSuccessColor()
+                          : themeService.getErrorColor(),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${tr('overtime')}: ${schedule.overtime == 'Y' ? tr('yes') : tr('no')}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: schedule.overtime == 'Y'
+                            ? themeService.getSuccessColor()
+                            : themeService.getErrorColor(),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 12),
 
-                const SizedBox(height: 16),
+                // Time Range
+                Row(
+                  children: [
+                    Icon(Icons.access_time, size: 14, color: themeService.getVioletStart()),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${schedule.workSchedule.formattedStartTime} - ${schedule.workSchedule.formattedEndTime}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: themeService.getVioletStart(),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
                 // Working Days
                 _buildWorkingDaysSection(schedule),
@@ -344,24 +276,17 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
     );
   }
 
-
   Widget _buildWorkingDaysSection(ScheduleTemplate schedule) {
-    final themeService = ThemeService.instance;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        Row(
-          children: schedule.workSchedule.workDays.map((workDay) {
-            return Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(right: 3),
-                child: _buildDayCheckbox(workDay),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: schedule.workSchedule.workDays.map((workDay) {
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(right: 3),
+            child: _buildDayCheckbox(workDay),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -371,14 +296,13 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: workDay.isWorking
-            ? themeService.getSuccessColor().withValues(alpha: 0.1)
-            : themeService.getErrorColor().withValues(alpha: 0.1),
+            ? themeService.getSuccessColor().withOpacity(0.1)
+            : themeService.getErrorColor().withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: workDay.isWorking
-              ? themeService.getSuccessColor().withValues(alpha: 0.3)
-              : themeService.getErrorColor().withValues(alpha: 0.3),
-          width: 1,
+              ? themeService.getSuccessColor().withOpacity(0.3)
+              : themeService.getErrorColor().withOpacity(0.3),
         ),
       ),
       child: Column(
@@ -392,7 +316,7 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            workDay.shortName,
+            tr(workDay.shortName.toLowerCase()),
             style: TextStyle(
               fontSize: 8,
               fontWeight: FontWeight.w600,

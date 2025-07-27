@@ -69,7 +69,7 @@ class DocumentScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${tr('document_list')} (${controller.documents.length} files)',
+                                  '${tr('document_list')} (${controller.documents.length} ${tr('files')})',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
@@ -153,7 +153,7 @@ class DocumentScreen extends StatelessWidget {
                     ],
                     Flexible(
                       child: Text(
-                        filterName,
+                        tr(filter['translation'] ?? filterName.toLowerCase()),
                         style: TextStyle(
                           color: isSelected ? ThemeService.instance.getContrastTextColor(filterColor) : filterColor,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,

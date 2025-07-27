@@ -4,6 +4,7 @@ import 'package:injazat_hr_app/data/remote/response/payroll_records_response.dar
 import 'package:injazat_hr_app/data/remote/response/payroll_summary_response.dart';
 import 'package:injazat_hr_app/utils/app_theme.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 import 'package:injazat_hr_app/view/payroll/payroll_controller.dart';
 import 'package:injazat_hr_app/widgets/saudi_riyal_display.dart';
 import '../../../services/theme_service.dart';
@@ -182,7 +183,7 @@ class PayrollCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      PayrollStatusChip(status: record.status),
+                     // PayrollStatusChip(status: record.status),
                     ],
                   ),
 
@@ -195,7 +196,7 @@ class PayrollCard extends StatelessWidget {
                       Expanded(
                         child: _buildAmountCard(
                           context,
-                          'Gross Pay',
+                          tr('gross_pay'),
                           SaudiRiyalDisplay(
                             amount: record.totalBenefits,
                             style: TextStyle(
@@ -213,7 +214,7 @@ class PayrollCard extends StatelessWidget {
                       Expanded(
                         child: _buildAmountCard(
                           context,
-                          'Deductions',
+                          tr('deductions'),
                           SaudiRiyalDisplay(
                             amount: record.totalDeductions,
                             style: TextStyle(
@@ -231,7 +232,7 @@ class PayrollCard extends StatelessWidget {
                       Expanded(
                         child: _buildAmountCard(
                           context,
-                          'Net Pay',
+                          tr('net_pay'),
                           SaudiRiyalDisplay(
                             amount: record.netSalary,
                             style: TextStyle(
@@ -255,7 +256,7 @@ class PayrollCard extends StatelessWidget {
                           Expanded(
                             child: _buildAmountCard(
                               context,
-                              'Gross Pay',
+                              tr('gross_pay'),
                               SaudiRiyalDisplay(
                                 amount: record.totalBenefits,
                                 style: TextStyle(
@@ -273,7 +274,7 @@ class PayrollCard extends StatelessWidget {
                           Expanded(
                             child: _buildAmountCard(
                               context,
-                              'Deductions',
+                              tr('deductions'),
                               SaudiRiyalDisplay(
                                 amount: record.totalDeductions,
                                 style: TextStyle(
@@ -292,7 +293,7 @@ class PayrollCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       _buildAmountCard(
                         context,
-                        'Net Pay',
+                        tr('net_pay'),
                         SaudiRiyalDisplay(
                           amount: record.netSalary,
                           style: TextStyle(
@@ -497,7 +498,7 @@ class PayrollSummaryTable extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Payroll Summary',
+                        tr('payroll_summary'),
                         style: TextStyle(
                           fontSize: isTablet ? 20 : 18,
                           fontWeight: FontWeight.w700,
@@ -520,7 +521,7 @@ class PayrollSummaryTable extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${summaryItems.length} months',
+                              '${summaryItems.length} ${tr('months')}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppTheme.getActionColor('payroll'),
@@ -538,7 +539,7 @@ class PayrollSummaryTable extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Payroll Summary',
+                          tr('payroll_summary'),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -562,7 +563,7 @@ class PayrollSummaryTable extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${summaryItems.length} months',
+                              '${summaryItems.length} ${tr('months')}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppTheme.getActionColor('payroll'),
@@ -578,43 +579,27 @@ class PayrollSummaryTable extends StatelessWidget {
             ),
           ),
 
-          if (isTablet)
-            Column(
-              children: [
-                _buildTableHeader(),
-                if (summaryItems.isEmpty)
-                  _buildEmptyState()
-                else
-                  ...summaryItems.map((item) => _buildTableRow(item)),
-                if (summaryItems.isNotEmpty) _buildTotalRow(),
-              ],
-            )
-          else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: screenWidth - 32),
-                child: IntrinsicWidth(
-                  child: Column(
-                    children: [
-                      _buildTableHeader(),
-                      if (summaryItems.isEmpty)
-                        _buildEmptyState()
-                      else
-                        ...summaryItems.map((item) => _buildTableRow(item)),
-                      if (summaryItems.isNotEmpty) _buildTotalRow(),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          Column(
+            children: [
+              _buildTableHeader(context),
+              if (summaryItems.isEmpty)
+                _buildEmptyState()
+              else
+                ...summaryItems.map((item) => _buildTableRow(context, item)),
+              if (summaryItems.isNotEmpty) _buildTotalRow(context),
+            ],
+          ),
 
         ],
       ),
     ));
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final fontSize = isTablet ? 14.0 : (screenWidth < 400 ? 10.0 : 12.0);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -629,9 +614,9 @@ class PayrollSummaryTable extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(
-              'Month',
+              tr('month'),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w700,
                 color: ThemeService.instance.getTextSecondaryColor(),
               ),
@@ -639,37 +624,43 @@ class PayrollSummaryTable extends StatelessWidget {
           ),
           Expanded(
             flex: 3,
-            child: Text(
-              'Earnings',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: ThemeService.instance.getTextSecondaryColor(),
+            child: Container(
+              alignment: Alignment.center,
+              child: SaudiRiyalDisplay(
+                customText: tr('earnings'),
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w700,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
               ),
             ),
           ),
           Expanded(
             flex: 3,
-            child: Text(
-              'Deductions',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: ThemeService.instance.getTextSecondaryColor(),
+            child: Container(
+              alignment: Alignment.center,
+              child: SaudiRiyalDisplay(
+                customText: tr('deductions'),
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w700,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
               ),
             ),
           ),
           Expanded(
             flex: 3,
-            child: Text(
-              'Net Pay',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: ThemeService.instance.getTextSecondaryColor(),
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: SaudiRiyalDisplay(
+                customText: tr('net_pay'),
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w700,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
               ),
             ),
           ),
@@ -678,7 +669,11 @@ class PayrollSummaryTable extends StatelessWidget {
     );
   }
 
-  Widget _buildTableRow(PayrollSummaryItem item) {
+  Widget _buildTableRow(BuildContext context, PayrollSummaryItem item) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final fontSize = isTablet ? 12.0 : (screenWidth < 400 ? 9.0 : 10.0);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -696,22 +691,24 @@ class PayrollSummaryTable extends StatelessWidget {
             child: Text(
               item.month.isNotEmpty ? item.month : 'N/A',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w600,
                 color: ThemeService.instance.isDarkMode 
                   ? ThemeService.instance.getTextPrimaryColor()
                   : Colors.black87,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
             flex: 3,
             child: Container(
               alignment: Alignment.center,
-              child: SaudiRiyalDisplay(
-                amount: item.totalEarnings,
+              child: Text(
+                item.totalEarnings.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w600,
                   color: ThemeService.instance.isDarkMode 
                     ? ThemeService.instance.getTextPrimaryColor()
@@ -724,10 +721,10 @@ class PayrollSummaryTable extends StatelessWidget {
             flex: 3,
             child: Container(
               alignment: Alignment.center,
-              child: SaudiRiyalDisplay(
-                amount: item.totalDeductions,
+              child: Text(
+                item.totalDeductions.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w600,
                   color: ThemeService.instance.isDarkMode 
                     ? ThemeService.instance.getTextPrimaryColor()
@@ -740,10 +737,10 @@ class PayrollSummaryTable extends StatelessWidget {
             flex: 3,
             child: Container(
               alignment: Alignment.centerRight,
-              child: SaudiRiyalDisplay(
-                amount: item.netPay,
+              child: Text(
+                item.netPay.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                   color: ThemeService.instance.isDarkMode 
                     ? ThemeService.instance.getTextPrimaryColor()
@@ -757,8 +754,13 @@ class PayrollSummaryTable extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalRow() {
+  Widget _buildTotalRow(BuildContext context) {
     if (summaryItems.isEmpty) return const SizedBox.shrink();
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final fontSize = isTablet ? 12.0 : (screenWidth < 400 ? 9.0 : 10.0);
+    final titleFontSize = isTablet ? 14.0 : (screenWidth < 400 ? 11.0 : 12.0);
 
     double totalEarnings = summaryItems.fold(0, (sum, item) => sum + (item.totalEarnings));
     double totalDeductions = summaryItems.fold(0, (sum, item) => sum + (item.totalDeductions));
@@ -778,22 +780,24 @@ class PayrollSummaryTable extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(
-              'TOTAL',
+              tr('total'),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.getActionColor('payroll'),
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
             flex: 3,
             child: Container(
               alignment: Alignment.center,
-              child: SaudiRiyalDisplay(
-                amount: totalEarnings,
+              child: Text(
+                totalEarnings.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                   color: ThemeService.instance.isDarkMode 
                     ? ThemeService.instance.getTextPrimaryColor()
@@ -806,10 +810,10 @@ class PayrollSummaryTable extends StatelessWidget {
             flex: 3,
             child: Container(
               alignment: Alignment.center,
-              child: SaudiRiyalDisplay(
-                amount: totalDeductions,
+              child: Text(
+                totalDeductions.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                   color: ThemeService.instance.isDarkMode 
                     ? ThemeService.instance.getTextPrimaryColor()
@@ -822,10 +826,10 @@ class PayrollSummaryTable extends StatelessWidget {
             flex: 3,
             child: Container(
               alignment: Alignment.centerRight,
-              child: SaudiRiyalDisplay(
-                amount: totalNet,
+              child: Text(
+                totalNet.toStringAsFixed(2),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.getActionColor('payroll'),
                 ),

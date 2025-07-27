@@ -105,7 +105,7 @@ class ScheduleScreen extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Schedule Templates',
+                tr('schedule_templates'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -208,7 +208,7 @@ class ScheduleScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                'Default',
+                                tr('default_schedule'),
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
@@ -229,8 +229,8 @@ class ScheduleScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildInfoItem(
-                        'Grace Period',
-                        '${schedule.gracePeriod} min',
+                        tr('grace_period'),
+                        '${schedule.gracePeriod} ${tr('minutes')}',
                         Icons.timer,
                         themeService.getWarningColor(),
                       ),
@@ -238,8 +238,8 @@ class ScheduleScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildInfoItem(
-                        'Overtime',
-                        schedule.overtime == 'Y' ? 'Enabled' : 'Disabled',
+                        tr('overtime'),
+                        schedule.overtime == 'Y' ? tr('enabled') : tr('disabled'),
                         schedule.overtime == 'Y' ? Icons.trending_up : Icons.trending_down,
                         schedule.overtime == 'Y' ? themeService.getSuccessColor() : themeService.getErrorColor(),
                       ),
@@ -253,7 +253,7 @@ class ScheduleScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildInfoItem(
-                        'Start Time',
+                        tr('start_time'),
                         schedule.workSchedule.formattedStartTime,
                         Icons.login,
                         themeService.getVioletStart(),
@@ -262,7 +262,7 @@ class ScheduleScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildInfoItem(
-                        'End Time',
+                        tr('end_time'),
                         schedule.workSchedule.formattedEndTime,
                         Icons.logout,
                         themeService.getVioletEnd(),
@@ -338,7 +338,7 @@ class ScheduleScreen extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              'Working Days',
+              tr('working_days'),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -389,7 +389,7 @@ class ScheduleScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            workDay.shortName,
+            tr(workDay.shortName.toLowerCase()),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,

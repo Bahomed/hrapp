@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/theme_service.dart';
-
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 class RequestLeaveScreen extends StatefulWidget {
   const RequestLeaveScreen({super.key});
 
@@ -13,8 +13,8 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
   Set<int> selectedDates = {};
   int? startDate;
   int? endDate;
-  String selectedLeaveType = 'Annual leave';
-  List<String> leaveTypes = ['Annual leave', 'Sick leave', 'Vacation', 'Personal leave', 'Emergency leave'];
+  String selectedLeaveType = '';
+  List<String> leaveTypes = [];
   TextEditingController notesController = TextEditingController();
   List<Map<String, dynamic>> attachedFiles = [];
 
@@ -39,7 +39,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Request Leave',
+                      tr('request_leave'),
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
@@ -184,7 +184,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           children: [
                             // Leave Type Section
                             Text(
-                              'Leave type',
+                              tr('leave_type'),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: themeService.getTextSecondaryColor(),

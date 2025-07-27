@@ -15,6 +15,7 @@ import 'package:injazat_hr_app/repository/logoutrepository.dart';
 import 'package:injazat_hr_app/utils/api_helper.dart';
 import 'package:dio/dio.dart';
 import '../utils/exceptionhandler.dart';
+import '../utils/translation_helper.dart';
 
 class RequestRepository {
   final Preferences preferences = Preferences();
@@ -29,7 +30,7 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$leaveRequestsUrl';
       
-      Map<String, dynamic> queryParams = {};
+      Map<String, dynamic> queryParams = {'locale': getCurrentLanguage()};
       if (status != null && status != 'All') {
         queryParams['status'] = status;
       }
@@ -163,7 +164,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LeaveRequestDetailsResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -186,7 +188,8 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$permitRequestsUrl';
       
-      Map<String, dynamic> queryParams = {};
+      Map<String, dynamic> queryParams =
+      {'locale': getCurrentLanguage()};
       if (status != null && status != 'All') {
         queryParams['status'] = status;
       }
@@ -316,7 +319,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return PermissionRequestDetailsResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -339,7 +343,8 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$loanRequestsUrl';
       
-      Map<String, dynamic> queryParams = {};
+      Map<String, dynamic> queryParams =
+      {'locale': getCurrentLanguage()};
       if (status != null && status != 'All') {
         queryParams['status'] = status;
       }
@@ -473,7 +478,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LoanRequestDetailsResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -496,7 +502,8 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$letterRequestsUrl';
       
-      Map<String, dynamic> queryParams = {};
+      Map<String, dynamic> queryParams =
+      {'locale': getCurrentLanguage()};
       if (status != null && status != 'All') {
         queryParams['status'] = status;
       }
@@ -622,7 +629,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LetterRequestDetailsResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -646,7 +654,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LetterDownloadResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -672,7 +681,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return AllRequestsResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -696,7 +706,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return RequestTypesResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -719,7 +730,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LeaveTypesResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -742,7 +754,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LoanTypesResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -765,7 +778,8 @@ class RequestRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return LetterTypesResponse.fromJson(response.data);
     } on DioException catch (e) {

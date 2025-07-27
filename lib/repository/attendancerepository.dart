@@ -9,6 +9,7 @@ import '../data/remote/response/saveemployeeattendanceresponse.dart';
 import '../data/remote/response/attendance_response.dart';
 import '../data/remote/response/weekly_attendance_response.dart';
 import '../utils/exceptionhandler.dart';
+import '../utils/translation_helper.dart';
 
 class AttendanceRepository {
 
@@ -247,7 +248,8 @@ class AttendanceRepository {
       final response = await dioclient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+        {'locale': getCurrentLanguage()},
+
       );
       
       return WeeklyAttendanceResponse.fromJson(response.data);

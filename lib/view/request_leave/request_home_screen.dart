@@ -1,6 +1,3 @@
-
-// File: lib/view/request_home/request_home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:injazat_hr_app/utils/translation_helper.dart';
@@ -8,7 +5,6 @@ import 'package:injazat_hr_app/utils/app_theme.dart';
 import 'package:injazat_hr_app/view/request_leave/request_controller.dart';
 import 'package:injazat_hr_app/view/request_leave/widgets/request_widgets.dart';
 import '../../services/theme_service.dart';
-
 class RequestHomeScreen extends StatelessWidget {
   const RequestHomeScreen({super.key});
 
@@ -40,11 +36,9 @@ class RequestHomeScreen extends StatelessWidget {
             color: Theme.of(context).cardColor,
             child: Column(
               children: [
-                // Filter Buttons
                 _buildFilterButtons(context, controller),
                 const SizedBox(height: 15),
-                // Tab Bar
-               _buildTabBar(context, controller),
+                _buildTabBar(context, controller),
                 const SizedBox(height: 20),
               ],
             ),
@@ -98,12 +92,13 @@ class RequestHomeScreen extends StatelessWidget {
       child: Obx(() => Row(
         children: controller.filters.map((filter) {
           final filterName = filter['name'] as String;
+          final filterKey = filter['key'] as String;
           final filterColor = filter['color'] as Color;
-          final isSelected = controller.selectedFilter.value == filterName;
+          final isSelected = controller.selectedFilter.value == filterKey;
 
           return Expanded(
             child: GestureDetector(
-              onTap: () => controller.changeFilter(filterName),
+              onTap: () => controller.changeFilter(filterKey),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -114,20 +109,22 @@ class RequestHomeScreen extends StatelessWidget {
                     color: isSelected ? filterColor : Theme.of(context).dividerColor,
                     width: 1.5,
                   ),
-                  boxShadow: isSelected ? [
+                  boxShadow: isSelected
+                      ? [
                     BoxShadow(
                       color: filterColor.withOpacity(0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
-                  ] : null,
+                  ]
+                      : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (isSelected) ...[
                       Icon(
-                        controller.getFilterIcon(filterName),
+                        controller.getFilterIcon(filterKey),
                         color: Colors.white,
                         size: 14,
                       ),
@@ -180,18 +177,10 @@ class RequestHomeScreen extends StatelessWidget {
         ),
         isScrollable: true,
         tabs: [
-          Tab(
-            text: 'Leave (${controller.leaveRequestCount})',
-          ),
-          Tab(
-            text: 'Permission (${controller.permissionRequestCount})',
-          ),
-          Tab(
-            text: 'Loan (${controller.loanRequestCount})',
-          ),
-          Tab(
-            text: 'Letter (${controller.letterRequestCount})',
-          ),
+          Tab(text: '${tr('leave')} (${controller.leaveRequestCount})'),
+          Tab(text: '${tr('permission')} (${controller.permissionRequestCount})'),
+          Tab(text: '${tr('loan')} (${controller.loanRequestCount})'),
+          Tab(text: '${tr('letter')} (${controller.letterRequestCount})'),
         ],
       )),
     );
@@ -207,31 +196,45 @@ class RequestHomeScreen extends StatelessWidget {
         );
       }
 
-      if (controller.leaveRequests.isEmpty) {
-        return _buildEmptyState(
-          context: context,
-          icon: Icons.calendar_today,
-          title: 'No Leave Requests',
-          subtitle: 'You haven\'t made any leave requests yet.',
-          color: AppTheme.getActionColor('requests'),
-          onTap: controller.createLeaveRequest,
-        );
-      }
-
       return RefreshIndicator(
         onRefresh: controller.refreshRequests,
         color: Theme.of(context).primaryColor,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.leaveRequests.length + (controller.hasMoreDataLeave.value ? 1 : 0),
+          itemCount: controller.leaveRequests.isEmpty
+              ? 1
+              : controller.leaveRequests.length + (controller.hasMoreDataLeave.value ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index == controller.leaveRequests.length) {
+            if (controller.leaveRequests.isEmpty) {
+              return Column(
+                children: [
+                  _buildEmptyState(
+                    context: context,
+                    icon: Icons.calendar_today,
+                    title: tr('no_leave_requests'),
+                    subtitle: tr('no_leave_requests_subtitle'),
+                    buttonText: tr('create_leave_request'),
+                    color: AppTheme.getActionColor('requests'),
+                    onTap: controller.createLeaveRequest,
+                  ),
+                  if (controller.hasMoreDataLeave.value)
+                    LoadMoreButton(
+                      onPressed: controller.loadMoreLeaveRequests,
+                      isLoading: controller.isLoadingMoreLeave.value,
+                      loadedYears: controller.loadedYearsLeave,
+                    ),
+                ],
+              );
+            }
+
+            if (index == controller.leaveRequests.length && controller.hasMoreDataLeave.value) {
               return LoadMoreButton(
                 onPressed: controller.loadMoreLeaveRequests,
                 isLoading: controller.isLoadingMoreLeave.value,
                 loadedYears: controller.loadedYearsLeave,
               );
             }
+
             final request = controller.leaveRequests[index];
             return LeaveRequestCard(request: request);
           },
@@ -250,31 +253,45 @@ class RequestHomeScreen extends StatelessWidget {
         );
       }
 
-      if (controller.permissionRequests.isEmpty) {
-        return _buildEmptyState(
-          context: context,
-          icon: Icons.badge_outlined,
-          title: 'No Permit Requests',
-          subtitle: 'You haven\'t made any permit requests yet.',
-          color: AppTheme.getActionColor('profile'),
-          onTap: controller.createPermissionRequest,
-        );
-      }
-
       return RefreshIndicator(
         onRefresh: controller.refreshRequests,
         color: Theme.of(context).primaryColor,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.permissionRequests.length + (controller.hasMoreDataPermission.value ? 1 : 0),
+          itemCount: controller.permissionRequests.isEmpty
+              ? 1
+              : controller.permissionRequests.length + (controller.hasMoreDataPermission.value ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index == controller.permissionRequests.length) {
+            if (controller.permissionRequests.isEmpty) {
+              return Column(
+                children: [
+                  _buildEmptyState(
+                    context: context,
+                    icon: Icons.badge_outlined,
+                    title: tr('no_permit_requests'),
+                    subtitle: tr('no_permit_requests_subtitle'),
+                    buttonText: tr('create_permission_request'),
+                    color: AppTheme.getActionColor('profile'),
+                    onTap: controller.createPermissionRequest,
+                  ),
+                  if (controller.hasMoreDataPermission.value)
+                    LoadMoreButton(
+                      onPressed: controller.loadMorePermissionRequests,
+                      isLoading: controller.isLoadingMorePermission.value,
+                      loadedYears: controller.loadedYearsPermission,
+                    ),
+                ],
+              );
+            }
+
+            if (index == controller.permissionRequests.length && controller.hasMoreDataPermission.value) {
               return LoadMoreButton(
                 onPressed: controller.loadMorePermissionRequests,
                 isLoading: controller.isLoadingMorePermission.value,
                 loadedYears: controller.loadedYearsPermission,
               );
             }
+
             final request = controller.permissionRequests[index];
             return PermissionRequestCard(request: request);
           },
@@ -293,31 +310,45 @@ class RequestHomeScreen extends StatelessWidget {
         );
       }
 
-      if (controller.loanRequests.isEmpty) {
-        return _buildEmptyState(
-          context: context,
-          icon: Icons.account_balance_wallet,
-          title: 'No Loan Requests',
-          subtitle: 'You haven\'t made any loan requests yet.',
-          color: AppTheme.successColor,
-          onTap: controller.createLoanRequest,
-        );
-      }
-
       return RefreshIndicator(
         onRefresh: controller.refreshRequests,
         color: Theme.of(context).primaryColor,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.loanRequests.length + (controller.hasMoreDataLoan.value ? 1 : 0),
+          itemCount: controller.loanRequests.isEmpty
+              ? 1
+              : controller.loanRequests.length + (controller.hasMoreDataLoan.value ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index == controller.loanRequests.length) {
+            if (controller.loanRequests.isEmpty) {
+              return Column(
+                children: [
+                  _buildEmptyState(
+                    context: context,
+                    icon: Icons.account_balance_wallet,
+                    title: tr('no_loan_requests'),
+                    subtitle: tr('no_loan_requests_subtitle'),
+                    buttonText: tr('create_loan_request'),
+                    color: AppTheme.successColor,
+                    onTap: controller.createLoanRequest,
+                  ),
+                  if (controller.hasMoreDataLoan.value)
+                    LoadMoreButton(
+                      onPressed: controller.loadMoreLoanRequests,
+                      isLoading: controller.isLoadingMoreLoan.value,
+                      loadedYears: controller.loadedYearsLoan,
+                    ),
+                ],
+              );
+            }
+
+            if (index == controller.loanRequests.length && controller.hasMoreDataLoan.value) {
               return LoadMoreButton(
                 onPressed: controller.loadMoreLoanRequests,
                 isLoading: controller.isLoadingMoreLoan.value,
                 loadedYears: controller.loadedYearsLoan,
               );
             }
+
             final request = controller.loanRequests[index];
             return LoanRequestCard(request: request);
           },
@@ -336,31 +367,45 @@ class RequestHomeScreen extends StatelessWidget {
         );
       }
 
-      if (controller.letterRequests.isEmpty) {
-        return _buildEmptyState(
-          context: context,
-          icon: Icons.description,
-          title: 'No Letter Requests',
-          subtitle: 'You haven\'t made any letter requests yet.',
-          color: ThemeService.instance.getActionColor('documents'),
-          onTap: controller.createLetterRequest,
-        );
-      }
-
       return RefreshIndicator(
         onRefresh: controller.refreshRequests,
         color: Theme.of(context).primaryColor,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.letterRequests.length + (controller.hasMoreDataLetter.value ? 1 : 0),
+          itemCount: controller.letterRequests.isEmpty
+              ? 1
+              : controller.letterRequests.length + (controller.hasMoreDataLetter.value ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index == controller.letterRequests.length) {
+            if (controller.letterRequests.isEmpty) {
+              return Column(
+                children: [
+                  _buildEmptyState(
+                    context: context,
+                    icon: Icons.description,
+                    title: tr('no_letter_requests'),
+                    subtitle: tr('no_letter_requests_subtitle'),
+                    buttonText: tr('create_letter_request'),
+                    color: ThemeService.instance.getActionColor('documents'),
+                    onTap: controller.createLetterRequest,
+                  ),
+                  if (controller.hasMoreDataLetter.value)
+                    LoadMoreButton(
+                      onPressed: controller.loadMoreLetterRequests,
+                      isLoading: controller.isLoadingMoreLetter.value,
+                      loadedYears: controller.loadedYearsLetter,
+                    ),
+                ],
+              );
+            }
+
+            if (index == controller.letterRequests.length && controller.hasMoreDataLetter.value) {
               return LoadMoreButton(
                 onPressed: controller.loadMoreLetterRequests,
                 isLoading: controller.isLoadingMoreLetter.value,
                 loadedYears: controller.loadedYearsLetter,
               );
             }
+
             final request = controller.letterRequests[index];
             return LetterRequestCard(request: request);
           },
@@ -374,6 +419,7 @@ class RequestHomeScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
+    required String buttonText,
     required Color color,
     VoidCallback? onTap,
   }) {
@@ -420,8 +466,8 @@ class RequestHomeScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onTap,
                 icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text(
-                  'Create Request',
+                label:  Text(
+                  buttonText,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

@@ -7,6 +7,7 @@ import 'package:injazat_hr_app/data/remote/response/permission_request_response.
 import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
 import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 import '../../../widgets/saudi_riyal_display.dart';
 
@@ -51,19 +52,19 @@ class RequestStatusChip extends StatelessWidget {
       case RequestStatus.approved:
         backgroundColor = themeService.getSuccessColor().withValues(alpha: 0.1);
         textColor = themeService.getSuccessColor();
-        text = 'Approved';
+        text = tr('approved');
         icon = Icons.check_circle_outline;
         break;
       case RequestStatus.rejected:
         backgroundColor = themeService.getErrorColor().withValues(alpha: 0.1);
         textColor = themeService.getErrorColor();
-        text = 'Rejected';
+        text = tr('rejected');
         icon = Icons.cancel_outlined;
         break;
       case RequestStatus.forApproval:
         backgroundColor = themeService.getWarningColor().withValues(alpha: 0.1);
         textColor = themeService.getWarningColor();
-        text = 'For Approval';
+        text = tr('for_approval');
         icon = Icons.access_time;
         break;
     }
@@ -177,7 +178,7 @@ class LeaveRequestCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
       Text(
-      '${request.startDate} To ${request.endDate}',
+      '${request.startDate} ${tr('to')} ${request.endDate}',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -186,7 +187,7 @@ class LeaveRequestCard extends StatelessWidget {
       ),
       const SizedBox(width: 12),
       RequestTag(
-        text: '${request.days} days',
+        text: '${request.days} ${tr('days')}',
         textColor: ThemeService.instance.getWarningColor(),
         backgroundColor:
         ThemeService.instance.getWarningColor().withOpacity(0.1),
@@ -205,7 +206,7 @@ class LeaveRequestCard extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Leave Type: ',
+                      text: '${tr('leave_type')}: ',
                       style: TextStyle(
                         color: ThemeService.instance.getTextPrimaryColor(),
                         fontSize: 14,
@@ -233,7 +234,7 @@ class LeaveRequestCard extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Reason: ',
+                  text: '${tr('reason')}: ',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -264,7 +265,8 @@ class LeaveRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Submitted: ${_formatDate(request.submittedDate)}',
+
+                  '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: ThemeService.instance.getTextSecondaryColor(),
@@ -273,7 +275,7 @@ class LeaveRequestCard extends StatelessWidget {
                   ),
                   if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
                     Text(
-                      'Approved: ${_formatDate(request.approvedDate!)}',
+                    '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
@@ -282,7 +284,7 @@ class LeaveRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
-                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getErrorColor(),
@@ -346,7 +348,7 @@ class PermissionRequestCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Purpose: ',
+                        text: '${tr('purpose')}:',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -395,7 +397,7 @@ class PermissionRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Submitted: ${_formatDate(request.submittedDate)}',
+                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: ThemeService.instance.getTextSecondaryColor(),
@@ -404,7 +406,7 @@ class PermissionRequestCard extends StatelessWidget {
                   ),
                   if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
                     Text(
-                      'Approved: ${_formatDate(request.approvedDate!)}',
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
@@ -413,7 +415,7 @@ class PermissionRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
-                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getErrorColor(),
@@ -476,7 +478,7 @@ class LoanRequestCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Loan Type: ',
+                        text: '${tr('loan_type')}: ',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -504,7 +506,7 @@ class LoanRequestCard extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Purpose: ',
+                  text: '${tr('purpose')}: ',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -559,7 +561,7 @@ class LoanRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Submitted: ${_formatDate(request.submittedDate)}',
+                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: ThemeService.instance.getTextSecondaryColor(),
@@ -568,7 +570,7 @@ class LoanRequestCard extends StatelessWidget {
                   ),
                   if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
                     Text(
-                      'Approved: ${_formatDate(request.approvedDate!)}',
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
@@ -577,7 +579,7 @@ class LoanRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
-                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getErrorColor(),
@@ -642,7 +644,7 @@ class LetterRequestCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Letter Type: ',
+                        text: '${tr('letter_type')}: ',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -671,7 +673,7 @@ class LetterRequestCard extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Reason: ',
+                  text: '${tr('reason')}: ',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -698,7 +700,7 @@ class LetterRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Submitted: ${_formatDate(request.createdAt)}',
+                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: ThemeService.instance.getTextSecondaryColor(),
@@ -707,7 +709,7 @@ class LetterRequestCard extends StatelessWidget {
                   ),
                   if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
                     Text(
-                      'Approved: ${_formatDate(request.approvedDate!)}',
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
@@ -716,7 +718,7 @@ class LetterRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
-                      'Rejected: ${_formatDate(request.approvedDate!)}',
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getErrorColor(),
@@ -809,7 +811,7 @@ class LoadMoreButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Loading...',
+                    tr('loading'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -830,7 +832,7 @@ class LoadMoreButton extends StatelessWidget {
                   Column(
                     children: [
                       Text(
-                        'Load More',
+                        tr('load_more'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -839,7 +841,7 @@ class LoadMoreButton extends StatelessWidget {
                       ),
                       if (loadedYears.isNotEmpty)
                         Text(
-                          'Load ${loadedYears.last - 1}',
+                          '${tr('load')} ${loadedYears.last - 1}',
                           style: TextStyle(
                             fontSize: 12,
                             color: themeService.getSilver().withValues(alpha: 0.8),
@@ -904,8 +906,7 @@ class EmptyRequestState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: controller.showRequestTypeDialog,
               icon: Icon(Icons.add, color: themeService.getSilver()),
-              label: Text(
-                'Create New Request',
+              label: Text(tr('create_new_request'),
                 style: TextStyle(
                   color: themeService.getSilver(),
                   fontWeight: FontWeight.w600,

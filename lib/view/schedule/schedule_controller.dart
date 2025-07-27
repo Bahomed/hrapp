@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/remote/response/schedule_models.dart';
 import '../../repository/schedule_repository.dart';
+import '../../utils/translation_helper.dart';
 
 class ScheduleController extends GetxController {
   final ScheduleRepository _repository = ScheduleRepository();
@@ -26,10 +27,10 @@ class ScheduleController extends GetxController {
         availableSchedules.assignAll(templates);
         currentSchedule.value = templates.first;
       } else {
-        _showErrorSnackbar('No schedules available');
+        _showErrorSnackbar(tr('no_schedules_available'));
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading schedules: $e');
+      _showErrorSnackbar('${tr('error_loading_schedules')}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -104,25 +105,25 @@ class ScheduleController extends GetxController {
       }
     }
 
-    return 'No working day found';
+    return tr('no_working_day_found');
   }
 
   // Current status (working/off)
   String get scheduleStatus {
     final schedule = currentSchedule.value?.workSchedule;
     if (schedule == null) return '--';
-    if (!isTodayWorkingDay) return 'Off day - Next working day: $nextWorkingDay';
+    if (!isTodayWorkingDay) return '${tr('off_day_next_working')}: $nextWorkingDay';
 
     final now = DateTime.now();
     final start = _parseTime(schedule.startTime);
     final end = _parseTime(schedule.endTime);
 
     if (now.isBefore(start)) {
-      return 'Work starts at ${schedule.formattedStartTime}';
+      return '${tr('work_starts_at')} ${schedule.formattedStartTime}';
     } else if (now.isAfter(end)) {
-      return 'Work day ended';
+      return tr('work_day_ended');
     } else {
-      return 'Currently working';
+      return tr('currently_working');
     }
   }
 
@@ -178,7 +179,7 @@ class ScheduleController extends GetxController {
   // Refresh data
   void refreshSchedule() {
     loadSchedules();
-    _showSuccessSnackbar('Schedule refreshed');
+    _showSuccessSnackbar(tr('schedule_refreshed'));
   }
 
   // Show details dialog
@@ -196,17 +197,17 @@ class ScheduleController extends GetxController {
           children: [
             Text(schedule.description, style: TextStyle(color: Colors.grey[600])),
             const SizedBox(height: 16),
-            Text('Working Hours: $workingHoursSummary', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${tr('working_hours')}: $workingHoursSummary', style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Text('Total Hours/Week: $totalWeeklyHours hours', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${tr('total_hours_week')}: $totalWeeklyHours ${tr('hours')}', style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Text('Working Days: $workingDaysCount days', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${tr('working_days_count')}: $workingDaysCount ${tr('days')}', style: const TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Close'),
+            child: Text(tr('close')),
           ),
         ],
       ),
@@ -216,7 +217,7 @@ class ScheduleController extends GetxController {
   // Success toast
   void _showSuccessSnackbar(String message) {
     Get.snackbar(
-      'Success',
+      tr('success'),
       message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF4CAF50),
@@ -228,7 +229,7 @@ class ScheduleController extends GetxController {
   // Error toast
   void _showErrorSnackbar(String message) {
     Get.snackbar(
-      'Error',
+      tr('error'),
       message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFFF44336),

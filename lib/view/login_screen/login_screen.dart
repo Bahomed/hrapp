@@ -36,21 +36,8 @@ class LoginScreen extends StatelessWidget {
                 themeService.isDarkMode ? logoWhite : logoBlack,
                 height: 80,
               ),
-              
-              SizedBox(height: ResponsiveUtils.responsiveHeight(context, 5)),
-              
-              // Welcome Text
-              Text(
-                '${tr('welcome')} 👋',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  color: themeService.getTextPrimaryColor(),
-                ),
-              ),
-              
-              const SizedBox(height: 8),
-              
+
+
               Text(
                 tr('app_name'),
                 style: TextStyle(
@@ -59,6 +46,17 @@ class LoginScreen extends StatelessWidget {
                   color: themeService.getTextSecondaryColor(),
                 ),
               ),
+              // Welcome Text
+              Text(
+                '${tr('welcome')} 👋',
+                style: TextStyle(
+                  fontSize: 38,
+                  fontWeight: FontWeight.w700,
+                  color: themeService.getTextPrimaryColor(),
+                ),
+              ),
+              
+
               
               const SizedBox(height: 50),
               

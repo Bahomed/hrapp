@@ -15,7 +15,7 @@ const Map<String, String> arTranslations = {
   'done': 'تم',
   'retry': 'إعادة المحاولة',
   'refresh': 'تحديث',
-  
+
   // Home Screen
   'good_morning': 'صباح الخير',
   'what_would_you_like_to_do': 'ماذا تريد أن تفعل؟',
@@ -23,7 +23,7 @@ const Map<String, String> arTranslations = {
   'face_id_attendance': 'حضور التعرف على الوجه',
   'secure_attendance_with_face_verification': 'حضور آمن مع التحقق من الوجه',
   'scan_face_for_attendance': 'مسح الوجه للحضور',
-  
+
   // Navigation
   'requests': 'الطلبات',
   'payroll': 'كشف الراتب',
@@ -31,7 +31,7 @@ const Map<String, String> arTranslations = {
   'attendance': 'الحضور',
   'schedule': 'الجدولة',
   'profile': 'الملف الشخصي',
-  
+
   // Attendance
   'attendance_calendar': 'تقويم الحضور',
   'attendance_for': 'الحضور لتاريخ',
@@ -50,7 +50,7 @@ const Map<String, String> arTranslations = {
   'half_days': 'أيام نصف دوام',
   'absent_days': 'أيام الغياب',
   'failed_to_load_attendance_data': 'فشل في تحميل بيانات الحضور',
-  
+
   // Face ID
   'face_verification': 'التحقق من الوجه',
   'position_your_face': 'ضع وجهك في الكاميرا',
@@ -64,7 +64,7 @@ const Map<String, String> arTranslations = {
   'face_verification_failed': 'الوجه لا يطابق Face ID المسجل',
   'no_face_detected': 'لم يتم اكتشاف وجه. يرجى المحاولة مرة أخرى.',
   'try_again': 'حاول مرة أخرى',
-  
+
   // Face ID Registration
   'face_has_been_saved': 'تم حفظ الوجه',
   'face_saved': 'تم حفظ الوجه',
@@ -72,7 +72,7 @@ const Map<String, String> arTranslations = {
   'face_not_saved': 'لم يتم حفظ الوجه',
   'face_not_saved_error': 'حدث خطأ ما. لم يتم حفظ الوجه',
   'scan_face_again': 'حدث خطأ ما. يرجى مسح الوجه مرة أخرى',
-  
+
   // Face ID Status
   'face_id_registered_ready': 'تم تسجيل Face ID - جاهز لتسجيل الدخول',
   'face_id_not_registered': 'لم يتم تسجيل Face ID - يرجى التسجيل لتسجيل الدخول',
@@ -81,14 +81,14 @@ const Map<String, String> arTranslations = {
   'face_id_required_break': 'مطلوب Face ID للاستراحة. يرجى تسجيل Face ID أولاً.',
   'face_id_required_clock_out': 'مطلوب Face ID لتسجيل الخروج. يرجى تسجيل Face ID أولاً.',
   'register_face_id': 'تسجيل Face ID',
-  
+
   // Attendance Messages
   'clocked_in_successfully': 'تم التحقق من الوجه وتسجيل الدخول بنجاح!',
   'break_started_successfully': 'بدأت الاستراحة بنجاح!',
   'break_ended_successfully': 'انتهت الاستراحة بنجاح!',
   'clocked_out_successfully': 'تم تسجيل الخروج بنجاح!',
   'face_verification_failed_retry': 'فشل التحقق من الوجه. يرجى المحاولة مرة أخرى.',
-  
+
   // Settings
   'settings': 'الإعدادات',
   'language': 'اللغة / Language',
@@ -103,7 +103,7 @@ const Map<String, String> arTranslations = {
   'current_language': 'اللغة الحالية',
   'language_changed_to': 'تم تغيير اللغة إلى',
   'terms_coming_soon': 'شروط الخدمة - قريباً',
-  
+
   // Theme
   'theme': 'المظهر',
   'choose_app_theme': 'اختر مظهر التطبيق المفضل لديك',
@@ -112,7 +112,7 @@ const Map<String, String> arTranslations = {
   'system_theme': 'مظهر النظام',
   'follows_system_settings': 'يتبع إعدادات النظام',
   'theme_changed': 'تم تغيير المظهر بنجاح',
-  
+
   // Privacy Policy
   'privacy_policy_data_protection': 'سياسة الخصوصية وحماية البيانات',
   'last_updated': 'آخر تحديث',
@@ -129,7 +129,7 @@ const Map<String, String> arTranslations = {
   'contact_us': '٦. اتصل بنا',
   'contact_us_content': 'إذا كان لديك أسئلة حول سياسة الخصوصية هذه:\n\n• البريد الإلكتروني: privacy@company.com\n• الهاتف: +966 11 123 4567\n• العنوان: الرياض، المملكة العربية السعودية',
   'privacy_agreement': 'باستخدام هذا التطبيق، فإنك توافق على سياسة الخصوصية هذه.',
-  
+
   // Location
   'getting_location_data': 'جاري الحصول على بيانات الموقع...',
   'processing_attendance': 'جاري معالجة الحضور...',
@@ -141,7 +141,7 @@ const Map<String, String> arTranslations = {
   'location_permission_denied': 'تم رفض إذن الموقع',
   'retry_gps': 'إعادة محاولة GPS',
   'gps_location': 'موقع GPS',
-  
+
   // Clocking Screen
   'clocking': 'التوقيت',
   'face_id_status': 'حالة Face ID',
@@ -156,7 +156,7 @@ const Map<String, String> arTranslations = {
   'state': 'المنطقة',
   'latitude': 'خط العرض',
   'longitude': 'خط الطول',
-  
+
   // Months
   'january': 'يناير',
   'february': 'فبراير',
@@ -170,7 +170,7 @@ const Map<String, String> arTranslations = {
   'october': 'أكتوبر',
   'november': 'نوفمبر',
   'december': 'ديسمبر',
-  
+
   // Short Months
   'jan': 'يناير',
   'feb': 'فبراير',
@@ -184,7 +184,7 @@ const Map<String, String> arTranslations = {
   'oct': 'أكتوبر',
   'nov': 'نوفمبر',
   'dec': 'ديسمبر',
-  
+
   // Days of Week
   'sunday': 'الأحد',
   'monday': 'الاثنين',
@@ -193,7 +193,7 @@ const Map<String, String> arTranslations = {
   'thursday': 'الخميس',
   'friday': 'الجمعة',
   'saturday': 'السبت',
-  
+
   // Short Days
   'sun': 'أحد',
   'mon': 'اثنين',
@@ -202,30 +202,66 @@ const Map<String, String> arTranslations = {
   'thu': 'خميس',
   'fri': 'جمعة',
   'sat': 'سبت',
-  
+
   // Payroll
   'payroll_history': 'سجل الرواتب',
+  'payroll_summary': 'ملخص الراتب',
+  'payslip_details': 'تفاصيل قسيمة الراتب',
+  'benefits': 'المزايا',
+  'gross_pay': 'إجمالي الراتب',
+  'processed': 'مُعالَج',
+  'downloading_payslip': 'جاري تحميل قسيمة الراتب...',
+  'info': 'معلومات',
+  'select_year': 'اختر السنة',
+  'month': 'الشهر',
+  'earnings': 'الأرباح',
+  'net_pay': 'صافي الراتب',
+  'total': 'الإجمالي',
+  'months': 'أشهر',
   'no_payroll_records': 'لا توجد سجلات رواتب',
   'records': 'سجلات',
-  
+
   // Documents
   'no_documents_found': 'لا توجد وثائق',
   'document_list': 'قائمة الوثائق',
-  
+
   // Schedule
   'my_schedule': 'جدولي',
   'no_schedule_found': 'لا يوجد جدول',
-  
+  'schedule_templates': 'قوالب المواعيد',
+  'default_schedule': 'افتراضي',
+  'grace_period': 'فترة السماح',
+  'overtime': 'وقت إضافي',
+  'enabled': 'مفعل',
+  'disabled': 'معطل',
+  'start_time': 'وقت البداية',
+  'end_time': 'وقت النهاية',
+  'working_days': 'أيام العمل',
+  'working_hours': 'ساعات العمل',
+  'total_hours_week': 'إجمالي الساعات/الأسبوع',
+  'working_days_count': 'أيام العمل',
+  'hours': 'ساعات',
+  'minutes': 'دقيقة',
+  'close': 'إغلاق',
+  'no_schedules_available': 'لا توجد جداول متاحة',
+  'error_loading_schedules': 'خطأ في تحميل الجداول',
+  'schedule_refreshed': 'تم تحديث الجدول',
+  'no_working_day_found': 'لم يتم العثور على يوم عمل',
+  'off_day_next_working': 'يوم إجازة - يوم العمل التالي',
+  'work_starts_at': 'يبدأ العمل في',
+  'work_day_ended': 'انتهى يوم العمل',
+  'currently_working': 'يعمل حالياً',
+
   // Profile
   'employee_details': 'تفاصيل الموظف',
   'personal_information': 'المعلومات الشخصية',
   'contact_information': 'معلومات الاتصال',
-  
+
   // Requests
   'my_requests': 'طلباتي',
   'create_request': 'إنشاء طلب',
   'no_requests_found': 'لا توجد طلبات',
-  
+
   // Login & Workspace
   'login': 'تسجيل الدخول',
   'enter_credentials': 'أدخل بيانات الاعتماد للمتابعة',
@@ -233,7 +269,7 @@ const Map<String, String> arTranslations = {
   'enter_email': 'أدخل بريدك الإلكتروني',
   'mobile_no': 'رقم الجوال',
   'mobile_number': 'رقم الهاتف المحمول',
-  'enter_mobile': 'أدخل رقم جوالك', 
+  'enter_mobile': 'أدخل رقم جوالك',
   'enter_mobile_no': 'أدخل رقم الجوال',
   'password': 'كلمة المرور',
   'enter_password': 'أدخل كلمة المرور',
@@ -255,7 +291,7 @@ const Map<String, String> arTranslations = {
   'connection_error': 'خطأ في الاتصال. يرجى التحقق من الإنترنت والمحاولة مرة أخرى.',
   'login_successful': 'تم تسجيل الدخول بنجاح',
   'please_enter_workspace_id': 'يرجى إدخال معرف مساحة العمل',
-  
+
   // Additional Login & Workspace Keys
   'sign_in': 'تسجيل الدخول',
   'workspace_setup': 'إعداد مساحة العمل',
@@ -265,7 +301,7 @@ const Map<String, String> arTranslations = {
   'your_email': 'بريدك الإلكتروني',
   'your_password': 'كلمة المرور الخاصة بك',
   'workspace_connection': 'اتصال مساحة العمل',
-  
+
   // Validation Messages
   'please_enter_email': 'يرجى إدخال بريدك الإلكتروني',
   'please_enter_valid_email': 'يرجى إدخال بريد إلكتروني صحيح',
@@ -275,7 +311,7 @@ const Map<String, String> arTranslations = {
   'field_required': 'هذا الحقل مطلوب',
   'invalid_workspace_id': 'معرف مساحة العمل غير صحيح',
   'login_failed': 'فشل تسجيل الدخول',
-  
+
   // Error Messages
   'error_occurred': 'حدث خطأ',
   'network_error': 'خطأ في الشبكة',
@@ -283,22 +319,21 @@ const Map<String, String> arTranslations = {
   'timeout_error': 'انتهت مهلة الطلب',
   'unknown_error': 'حدث خطأ غير معروف',
   'try_again_later': 'يرجى المحاولة مرة أخرى لاحقاً',
-  
+
   // Success Messages
   'operation_successful': 'تمت العملية بنجاح',
   'data_saved': 'تم حفظ البيانات بنجاح',
   'changes_saved': 'تم حفظ التغييرات بنجاح',
-  
+
   // Common Actions
   'submit': 'إرسال',
   'continue': 'متابعة',
   'finish': 'إنهاء',
   'skip': 'تخطي',
-  'close': 'إغلاق',
   'confirm': 'تأكيد',
   'yes': 'نعم',
   'no': 'لا',
-  
+
   // Status Messages
   'loading_data': 'جارٍ تحميل البيانات...',
   'saving_data': 'جارٍ حفظ البيانات...',
@@ -306,7 +341,7 @@ const Map<String, String> arTranslations = {
   'processing': 'جارٍ المعالجة...',
   'validating': 'جارٍ التحقق...',
   'please_wait': 'يرجى الانتظار...',
-  
+
   // Face ID & Biometric
   'face_id': 'التعرف على الوجه',
   'biometric_authentication': 'المصادقة البيومترية',
@@ -316,7 +351,7 @@ const Map<String, String> arTranslations = {
   'biometric_not_available': 'المصادقة البيومترية غير متاحة',
   'biometric_not_enrolled': 'لا توجد بيانات بيومترية مسجلة',
   'biometric_authentication_failed': 'فشلت المصادقة البيومترية',
-  
+
   // Permissions
   'permission_required': 'إذن مطلوب',
   'camera_permission': 'إذن الكاميرا',
@@ -326,7 +361,7 @@ const Map<String, String> arTranslations = {
   'permission_denied': 'تم رفض الإذن',
   'grant_permission': 'منح الإذن',
   'permission_explanation': 'هذا الإذن مطلوب لعمل التطبيق بشكل صحيح',
-  
+
   // Employee Information
   'employee_id': 'رقم الموظف',
   'employee_name': 'اسم الموظف',
@@ -339,10 +374,9 @@ const Map<String, String> arTranslations = {
   'part_time': 'دوام جزئي',
   'contract': 'عقد',
   'internship': 'تدريب',
-  
+
   // Time and Attendance
   'work_hours': 'ساعات العمل',
-  'overtime': 'ساعات إضافية',
   'total_hours': 'إجمالي الساعات',
   'break_time': 'وقت الاستراحة',
   'late_arrival': 'وصول متأخر',
@@ -352,7 +386,7 @@ const Map<String, String> arTranslations = {
   'half_day': 'نصف يوم',
   'work_from_home': 'العمل من المنزل',
   'on_leave': 'في إجازة',
-  
+
   // Leave Management
   'annual_leave': 'الإجازة السنوية',
   'sick_leave': 'إجازة مرضية',
@@ -372,7 +406,7 @@ const Map<String, String> arTranslations = {
   'for_approval': 'في انتظار الموافقة',
   'rejected': 'مرفوض',
   'cancelled': 'ملغي',
-  
+
   // Payroll
   'basic_salary': 'الراتب الأساسي',
   'allowances': 'البدلات',
@@ -385,7 +419,7 @@ const Map<String, String> arTranslations = {
   'commission': 'عمولة',
   'pay_slip': 'قسيمة الراتب',
   'salary_certificate': 'شهادة راتب',
-  
+
   // Benefits
   'health_insurance': 'التأمين الصحي',
   'life_insurance': 'تأمين الحياة',
@@ -393,7 +427,7 @@ const Map<String, String> arTranslations = {
   'travel_allowance': 'بدل سفر',
   'meal_allowance': 'بدل وجبات',
   'phone_allowance': 'بدل هاتف',
-  
+
   // Performance
   'performance_review': 'تقييم الأداء',
   'goals': 'الأهداف',
@@ -401,7 +435,7 @@ const Map<String, String> arTranslations = {
   'rating': 'التقييم',
   'feedback': 'التغذية الراجعة',
   'development_plan': 'خطة التطوير',
-  
+
   // Company Information
   'company_name': 'اسم الشركة',
   'company_address': 'عنوان الشركة',
@@ -409,7 +443,7 @@ const Map<String, String> arTranslations = {
   'company_email': 'بريد الشركة الإلكتروني',
   'branch': 'الفرع',
   'office_location': 'موقع المكتب',
-  
+
   // Navigation and UI
   'dashboard': 'لوحة التحكم',
   'home': 'الرئيسية',
@@ -423,7 +457,7 @@ const Map<String, String> arTranslations = {
   'show_less': 'عرض أقل',
   'expand': 'توسيع',
   'collapse': 'طي',
-  
+
   // Time Format
   'today': 'اليوم',
   'yesterday': 'أمس',
@@ -434,7 +468,7 @@ const Map<String, String> arTranslations = {
   'last_month': 'الشهر الماضي',
   'this_year': 'هذا العام',
   'last_year': 'العام الماضي',
-  
+
   // File Types
   'pdf': 'PDF',
   'image': 'صورة',
@@ -456,7 +490,7 @@ const Map<String, String> arTranslations = {
   'edit_loan_request': 'تعديل طلب القرض',
   'edit_leave_request': 'تعديل طلب الإجازة',
   'edit_permission_request': 'تعديل طلب الإذن',
-  
+
   // Request Descriptions
   'loan_request_description': 'طلب مساعدة مالية',
   'letter_request_description': 'طلب وثائق ورسائل رسمية',
@@ -466,7 +500,7 @@ const Map<String, String> arTranslations = {
   'edit_loan_request_description': 'تعديل تفاصيل طلب القرض',
   'edit_leave_request_description': 'تعديل تفاصيل طلب الإجازة',
   'edit_permission_request_description': 'تعديل تفاصيل طلب الإذن',
-  
+
   // Form Fields
   'loan_type': 'نوع القرض',
   'letter_type': 'نوع الرسالة',
@@ -479,11 +513,11 @@ const Map<String, String> arTranslations = {
   'end_date': 'تاريخ النهاية',
   'from_time': 'من الوقت',
   'to_time': 'إلى الوقت',
-  
+
   // Form Hints
   'enter_repayment_months_hint': 'أدخل عدد الأشهر (الحد الأدنى 1)',
   'select_field': 'اختر {field}',
-  
+
   // Validation Messages
   'please_select_loan_type': 'يرجى اختيار نوع القرض',
   'please_select_letter_type': 'يرجى اختيار نوع الرسالة',
@@ -507,7 +541,7 @@ const Map<String, String> arTranslations = {
   'please_select_to_time': 'يرجى اختيار الوقت إلى',
   'to_time_after_from_time': 'يجب أن يكون الوقت إلى بعد الوقت من',
   'invalid_time_format': 'تنسيق الوقت غير صحيح',
-  
+
   // Submit Buttons
   'submit_loan_request': 'إرسال طلب القرض',
   'submit_letter_request': 'إرسال طلب الرسالة',
@@ -517,7 +551,7 @@ const Map<String, String> arTranslations = {
   'update_loan_request': 'تحديث طلب القرض',
   'update_leave_request': 'تحديث طلب الإجازة',
   'update_permission_request': 'تحديث طلب الإذن',
-  
+
   // Request Info
   'request_id': 'رقم الطلب',
 
@@ -544,7 +578,7 @@ const Map<String, String> arTranslations = {
   'check_if_document_for_dependant': 'حدد إذا كانت هذه الوثيقة للمُعال',
   'select_document_file': 'اختر ملف الوثيقة',
   'uploading': 'جاري الرفع...',
-  
+
   // Document Upload Error Messages
   'failed_to_load_categories': 'فشل في تحميل الفئات',
   'error_loading_categories': 'خطأ في تحميل الفئات',
@@ -558,7 +592,7 @@ const Map<String, String> arTranslations = {
   'document_uploaded_successfully': 'تم رفع الوثيقة بنجاح',
   'upload_failed': 'فشل الرفع',
   'error_uploading_document': 'خطأ في رفع الوثيقة',
-  
+
   // Workspace Change
   'different_workspace': 'مساحة عمل مختلفة؟',
   'change_workspace_hint': 'التبديل إلى مساحة عمل شركة أخرى',
@@ -662,4 +696,131 @@ const Map<String, String> arTranslations = {
   'expires_on': 'ينتهي في {date}',
   'unknown': 'غير معروف',
   'draft': 'مسودة',
+  'search_documents': 'البحث في الوثائق...',
+  'files': 'ملفات',
+  'document_overview': 'نظرة عامة على الوثائق',
+  'docs': 'وثائق',
+  'categories': 'الفئات',
+  'no_categories_available': 'لا توجد فئات متاحة',
+  "create_new_request": "إنشاء طلب جديد",
+  "request_time_off_work": "طلب إجازة من العمل",
+  "request_work_permissions": "طلب اذن من العمل",
+  "request_financial_loan": "طلب سلفة مالية",
+  "request_official_documents": "طلب خطاب رسمي",
+  "delete_request": "حذف الطلب",
+  "confirm_delete_leave_request": "هل أنت متأكد من حذف طلب الإجازة هذا؟",
+  "delete_permission_request": "حذف طلب الإذن",
+  "confirm_delete_permission_request": "هل أنت متأكد من رغبتك في حذف طلب الإذن هذا؟",
+  "delete_loan_request": "حذف طلب السلفة",
+  "confirm_delete_loan_request": "هل أنت متأكد من حذف طلب السلفة هذه؟",
+  "delete_letter_request": "حذف طلب خطاب",
+  "confirm_delete_letter_request": "هل أنت متأكد من حذف طلب الخطاب هذا؟",
+  "deleted": "تم الحذف",
+  "request_deleted_successfully": "تم حذف الطلب بنجاح",
+  "permission_request_deleted_successfully": "تم حذف طلب الإذن بنجاح",
+  "loan_request_deleted_successfully": "تم حذف طلب السلفة بنجاح",
+  "letter_request_deleted_successfully": "تم حذف طلب خطاب بنجاح",
+  "view_details": "عرض التفاصيل",
+  "view_leave_request": "عرض: %s",
+  "view_permission_details": "عرض تفاصيل الإذن",
+  "view_permission": "عرض: %s",
+  "view_loan_details": "عرض تفاصيل السلفة",
+  "view_loan": "عرض: %s",
+  "view_letter_details": "عرض تفاصيل الخطاب",
+  "view_letter": "عرض: %s",
+  'leave_request_title': 'طلب إجازة',
+  'permission_request_title': 'طلب إذن',
+  'loan_request_title': 'طلب قرض',
+  'letter_request_title': 'طلب رسالة',
+
+  // Empty states for request screens
+  'no_leave_requests': 'لا توجد طلبات إجازة',
+  'no_leave_requests_subtitle': 'لم تقم بتقديم أي طلبات إجازة بعد.',
+  'no_permit_requests': 'لا توجد طلبات أذونات',
+  'no_permit_requests_subtitle': 'لم تقم بتقديم أي طلبات أذونات بعد.',
+  'no_loan_requests': 'لا توجد طلبات قروض',
+  'no_loan_requests_subtitle': 'لم تقم بتقديم أي طلبات قروض بعد.',
+  'no_letter_requests': 'لا توجد طلبات رسائل',
+  'no_letter_requests_subtitle': 'لم تقم بتقديم أي طلبات رسائل بعد.',
+
+  'downloading_letter': 'جاري التحميل',
+  'letter_downloaded': 'تم تحميل الرسالة',
+  'failed_to_load_leave_types': 'فشل في تحميل أنواع الإجازات',
+  'error_loading_leave_types': 'خطأ في تحميل أنواع الإجازات',
+  'failed_to_load_loan_types': 'فشل في تحميل أنواع القروض',
+  'error_loading_loan_types': 'خطأ في تحميل أنواع القروض',
+  'failed_to_load_letter_types': 'فشل في تحميل أنواع الرسائل',
+  'error_loading_letter_types': 'خطأ في تحميل أنواع الرسائل',
+  'failed_to_load_leave_requests': 'فشل في تحميل طلبات الإجازات',
+  'error_loading_leave_requests': 'خطأ في تحميل طلبات الإجازات',
+  'failed_to_load_permission_requests': 'فشل في تحميل طلبات الأذونات',
+  'error_loading_permission_requests': 'خطأ في تحميل طلبات الأذونات',
+  'failed_to_load_loan_requests': 'فشل في تحميل طلبات القروض',
+  'error_loading_loan_requests': 'خطأ في تحميل طلبات القروض',
+  'failed_to_load_letter_requests': 'فشل في تحميل طلبات الرسائل',
+  'error_loading_letter_requests': 'خطأ في تحميل طلبات الرسائل',
+  'failed_to_delete_request': 'فشل في حذف الطلب',
+  'error_deleting_request': 'خطأ في حذف الطلب',
+  'failed_to_delete_permission_request': 'فشل في حذف طلب الإذن',
+  'error_deleting_permission_request': 'خطأ في حذف طلب الإذن',
+  'failed_to_delete_loan_request': 'فشل في حذف طلب القرض',
+  'error_deleting_loan_request': 'خطأ في حذف طلب القرض',
+  'failed_to_delete_letter_request': 'فشل في حذف طلب الرسالة',
+  'error_deleting_letter_request': 'خطأ في حذف طلب الرسالة',
+  'failed_to_download_letter': 'فشل في تحميل الرسالة',
+  'error_downloading_letter': 'خطأ في تحميل الرسالة',
+  'failed_to_create_leave_request': 'فشل في إنشاء طلب الإجازة',
+  'error_creating_leave_request': 'خطأ في إنشاء طلب الإجازة',
+  'leave_request_created_successfully': 'تم إنشاء طلب الإجازة بنجاح',
+  'failed_to_create_permission_request': 'فشل في إنشاء طلب الإذن',
+  'error_creating_permission_request': 'خطأ في إنشاء طلب الإذن',
+  'permission_request_created_successfully': 'تم إنشاء طلب الإذن بنجاح',
+  'failed_to_create_loan_request': 'فشل في إنشاء طلب القرض',
+  'error_creating_loan_request': 'خطأ في إنشاء طلب القرض',
+  'loan_request_created_successfully': 'تم إنشاء طلب القرض بنجاح',
+  'failed_to_create_letter_request': 'فشل في إنشاء طلب الرسالة',
+  'error_creating_letter_request': 'خطأ في إنشاء طلب الرسالة',
+  'letter_request_created_successfully': 'تم إنشاء طلب الرسالة بنجاح',
+  'failed_to_update_loan_request': 'فشل في تحديث طلب القرض',
+  'error_updating_loan_request': 'خطأ في تحديث طلب القرض',
+  'loan_request_updated_successfully': 'تم تحديث طلب القرض بنجاح',
+  'failed_to_update_letter_request': 'فشل في تحديث طلب الرسالة',
+  'error_updating_letter_request': 'خطأ في تحديث طلب الرسالة',
+  'letter_request_updated_successfully': 'تم تحديث طلب الرسالة بنجاح',
+  'failed_to_update_leave_request': 'فشل في تحديث طلب الإجازة',
+  'error_updating_leave_request': 'خطأ في تحديث طلب الإجازة',
+  'leave_request_updated_successfully': 'تم تحديث طلب الإجازة بنجاح',
+  'failed_to_update_permission_request': 'فشل في تحديث طلب الإذن',
+  'error_updating_permission_request': 'خطأ في تحديث طلب الإذن',
+  'permission_request_updated_successfully': 'تم تحديث طلب الإذن بنجاح',
+  'failed_to_load_more_leave_requests': 'فشل في تحميل المزيد من طلبات الإجازات',
+  'error_loading_more_leave_requests': 'خطأ في تحميل المزيد من طلبات الإجازات',
+  'failed_to_load_more_permission_requests': 'فشل في تحميل المزيد من طلبات الأذونات',
+  'error_loading_more_permission_requests': 'خطأ في تحميل المزيد من طلبات الأذونات',
+  'failed_to_load_more_loan_requests': 'فشل في تحميل المزيد من طلبات القروض',
+  'error_loading_more_loan_requests': 'خطأ في تحميل المزيد من طلبات القروض',
+  'failed_to_load_more_letter_requests': 'فشل في تحميل المزيد من طلبات الرسائل',
+  'error_loading_more_letter_requests': 'خطأ في تحميل المزيد من طلبات الرسائل',
+  'leave': 'إجازة',
+  'permission': 'إذن',
+  'loan': 'قرض',
+  'letter': 'رسالة',
+  'load': 'تحميل',
+  'submitted':'مُقَدَّم',
+  'load_more': 'تحميل المزيد',
+
+
+  "attendance_detail": "تفاصيل الحضور",
+  "weekly_attendance": "الحضور الأسبوعي",
+
+'current_week': "الأسبوع الحالي",
+'status': "الحالة",
+'in': "الدخول",
+'out': "الخروج",
+'penalty': "الجزاء",
+'date':"التاريخ",
+
+'grace': 'فترة السماح',
+
+'to':'إلى'
 };

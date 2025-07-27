@@ -72,7 +72,7 @@ class PayrollScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${controller.payrollRecords.length} records',
+                            '${controller.payrollRecords.length} ${tr('records')}',
                             style: TextStyle(
                               fontSize: 14,
                               color: themeService.getTextSecondaryColor(),

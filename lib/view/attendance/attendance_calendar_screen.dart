@@ -54,16 +54,16 @@ class AttendanceCalendarScreen extends StatelessWidget {
                 children: [
                   // Month/Year Header
                   _buildMonthYearHeader(context, controller),
+                  SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2.5)),
+
+                  // Legend
+                  _buildLegend(context),
 
                   SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2.5)),
 
                   // Calendar
                   _buildCalendar(context, controller),
 
-                  SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2.5)),
-
-                  // Legend
-                  _buildLegend(context),
 
                   SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2.5)),
 

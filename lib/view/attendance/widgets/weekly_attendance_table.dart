@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../data/remote/response/weekly_attendance_response.dart';
 import '../../../services/theme_service.dart';
 import '../../../utils/app_theme.dart';
+import '../../../utils/translation_helper.dart';
 import '../weekly_attendance_controller.dart';
 
 class WeeklyAttendanceTable extends StatelessWidget {
@@ -53,7 +54,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Weekly Attendance',
+                            tr('weekly_attendance'),
                             style: TextStyle(
                               fontSize: isTablet ? 20 : 18,
                               fontWeight: FontWeight.w700,
@@ -90,7 +91,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${attendanceData.length} days',
+                            '${attendanceData.length} ${tr('days')}',
                             style: TextStyle(
                               fontSize: 12,
                               color: AppTheme.getActionColor('attendance'),
@@ -149,7 +150,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Date',
+              tr('date'),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
@@ -160,7 +161,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Status',
+              tr('status'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -172,7 +173,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'In',
+              tr('in'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -184,7 +185,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Out',
+              tr('out'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -196,7 +197,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Hours',
+              tr('hours'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -208,7 +209,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Penalty',
+              tr('penalty'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -220,7 +221,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'Overtime',
+              tr('overtime'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 10,
@@ -421,55 +422,6 @@ class WeeklyAttendanceTable extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow() {
-    if (attendanceData.isEmpty) return const SizedBox.shrink();
-
-    final presentDays = attendanceData.where((item) => 
-        item.status.toLowerCase() == 'present').length;
-    final totalDays = attendanceData.length;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.getActionColor('attendance').withOpacity(0.1),
-        border: Border(
-          bottom: BorderSide(
-            color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 6,
-            child: Text(
-              'Weekly Summary',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.getActionColor('attendance'),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Container(
-              alignment: Alignment.centerRight,
-              child: Text(
-                '$presentDays/$totalDays Days Present',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.getActionColor('attendance'),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildTotalsFooter() {
     if (attendanceData.isEmpty) return const SizedBox.shrink();
@@ -519,7 +471,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'TOTAL',
+              tr('total'),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -666,9 +618,9 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             child: _buildNavButton(
               icon: Icons.today,
-              label: 'Current Week',
+              label: tr('current_week'),
               onPressed: controller.loadCurrentWeekData,
-              tooltip: 'Go to Current Week',
+              tooltip: tr('go_to_current_week'),
               isPrimary: true,
             ),
           ),
@@ -679,7 +631,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           _buildNavButton(
             icon: Icons.refresh,
             onPressed: controller.refreshCurrentWeek,
-            tooltip: 'Refresh Data',
+            tooltip: tr('refresh_data'),
           ),
           
           const SizedBox(width: 12),
@@ -688,7 +640,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Obx(() => _buildNavButton(
             icon: Icons.chevron_right,
             onPressed: controller.canGoToNextWeek ? controller.loadNextWeek : null,
-            tooltip: 'Next Week',
+            tooltip: tr('next_week'),
             isDisabled: !controller.canGoToNextWeek,
           )),
         ],

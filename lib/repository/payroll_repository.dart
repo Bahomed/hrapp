@@ -8,6 +8,7 @@ import 'package:injazat_hr_app/data/remote/response/payroll_summary_response.dar
 import 'package:injazat_hr_app/data/remote/response/payroll_years_response.dart';
 import 'package:injazat_hr_app/data/remote/response/payslip_download_response.dart';
 import '../utils/exceptionhandler.dart';
+import '../utils/translation_helper.dart';
 
 class PayrollRepository {
 final Preferences preferences = Preferences();
@@ -23,7 +24,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollRecordsResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -47,7 +49,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/$id';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollRecordsResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -72,7 +75,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/summary/dashboard/$yearParam';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollSummaryResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -96,7 +100,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/status/$status';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollRecordsResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -120,7 +125,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/year/$year';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollRecordsResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -144,7 +150,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/filter/years';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 return PayrollYearsResponse.fromJson(response.data);
 } on DioException catch (e) {
@@ -169,7 +176,8 @@ final apiUrl = '$workspaceUrl$payrollBaseUrl/$payrollId/download';
 var response = await dioClient.get(
 apiUrl,
 {'Authorization': 'Bearer $token'},
-{},
+
+  {'locale': getCurrentLanguage()},
 );
 
 // Handle case where response might be a direct string or JSON object

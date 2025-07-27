@@ -12,6 +12,7 @@ import '../../repository/documentrepository.dart';
 import 'document_widgets.dart';
 import 'document_upload_screen.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/translation_helper.dart';
 
 class DocumentController extends GetxController with GetTickerProviderStateMixin {
   final DocumentRepository _documentRepository = DocumentRepository();
@@ -31,10 +32,9 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
 
   // Filter configuration
   List<Map<String, dynamic>> get filters => [
-    {'name': 'All', 'key': 'all', 'color': getFilterColor('all')},
-    {'name': 'Active', 'key': 'active', 'color': getFilterColor('active')},
-    {'name': 'Expired', 'key': 'expired', 'color': getFilterColor('expired')},
-
+    {'name': 'All', 'key': 'all', 'translation': 'all', 'color': getFilterColor('all')},
+    {'name': 'Active', 'key': 'active', 'translation': 'active', 'color': getFilterColor('active')},
+    {'name': 'Expired', 'key': 'expired', 'translation': 'expired', 'color': getFilterColor('expired')},
   ];
 
   @override
@@ -87,10 +87,10 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
 
         documents.value = filteredDocuments;
       } else {
-        _showErrorSnackbar('Failed to load documents', response.message);
+        _showErrorSnackbar(tr('failed_to_load_documents'), response.message);
       }
     } catch (e) {
-      _showErrorSnackbar('Error loading documents', e.toString());
+      _showErrorSnackbar(tr('error_loading_documents'), e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -164,10 +164,10 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
       if (response.success) {
         documents.value = response.data;
       } else {
-        _showErrorSnackbar('Failed to filter documents', response.message);
+        _showErrorSnackbar(tr('failed_to_filter_documents'), response.message);
       }
     } catch (e) {
-      _showErrorSnackbar('Error filtering documents', e.toString());
+      _showErrorSnackbar(tr('error_filtering_documents'), e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -181,10 +181,10 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
       if (response.success) {
         documents.value = response.data;
       } else {
-        _showErrorSnackbar('Failed to filter documents', response.message);
+        _showErrorSnackbar(tr('failed_to_filter_documents'), response.message);
       }
     } catch (e) {
-      _showErrorSnackbar('Error filtering documents', e.toString());
+      _showErrorSnackbar(tr('error_filtering_documents'), e.toString());
     } finally {
       isLoading.value = false;
     }

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../data/remote/response/document_response.dart';
 import '../../services/theme_service.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/translation_helper.dart';
 import 'document_controller.dart';
 
 class DocumentStatusChip extends StatelessWidget {
@@ -463,7 +464,7 @@ class DocumentSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Document Overview',
+                tr('document_overview'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -477,7 +478,7 @@ class DocumentSummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${summary.totalDocuments} docs',
+                  '${summary.totalDocuments} ${tr('docs')}',
                   style: TextStyle(
                     fontSize: 12,
                     color: ThemeService.instance.getTextPrimaryColor(),
@@ -494,7 +495,7 @@ class DocumentSummaryCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildSummaryItem(
-                  'Active',
+                  tr('active'),
                   '${summary.activeDocuments}',
                   Icons.check_circle_outline,
                 ),
@@ -504,7 +505,8 @@ class DocumentSummaryCard extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildSummaryItem(
-                  'Expired',
+                  tr('expired')
+                  ,
                   '${summary.expiredDocuments}',
                   Icons.access_time,
                 ),
@@ -557,7 +559,7 @@ class DocumentCategoryTabs extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Categories',
+            tr('categories'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -579,7 +581,7 @@ class DocumentCategoryTabs extends StatelessWidget {
               if (controller.availableCategories.isEmpty) {
                 return Center(
                   child: Text(
-                    'No categories available',
+                    tr('no_categories_available'),
                     style: TextStyle(
                       color: ThemeService.instance.getTextSecondaryColor(),
                       fontSize: 14,
@@ -749,7 +751,7 @@ class DocumentSearchBar extends StatelessWidget {
       child: TextField(
         onChanged: controller.updateSearchQuery,
         decoration: InputDecoration(
-          hintText: 'Search documents...',
+          hintText: tr('search_documents'),
           prefixIcon: Icon(Icons.search, color: ThemeService.instance.getPrimaryColor()),
           suffixIcon: Obx(() => controller.isGridView.value
               ? IconButton(

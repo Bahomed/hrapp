@@ -6,6 +6,7 @@ import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
 import 'package:injazat_hr_app/data/remote/response/document_response.dart';
 
 import '../utils/exceptionhandler.dart';
+import '../utils/translation_helper.dart';
 
 class DocumentRepository {
   final Preferences preferences = Preferences();
@@ -21,7 +22,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -45,7 +47,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -69,7 +72,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentSummaryResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -93,7 +97,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -117,7 +122,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -141,7 +147,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -165,7 +172,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -189,7 +197,8 @@ class DocumentRepository {
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {},
+
+        {'locale': getCurrentLanguage()},
       );
       return DocumentCategoriesResponse.fromJson(response.data);
     } on DioException catch (e) {
