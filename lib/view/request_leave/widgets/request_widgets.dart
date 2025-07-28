@@ -307,13 +307,7 @@ class LeaveRequestCard extends StatelessWidget {
                       color: ThemeService.instance.getErrorColor(),
                       onTap: () => controller.deleteLeaveRequest(request),
                     ),
-                  ] else ...[
-                    RequestActionButton(
-                      icon: Icons.visibility_outlined,
-                      color: ThemeService.instance.getTextSecondaryColor(),
-                      onTap: () => controller.viewLeaveRequestDetails(request),
-                    ),
-                  ],
+                  ]
                 ],
               ),
             ],

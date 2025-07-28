@@ -326,7 +326,7 @@ class PayrollController extends GetxController {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildNetPaySection(
-          tr('gross_pay'),
+          tr('benefits'),
           record.totalBenefits,
           _themeService.getSecondaryColor(),
         ),

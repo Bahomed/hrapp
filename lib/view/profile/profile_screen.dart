@@ -241,13 +241,13 @@ class ProfileScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.mobile_friendly_outlined ,
+                  Icons.calendar_today_rounded ,
                   size: ResponsiveUtils.responsiveIconSize(context, mobile: 14, tablet: 16, desktop: 18),
                   color: themeService.getSuccessColor(),
                 ),
                 SizedBox(width: ResponsiveUtils.responsiveWidth(context, 2)),
                 Text(
-                  controller.userMobile,
+                  controller.userHiredDate,
                   style: TextStyle(
                     fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
                     color: themeService.getSuccessColor(),
@@ -266,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildQuickInfoCard(
                   context,
-                  'Employee ID',
+                  tr('employee_id'),
                   controller.userEmployeeNo,
                   Icons.badge,
                   themeService.getPrimaryColor(),
@@ -276,7 +276,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildQuickInfoCard(
                   context,
-                  'Department',
+                  tr('department'),
                   controller.userDepartment,
                   Icons.business,
                   themeService.getSuccessColor(),
@@ -292,7 +292,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildQuickInfoCard(
                   context,
-                  'Section',
+                  tr('section'),
                   controller.userSection,
                   Icons.group_work,
                   themeService.getWarningColor(),
@@ -302,7 +302,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildQuickInfoCard(
                   context,
-                  'Report To',
+                  tr('report_to'),
                   controller.userReportToEmployee,
                   Icons.work,
                   const Color(0xFF9C27B0),

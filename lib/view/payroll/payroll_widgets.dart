@@ -196,7 +196,7 @@ class PayrollCard extends StatelessWidget {
                       Expanded(
                         child: _buildAmountCard(
                           context,
-                          tr('gross_pay'),
+                          tr('benefits'),
                           SaudiRiyalDisplay(
                             amount: record.totalBenefits,
                             style: TextStyle(
@@ -256,7 +256,7 @@ class PayrollCard extends StatelessWidget {
                           Expanded(
                             child: _buildAmountCard(
                               context,
-                              tr('gross_pay'),
+                              tr('benefits'),
                               SaudiRiyalDisplay(
                                 amount: record.totalBenefits,
                                 style: TextStyle(
@@ -328,7 +328,7 @@ class PayrollCard extends StatelessWidget {
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
-                                  'Paid on ${record.paymentDate}',
+                                  '${tr('paid_on')} ${record.paymentDate}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: ThemeService.instance.getTextSecondaryColor(),
@@ -372,7 +372,7 @@ class PayrollCard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
-                            'Paid on ${record.paymentDate}',
+                            '${tr('paid_on')}  ${record.paymentDate}',
                             style: TextStyle(
                               fontSize: 11,
                               color: ThemeService.instance.getTextSecondaryColor(),

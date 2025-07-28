@@ -109,7 +109,12 @@ class EditLeaveRequestScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  request.status,
+                  switch (request.status.toLowerCase()) {
+                    'approved' => tr(request.status),
+                    'rejected' => tr(request.status),
+                    'pending' || 'for-approval' => tr('for_approval'),
+                    _ => tr(request.status),
+                  },
                   style: TextStyle(
                     color: _getStatusColor(request.status, themeService),
                     fontSize: 12,

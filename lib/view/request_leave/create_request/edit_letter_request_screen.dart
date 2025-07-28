@@ -132,7 +132,12 @@ class EditLetterRequestScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        request.status.toUpperCase(),
+                        switch (request.status.toLowerCase()) {
+                          'approved' => tr(request.status),
+                          'rejected' => tr(request.status),
+                          'pending' || 'for-approval' => tr('for_approval'),
+                          _ => tr(request.status),
+                        },
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,

@@ -134,8 +134,12 @@ class EditLoanRequestScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        request.status.toUpperCase(),
-                        style: const TextStyle(
+                        switch (request.status.toLowerCase()) {
+                          'approved' => tr(request.status),
+                          'rejected' => tr(request.status),
+                          'pending' || 'for-approval' => tr('for_approval'),
+                          _ => tr(request.status),
+                        },                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

@@ -194,6 +194,7 @@ class ProfileController extends GetxController {
   String get userCurrentAddress => userData.value?.currentAddress ?? tr('n_a');
   String get userPermanentAddress => userData.value?.permanentAddress ?? tr('n_a');
   String get userImage => userData.value?.image ?? '';
+  String get userHiredDate => userData.value?.hiredDate ?? '';
   String get userPreferredLang => userData.value?.preferredLang ?? tr('n_a');
   String get userReportToEmployee=> userData.value?.reportToEmployee?? tr('n_a');
 

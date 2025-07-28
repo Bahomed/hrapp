@@ -366,6 +366,8 @@ const Map<String, String> enTranslations = {
   'employee_id': 'Employee ID',
   'employee_name': 'Employee Name',
   'department': 'Department',
+  'section': 'Section',
+  'report_to': 'Report To',
   'position': 'Position',
   'manager': 'Manager',
   'join_date': 'Join Date',
@@ -692,8 +694,8 @@ const Map<String, String> enTranslations = {
   'document_name': 'Document Name',
   'enter_document_name': 'Enter document name',
   'enter_document_type': 'Enter document type',
-  'uploaded': 'Uploaded {date}',
-  'expires_on': 'Expires on {date}',
+  'uploaded': 'Uploaded',
+  'expires_on': 'Expires on',
   'unknown': 'Unknown',
   'draft': 'Draft',
   'search_documents': 'Search documents...',
@@ -702,7 +704,7 @@ const Map<String, String> enTranslations = {
   'docs': 'docs',
   'categories': 'Categories',
   'no_categories_available': 'No categories available',
-'   submitted':'Submitted',
+'submitted':'Submitted',
     "create_new_request": "Create New Request",
     "request_time_off_work": "Request time off work",
     "request_work_permissions": "Request work permissions",
@@ -817,5 +819,8 @@ const Map<String, String> enTranslations = {
 'out':'Out',
 'penalty':'Penalty',
 'date':'Date',
-  'to':'To'
+  'to':'To',
+  'paid_on':'Paid on',
+  'expiry_date':'Expiry Date',
+  'file_type':'File Type'
 };

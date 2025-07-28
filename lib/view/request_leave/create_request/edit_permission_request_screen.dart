@@ -78,7 +78,7 @@ class EditPermissionRequestScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            tr('edit_permission_description'),
+                            tr('edit_permission_request_description'),
                             style: TextStyle(
                               fontSize: 14,
                               color: themeService.getTextSecondaryColor(),
@@ -101,8 +101,12 @@ class EditPermissionRequestScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  request.status,
-                  style: TextStyle(
+                  switch (request.status.toLowerCase()) {
+                    'approved' => tr(request.status),
+                    'rejected' => tr(request.status),
+                    'pending' || 'for-approval' => tr('for_approval'),
+                    _ => tr(request.status),
+                  },                  style: TextStyle(
                     color: _getStatusColor(request.status, themeService),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -237,62 +241,13 @@ class EditPermissionRequestScreen extends StatelessWidget {
       case 'rejected':
         return themeService.getErrorColor();
       case 'pending':
-      case 'for approval':
+      case 'for-approval':
         return themeService.getWarningColor();
       default:
         return themeService.getTextSecondaryColor();
     }
   }
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    String? Function(String?)? validator,
-  }) {
-    final themeService = ThemeService.instance;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          style: TextStyle(color: themeService.getTextPrimaryColor()),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: themeService.getCardColor(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getActionColor('profile')),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getErrorColor()),
-            ),
-            contentPadding: const EdgeInsets.all(16),
-            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildTextAreaField({
     required String label,

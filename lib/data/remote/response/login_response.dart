@@ -121,6 +121,7 @@ class Data {
   String? permanentAddress;
   String? token;
   String? reportToEmployee;
+  String? hiredDate;
   FaceData? faceData;
 
   Data({
@@ -151,6 +152,7 @@ class Data {
     this.permanentAddress,
     this.token,
     this.reportToEmployee,
+    this.hiredDate,
     this.faceData,
   });
 
@@ -182,6 +184,7 @@ class Data {
     permanentAddress: json["permanent_address"] ?? "",
     token: json["token"] ?? "",
     reportToEmployee: json["report_to_employee"] ?? "",
+    hiredDate: json["hireddate_g"] ?? "",
     faceData: json["face_data"] != null ? FaceData.fromJson(json["face_data"]) : null,
   );
 
@@ -213,6 +216,7 @@ class Data {
     "permanent_address": permanentAddress,
     "token": token,
     "report_to_employee": reportToEmployee,
+    'hireddate_g':hiredDate,
     "face_data": faceData?.toJson(),
   };
 }

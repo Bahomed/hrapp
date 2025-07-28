@@ -25,25 +25,25 @@ class DocumentStatusChip extends StatelessWidget {
       case 'active':
         backgroundColor = themeService.getStatusBackgroundColor('active');
         textColor = themeService.getStatusColor('active');
-        text = 'Active';
+        text = tr('active');
         icon = Icons.check_circle_outline;
         break;
       case 'expired':
         backgroundColor = themeService.getStatusBackgroundColor('expired');
         textColor = themeService.getStatusColor('expired');
-        text = 'Expired';
+        text = tr('expired');
         icon = Icons.access_time;
         break;
       case 'pending':
         backgroundColor = themeService.getStatusBackgroundColor('pending');
         textColor = themeService.getStatusColor('pending');
-        text = 'Pending';
+        text = tr('pending');
         icon = Icons.schedule;
         break;
       case 'rejected':
         backgroundColor = themeService.getStatusBackgroundColor('rejected');
         textColor = themeService.getStatusColor('rejected');
-        text = 'Rejected';
+        text = tr('rejected');
         icon = Icons.cancel_outlined;
         break;
       default:
@@ -187,7 +187,7 @@ class DocumentCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Uploaded ${document.uploadedDate}',
+                        '${tr('uploaded')} ${document.uploadedDate}',
                         style: TextStyle(
                           fontSize: 12,
                           color: ThemeService.instance.getTextSecondaryColor(),
@@ -910,7 +910,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
           children: [
             Expanded(
               child: _buildInfoCard(
-                'File Type',
+                tr('file_type'),
                 document.fileType?.toUpperCase() ?? '',
                 Icons.insert_drive_file,
                 ThemeService.instance.getDocumentColor(0),
@@ -923,7 +923,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
           children: [
             Expanded(
               child: _buildInfoCard(
-                'Category',
+                tr('category'),
                 document.category.capitalize ?? '',
                 Icons.folder,
                 ThemeService.instance.getDocumentColor(8),
@@ -932,7 +932,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _buildInfoCard(
-                'Uploaded',
+                '${tr('uploaded')}',
                 document.uploadedDate,
                 Icons.cloud_upload,
                 ThemeService.instance.getDocumentColor(7),
@@ -988,7 +988,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Document Details',
+          tr('document_details'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -997,7 +997,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         if (document.expiryDate != null && document.expiryDate!.isNotEmpty)
-          _buildDetailRow('Expiry Date', document.expiryDate!),
+          _buildDetailRow(tr('expiry_date'), document.expiryDate!),
       ],
     );
   }
