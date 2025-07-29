@@ -44,24 +44,7 @@ class DashboardRepository {
     preferences.saveCompanyImage(image);
   }
 
-  Future<GetDashboardResponse> dashBoardFromApi() async {
-    try {
-      final token = await preferences.getToken();
-      var response = await dioClient
-          .get(dashBoardUrl, {'Authorization': 'Bearer $token'}, {});
-      return GetDashboardResponse.fromJson(response.data);
-    }
-    on DioException catch (e) {
-      if (e.error is SocketException) {
-        throw 'No Internet Connection';
-      } else {
-        throw exceptionHandler(e);
-      }
 
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   Future<String> getGreeting({String? locale, String? datetime}) async {
     try {
@@ -82,7 +65,9 @@ class DashboardRepository {
       var response = await dioClient
           .get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
       
-      return response.data['greeting'] ?? 'Good morning';
+      final greeting = response.data['greeting'] ?? 'Good morning';
+      print('Repository returning greeting: "$greeting"');
+      return greeting;
     }
     on DioException catch (e) {
       if (e.error is SocketException) {

@@ -22,7 +22,7 @@ const Map<String, String> enTranslations = {
   'pending_requests': 'Pending requests',
   'face_id_attendance': 'Face ID Attendance',
   'secure_attendance_with_face_verification': 'Secure attendance with face verification',
-  'scan_face_for_attendance': 'Scan Face for Attendance',
+  'face_recognition_for_attendance': 'Face recognition for attendance',
   
   // Navigation
   'requests': 'Requests',

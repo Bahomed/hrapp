@@ -22,7 +22,7 @@ const Map<String, String> arTranslations = {
   'pending_requests': 'الطلبات المعلقة',
   'face_id_attendance': 'حضور التعرف على الوجه',
   'secure_attendance_with_face_verification': 'حضور آمن مع التحقق من الوجه',
-  'scan_face_for_attendance': 'مسح الوجه للحضور',
+  'face_recognition_for_attendance': 'التعرف على الوجه لتسجيل الحضور والانصراف',
 
   // Navigation
   'requests': 'الطلبات',

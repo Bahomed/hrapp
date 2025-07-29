@@ -11,6 +11,7 @@ import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
 import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
 import 'package:injazat_hr_app/data/remote/response/request_summary_response.dart';
 import 'package:injazat_hr_app/data/remote/response/request_response.dart' show LoanTypesResponse, LetterTypesResponse;
+import 'package:injazat_hr_app/data/remote/response/approval_request_response.dart';
 import 'package:injazat_hr_app/repository/logoutrepository.dart';
 import 'package:injazat_hr_app/utils/api_helper.dart';
 import 'package:dio/dio.dart';
@@ -782,6 +783,63 @@ class RequestRepository {
         {'locale': getCurrentLanguage()},
       );
       return LetterTypesResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ================ APPROVAL METHODS ================
+
+  Future<ApprovalRequestResponse> getDashboardEmployeeRequests() async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl/api/get-dashboard-employee-request';
+      
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return ApprovalRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<BaseResponse> updateRequestStatus({
+    required int requestId,
+    required String status,
+  }) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl/api/update-request-status';
+      
+      var data = {
+        'request_id': requestId,
+        'status': status,
+      };
+      
+      var response = await dioClient.post(
+        apiUrl,
+        data,
+        {},
+        {'Authorization': 'Bearer $token'},
+      );
+      return BaseResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';

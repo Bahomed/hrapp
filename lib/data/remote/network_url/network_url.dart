@@ -47,5 +47,5 @@ const String allRequestsUrl = '/api/requests/all';
 const String requestTypesUrl = '/api/requests/types';
 const String payrollBaseUrl = '/api/payroll';
 const String documentBaseUrl='/api/documents';
-const dashBoardUrl='api/get-dashboard';
-const getGreetingUrl='api/greeting';
+const dashBoardUrl='/api/get-dashboard';
+const getGreetingUrl='/api/greeting';

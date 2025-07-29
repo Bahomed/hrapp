@@ -281,8 +281,57 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     return faceWidth > 80 && faceHeight > 80 &&
         faceWidth < 500 && faceHeight < 500;
   }
-
   bool isCorrectAngleForStep(Face face) {
+    // Get head pose angles
+    double? headEulerAngleX = face.headEulerAngleX; // Up/Down (pitch)
+    double? headEulerAngleY = face.headEulerAngleY; // Left/Right (yaw)
+    double? headEulerAngleZ = face.headEulerAngleZ; // Tilt (roll)
+
+    if (headEulerAngleX == null || headEulerAngleY == null || headEulerAngleZ == null) {
+      return false;
+    }
+
+    // 👇 Flip yaw (Y) only on Android for front camera
+    if (Platform.isAndroid && camDirec == CameraLensDirection.front) {
+      headEulerAngleY = -headEulerAngleY;
+    }
+
+    // Thresholds
+    const double tolerance = 15.0;
+    const double rollTolerance = 25.0;
+
+    switch (currentStep) {
+      case 0: // Look straight
+        return headEulerAngleX.abs() < tolerance &&
+            headEulerAngleY.abs() < tolerance &&
+            headEulerAngleZ.abs() < rollTolerance;
+
+      case 1: // Look up
+        return headEulerAngleX > 8 && headEulerAngleX < 50 &&
+            headEulerAngleY.abs() < tolerance &&
+            headEulerAngleZ.abs() < rollTolerance;
+
+      case 2: // Look down
+        return headEulerAngleX < -8 && headEulerAngleX > -50 &&
+            headEulerAngleY.abs() < tolerance &&
+            headEulerAngleZ.abs() < rollTolerance;
+
+      case 3: // Look left
+        return headEulerAngleY < -8 && headEulerAngleY > -50 &&
+            headEulerAngleX.abs() < tolerance &&
+            headEulerAngleZ.abs() < rollTolerance;
+
+      case 4: // Look right
+        return headEulerAngleY > 8 && headEulerAngleY < 50 &&
+            headEulerAngleX.abs() < tolerance &&
+            headEulerAngleZ.abs() < rollTolerance;
+
+      default:
+        return false;
+    }
+  }
+
+  bool oldIsCorrectAngleForStep(Face face) {
     // Get head pose angles
     double? headEulerAngleX = face.headEulerAngleX; // Up/Down (pitch)
     double? headEulerAngleY = face.headEulerAngleY; // Left/Right (yaw)
@@ -553,11 +602,11 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         // Use the first face embedding as the primary one
         Recognition primaryRecognition = faceEmbeddings.first;
         img.Image primaryFace = capturedFaces.first;
-        
+
         // Get user ID from preferences
         final preferences = Preferences();
         final userId = await preferences.getUserId();
-        
+
         if (userId != null) {
           // Create repository instance
           final faceRepository = FaceRegistrationRepository();

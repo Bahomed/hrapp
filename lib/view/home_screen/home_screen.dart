@@ -86,14 +86,16 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          tr('good_morning'),
+                        Obx(() => Text(
+                          model.greetingText.value.isNotEmpty 
+                              ? model.greetingText.value
+                              : '',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w400,
                           ),
-                        ),
+                        )),
                         Obx(() => Text(
                           model.userName.value.isNotEmpty ? model.userName.value : tr('user'),
                           style: TextStyle(

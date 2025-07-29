@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:injazat_hr_app/view/payroll/payroll_screen.dart';
 import 'package:injazat_hr_app/utils/translation_helper.dart';
 import 'package:injazat_hr_app/utils/app_theme.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
+import 'package:injazat_hr_app/utils/responsive_utils.dart';
 
 import '../../../data/local/preferences.dart';
 import '../../attendance/clocking_screen.dart';
@@ -11,6 +13,7 @@ import '../../document/document_screen.dart';
 import '../../schedule/schedule_screen.dart';
 import '../homescreen_controller.dart';
 import 'package:injazat_hr_app/view/request_leave/request_home_screen.dart';
+import 'package:injazat_hr_app/view/approval/approval_screen.dart';
 
 class HomeScreenWidget extends StatelessWidget {
   const HomeScreenWidget({super.key});
@@ -20,7 +23,7 @@ class HomeScreenWidget extends StatelessWidget {
     final model = Get.find<HomeScreenController>();
     return RefreshIndicator(
       onRefresh: () async {
-        await model.getDashboardFromApi();
+       /// await model.getDashboardFromApi();
         await model.loadGreeting();
       },
       child: ScreenThemes.buildHomeScreenContainer(
@@ -77,7 +80,7 @@ class HomeScreenWidget extends StatelessWidget {
                 // Face ID Attendance Section
                 _buildFaceIdAttendanceSection(),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 25),
 
                 // What would you like to do section
                 Text(
@@ -113,172 +116,66 @@ class HomeScreenWidget extends StatelessWidget {
   }
 
   // Header section with profile and notifications
-  Widget _buildHeader() {
-    final model = Get.find<HomeScreenController>();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(5),
-                  bottomRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(5),
-                ),
-                gradient: const LinearGradient(
-                  colors: [AppTheme.secondaryColor, Color(0xCC4ECDC4)],
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.white,
-                child: Icon(
-                    Icons.person, color: AppTheme.secondaryColor, size: 20),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Obx(() => Text(
-                  model.greetingText.value.isNotEmpty 
-                      ? model.greetingText.value 
-                      : tr('good_morning'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                )),
-                Obx(() =>
-                    Text(
-                      model.userName.value.isNotEmpty
-                          ? model.userName.value
-                          : tr('user'),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    )),
-              ],
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(4),
-              bottomRight: Radius.circular(12),
-              bottomLeft: Radius.circular(4),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            onPressed: () {
-              // Handle notification tap
-            },
-            icon: Icon(
-                Icons.notifications_outlined, color: AppTheme.secondaryColor),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildFaceIdAttendanceSection() {
-    return ScreenThemes.buildFaceIdCard(
+    return Center(
       child: Column(
         children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.face_retouching_natural,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tr('face_id_attendance'),
-                      style: AppTheme.bodyLarge.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      tr('secure_attendance_with_face_verification'),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          // Caption
+          Text(
+            tr('face_recognition_for_attendance'),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(Get.context!).textTheme.bodyMedium?.color,
+            ),
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 12),
 
-          const SizedBox(height: 20),
-
-          // Face ID Scan Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Get.to(const ClockingScreen());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppTheme.accentColor,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.face_outlined, size: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    tr('scan_face_for_attendance'),
-                    style: AppTheme.buttonText.copyWith(
-                      color: AppTheme.accentColor,
-                    ),
+          // Circular Face Recognition Button
+          GestureDetector(
+            onTap: () {
+              Get.to(const ClockingScreen());
+            },
+            child: Container(
+              width: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 110, tablet: 130, desktop: 150),
+              height: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 110, tablet: 130, desktop: 150),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(Get.context!).primaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(Get.context!).primaryColor.withOpacity(0.3),
+                    blurRadius: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 12, tablet: 15, desktop: 18),
+                    offset: Offset(0, ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 4, tablet: 5, desktop: 6)),
                   ),
                 ],
               ),
+
+              // Center the SVG properly within the circle
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/icons/face_recognition.svg',
+                  width: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 55, tablet: 65, desktop: 75),
+                  height: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 55, tablet: 65, desktop: 75),
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  // Ensure the SVG fits within its bounds
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
+
+
+
         ],
       ),
     );
   }
-
   Widget _buildActionGrid() {
     final actions = [
       {
@@ -325,10 +222,7 @@ class HomeScreenWidget extends StatelessWidget {
           () => Get.to(const DocumentScreen()),
           () => Get.find<HomeScreenController>().goToAttendanceDetailScreen(),
           () => Get.to(const ScheduleScreen()),
-          () {
-            // TODO: Navigate to Approval screen when implemented
-            print('Approval screen not implemented yet');
-          },
+          () => Get.to(const ApprovalScreen()),
           () => Get.find<HomeScreenController>().goToProfileScreen(),
     ];
 
@@ -353,6 +247,4 @@ class HomeScreenWidget extends StatelessWidget {
       },
     );
   }
-
-
 }

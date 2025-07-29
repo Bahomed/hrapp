@@ -48,7 +48,7 @@ class HomeScreenController extends SuperController {
     // Load greeting
     await loadGreeting();
 
-    getDashboardFromApi();
+
     super.onInit();
   }
 
@@ -96,12 +96,16 @@ class HomeScreenController extends SuperController {
       final locale = Get.locale?.languageCode ?? 'en';
       final datetime = DateTime.now().toIso8601String();
       
+      print('Loading greeting with locale: $locale, datetime: $datetime');
+      
       final greeting = await repository.getGreeting(
         locale: locale,
         datetime: datetime,
       );
       
+      print('Greeting received: "$greeting"');
       greetingText.value = greeting;
+      print('Greeting set to observable: "${greetingText.value}"');
     } catch (e) {
       print('Error loading greeting: $e');
       greetingText.value = 'Good morning'; // Fallback
@@ -141,26 +145,6 @@ class HomeScreenController extends SuperController {
     Get.to(const SettingsScreen());
   }
 
-  Future<void> getDashboardFromApi() async {
-    try {
-      var response = await repository.dashBoardFromApi();
-      noticeString.value = response.data.noticeBirthday.trim();
-      bannerImage.value = response.data.bannerImage;
-      companyName.value = response.data.companyDetail.name;
-      companyAddress.value = response.data.companyDetail.address;
-      companyImage.value = response.data.companyDetail.image;
-      bannerUrl.value = response.data.bannerurl;
-      repository
-          .saveCheckPassword(response.data.checkPassword == "0" ? false : true);
-      repository.saveAppPassword(response.data.appPassword);
-      repository.saveCompanyDetail(
-          response.data.companyDetail.name,
-          response.data.companyDetail.address,
-          response.data.companyDetail.image);
-    } catch (e) {
-      showAlert(e.toString());
-    }
-  }
 
   @override
   void onDetached() {
