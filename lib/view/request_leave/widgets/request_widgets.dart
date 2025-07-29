@@ -371,13 +371,13 @@ class PermissionRequestCard extends StatelessWidget {
           Row(
             children: [
               RequestTag(
-                text: _formatTimeDisplay(request.fromTime),
+                text: '${tr('from')} ${_formatTimeDisplay(request.fromTime)}',
                 textColor: ThemeService.instance.getActionColor('profile'),
                 backgroundColor: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.1),
               ),
               const SizedBox(width: 12),
               RequestTag(
-                text: _formatTimeDisplay(request.toTime),
+                text: '${tr('to')} ${_formatTimeDisplay(request.fromTime)}',
                 textColor: ThemeService.instance.getWarningColor(),
                 backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
               ),
@@ -524,26 +524,30 @@ class LoanRequestCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: SaudiRiyalDisplay(
-                  amount: double.tryParse(request.amount) ?? 0.0,
-                  style: TextStyle(
-                    color: ThemeService.instance.getSuccessColor(),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: SaudiRiyalDisplay(
+                    customText: '${tr('amount') } ${double.tryParse(request.amount) ?? 0.0}',
+                    style: TextStyle(
+                      color: ThemeService.instance.getSuccessColor(),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
-              RequestTag(
-                text: '${request.repaymentMonths} months',
-                textColor: ThemeService.instance.getWarningColor(),
-                backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
+              Flexible(
+                child: RequestTag(
+                  text: '${tr('instalment')} ${request.repaymentMonths} ${tr('months')}',
+                  textColor: ThemeService.instance.getWarningColor(),
+                  backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
+                ),
               ),
             ],
           ),

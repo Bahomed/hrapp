@@ -201,10 +201,9 @@ class AttendanceCalendarScreen extends StatelessWidget {
     final status = controller.getAttendanceStatusForDate(day);
 
     return Container(
-
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: isToday ? Theme.of(context).primaryColor: color,
+        color: color,
         shape: BoxShape.circle,
         border: isToday 
             ? Border.all(color: Theme.of(context).primaryColor, width: 2) 

@@ -30,6 +30,7 @@ const Map<String, String> arTranslations = {
   'documents': 'الوثائق',
   'attendance': 'الحضور',
   'schedule': 'الجدولة',
+  'approval': 'الموافقة',
   'profile': 'الملف الشخصي',
 
   // Attendance
@@ -829,5 +830,34 @@ const Map<String, String> arTranslations = {
 'to':'إلى',
   'paid_on':'دفعت على',
   'expiry_date':'تاريخ انتهاء الصلاحية',
-  'file_type':'نوع الملف'
+  'file_type':'نوع الملف',
+  
+  // Additional keys for clocking screen
+  'face_recognition_status': 'حالة التعرف على الوجه',
+  'register_face_recognition': 'تسجيل التعرف على الوجه',
+  'go_to_current_week': 'الذهاب إلى الأسبوع الحالي',
+  'refresh_data': 'تحديث البيانات',
+  'next_week': 'الأسبوع القادم',
+  'from':'من',
+  'amount':' المبلغ',
+  'instalment':'قسط',
+  
+  // Clocking Controller Messages
+  'checking_embedding_status': 'جاري فحص حالة التضمين...',
+  'face_recognition_ready': 'التعرف على الوجه جاهز - جاهز لتسجيل الدخول',
+  'face_recognition_not_set_up': 'لم يتم إعداد التعرف على الوجه - يرجى التسجيل لتسجيل الدخول',
+  
+  // Clocking Screen Messages
+  'getting_gps_location_status': 'جاري الحصول على موقع GPS...',
+  'clock_in_button': 'تسجيل الدخول',
+  'break_start_button': 'بداية الاستراحة',
+  'break_end_button': 'نهاية الاستراحة',
+  'clock_out_button': 'تسجيل الخروج',
+  'face_recognition_required_clock_in_message': 'مطلوب التعرف على الوجه لتسجيل الدخول. يرجى تسجيل التعرف على الوجه أولاً.',
+  'face_recognition_required_break_message': 'مطلوب التعرف على الوجه للاستراحة. يرجى تسجيل التعرف على الوجه أولاً.',
+  'face_recognition_required_clock_out_message': 'مطلوب التعرف على الوجه لتسجيل الخروج. يرجى تسجيل التعرف على الوجه أولاً.',
+  'face_verified_clocked_in_at': 'تم التحقق من الوجه وتسجيل الدخول بنجاح في {time}!',
+  'break_start_failed_try_again': 'فشل بدء الاستراحة. يرجى المحاولة مرة أخرى.',
+  'break_end_failed_try_again': 'فشل إنهاء الاستراحة. يرجى المحاولة مرة أخرى.',
+  'clock_out_failed_try_again': 'فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.'
 };

@@ -21,6 +21,7 @@ class HomeScreenWidget extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async {
         await model.getDashboardFromApi();
+        await model.loadGreeting();
       },
       child: ScreenThemes.buildHomeScreenContainer(
         child: SafeArea(
@@ -143,13 +144,15 @@ class HomeScreenWidget extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tr('good_morning'),
+                Obx(() => Text(
+                  model.greetingText.value.isNotEmpty 
+                      ? model.greetingText.value 
+                      : tr('good_morning'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
                   ),
-                ),
+                )),
                 Obx(() =>
                     Text(
                       model.userName.value.isNotEmpty
@@ -304,6 +307,11 @@ class HomeScreenWidget extends StatelessWidget {
         'key': 'schedule'
       },
       {
+        'icon': Icons.check_circle_outline,
+        'label': tr('approval'),
+        'key': 'approval'
+      },
+      {
         'icon': Icons.person_outline_rounded,
         'label': tr('profile'),
         'key': 'profile'
@@ -317,6 +325,10 @@ class HomeScreenWidget extends StatelessWidget {
           () => Get.to(const DocumentScreen()),
           () => Get.find<HomeScreenController>().goToAttendanceDetailScreen(),
           () => Get.to(const ScheduleScreen()),
+          () {
+            // TODO: Navigate to Approval screen when implemented
+            print('Approval screen not implemented yet');
+          },
           () => Get.find<HomeScreenController>().goToProfileScreen(),
     ];
 

@@ -263,7 +263,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  item.dayName,
+                  tr(item.dayName.toLowerCase()),
                   style: TextStyle(
                     fontSize: 8,
                     color: ThemeService.instance.getTextSecondaryColor(),
@@ -407,7 +407,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           const SizedBox(width: 2),
           Flexible(
             child: Text(
-              status,
+              tr(status.toLowerCase()),
               style: TextStyle(
                 fontSize: 8,
                 color: textColor,

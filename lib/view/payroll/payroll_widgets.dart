@@ -145,8 +145,7 @@ class PayrollCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          PayrollStatusChip(status: record.status),
+
                         ],
                       ),
                     ],
@@ -183,7 +182,7 @@ class PayrollCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                     // PayrollStatusChip(status: record.status),
+
                     ],
                   ),
 
@@ -627,7 +626,7 @@ class PayrollSummaryTable extends StatelessWidget {
             child: Container(
               alignment: Alignment.center,
               child: SaudiRiyalDisplay(
-                customText: tr('earnings'),
+                customText: tr('benefits'),
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w700,

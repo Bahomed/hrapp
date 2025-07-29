@@ -44,7 +44,7 @@ class AttendanceCalendarController extends GetxController {
         attendanceEntries.assignAll(response.data);
         _calculateAttendanceCounts();
       } else {
-        errorMessage.value = response.message.isNotEmpty ? response.message : 'Failed to load attendance data';
+        errorMessage.value = response.message.isNotEmpty ? response.message : tr('failed_to_load_attendance_data');
         _showErrorSnackbar(tr('error'), errorMessage.value);
       }
     } catch (e) {
@@ -73,12 +73,12 @@ class AttendanceCalendarController extends GetxController {
                  entry.date.year == date.year,
     );
     
-    return entry?.status ?? 'No_Data';
+    return entry?.status ?? tr('no_data');
   }
   
   /// Get color for attendance status
   Color getColorForStatus(String status) {
-    final themeService = Get.find<ThemeService>();
+    final themeService = ThemeService.instance;
     switch (status) {
       case 'Absent':
         return themeService.getErrorColor();
@@ -142,11 +142,11 @@ class AttendanceCalendarController extends GetxController {
   
   /// Get month name
   String getMonthName(int month) {
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+    const monthKeys = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
     ];
-    return monthNames[month - 1];
+    return tr(monthKeys[month - 1]);
   }
   
   /// Get formatted month/year string
@@ -156,7 +156,7 @@ class AttendanceCalendarController extends GetxController {
   
   /// Show error snackbar
   void _showErrorSnackbar(String title, String message) {
-    final themeService = Get.find<ThemeService>();
+    final themeService = ThemeService.instance;
     Get.snackbar(
       title,
       message,

@@ -481,17 +481,17 @@ class _ClockingScreenState extends State<ClockingScreen> {
         : dateTime.hour.toString().padLeft(2, '0');
     String minute = dateTime.minute.toString().padLeft(2, '0');
     String second = dateTime.second.toString().padLeft(2, '0');
-    String period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    String period = dateTime.hour >= 12 ? tr('pm') : tr('am');
 
     return '$hour:$minute:$second $period';
   }
 
   String _formatDate(DateTime dateTime) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    final monthKeys = [
+      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
     ];
-    return '${dateTime.day} ${months[dateTime.month - 1]}, ${dateTime.year}';
+    return '${dateTime.day} ${tr(monthKeys[dateTime.month - 1])}, ${dateTime.year}';
   }
 
   @override
@@ -701,7 +701,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'GPS Location',
+                          tr('gps_location'),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -731,7 +731,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        _isLocationLoading ? 'Getting GPS location...' : _locationStatus,
+                        _isLocationLoading ? tr('getting_gps_location_status') : _locationStatus,
                         style: TextStyle(
                           fontSize: 14,
                           color: themeService.getTextSecondaryColor(),
@@ -779,7 +779,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Address Details',
+                          tr('address_details'),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -801,15 +801,15 @@ class _ClockingScreenState extends State<ClockingScreen> {
                     const SizedBox(height: 16),
 
                     // Address Information
-                    _buildAddressRow('Street', _street ?? 'Loading...', Icons.route),
+                    _buildAddressRow(tr('street'), _street ?? tr('loading'), Icons.route),
                     const SizedBox(height: 12),
-                    _buildAddressRow('City', _city ?? 'Loading...', Icons.location_city),
+                    _buildAddressRow(tr('city'), _city ?? tr('loading'), Icons.location_city),
                     const SizedBox(height: 12),
-                    _buildAddressRow('State', _state ?? 'Loading...', Icons.map),
+                    _buildAddressRow(tr('state'), _state ?? tr('loading'), Icons.map),
                     const SizedBox(height: 12),
-                    _buildAddressRow('Latitude', _currentLat?.toStringAsFixed(6) ?? 'Loading...', Icons.my_location),
+                    _buildAddressRow(tr('latitude'), _currentLat?.toStringAsFixed(6) ?? tr('loading'), Icons.my_location),
                     const SizedBox(height: 12),
-                    _buildAddressRow('Longitude', _currentLng?.toStringAsFixed(6) ?? 'Loading...', Icons.place),
+                    _buildAddressRow(tr('longitude'), _currentLng?.toStringAsFixed(6) ?? tr('loading'), Icons.place),
                   ],
                 ),
               ),
@@ -855,7 +855,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Face Recognition Status',
+                          tr('face_recognition_status'),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -912,8 +912,8 @@ class _ClockingScreenState extends State<ClockingScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Register Face Recognition',
+                          child: Text(
+                            tr('register_face_recognition'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -981,7 +981,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                 children: [
                   // Clock-in Button (Active)
                   Obx(() => _buildActionButton(
-                    title: 'Clock-in',
+                    title: tr('clock_in_button'),
                     time: _getClockInTime(),
                     isActive: _isClockInActive(),
                     isDisabled: !_canClockIn(),
@@ -991,7 +991,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         if (!clockingController.canClockIn()) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Face recognition required to clock in. Please register face recognition first.'),
+                              content: Text(tr('face_recognition_required_clock_in_message')),
                               backgroundColor: ThemeService.instance.getWarningColor(),
                             ),
                           );
@@ -1022,7 +1022,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Face verified and clocked in successfully at ${_formatTime(attendanceTime)}!'),
+                                content: Text(tr('clocked_in_successfully')),
                                 backgroundColor: ThemeService.instance.getSuccessColor(),
                               ),
                             );
@@ -1037,7 +1037,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             );
                           } else {
                             // Handle error message
-                            String errorMessage = result['message'] ?? 'Face verification failed. Please try again.';
+                            String errorMessage = result['message'] ?? tr('face_verification_failed_retry');
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(errorMessage),
@@ -1048,7 +1048,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Face verification failed. Please try again.'),
+                              content: Text(tr('face_verification_failed_retry')),
                               backgroundColor: ThemeService.instance.getErrorColor(),
                             ),
                           );
@@ -1059,7 +1059,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
                   // Break start
                   Obx(() => _buildActionButton(
-                    title: 'Break Start',
+                    title: tr('break_start_button'),
                     time: _getBreakTime(false),
                     isActive: _attendanceStatus?.attendanceData.breakIn != null && _attendanceStatus?.attendanceData.breakOut == null,
                     isDisabled: !_canBreakIn(),
@@ -1067,7 +1067,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                       if (!clockingController.canClockIn()) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Face recognition required for break. Please register face recognition first.'),
+                            content: Text(tr('face_recognition_required_break_message')),
                             backgroundColor: ThemeService.instance.getWarningColor(),
                           ),
                         );
@@ -1087,7 +1087,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Break started successfully!'),
+                              content: Text(tr('break_started_successfully')),
                               backgroundColor: ThemeService.instance.getSuccessColor(),
                             ),
                           );
@@ -1100,7 +1100,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             ),
                           );
                         } else {
-                          String errorMessage = result['message'] ?? 'Break start failed. Please try again.';
+                          String errorMessage = result['message'] ?? tr('break_start_failed_try_again');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(errorMessage),
@@ -1114,7 +1114,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
                   // Break end
                   Obx(() => _buildActionButton(
-                    title: 'Break End',
+                    title: tr('break_end_button'),
                     time: _getBreakTime(true),
                     isActive: _attendanceStatus?.attendanceData.breakIn != null && _attendanceStatus?.attendanceData.breakOut != null,
                     isDisabled: !_canBreakOut(),
@@ -1122,7 +1122,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                       if (!clockingController.canClockIn()) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Face recognition required for break. Please register face recognition first.'),
+                            content: Text(tr('face_recognition_required_break_message')),
                             backgroundColor: ThemeService.instance.getWarningColor(),
                           ),
                         );
@@ -1142,7 +1142,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Break ended successfully!'),
+                              content: Text(tr('break_ended_successfully')),
                               backgroundColor: ThemeService.instance.getSuccessColor(),
                             ),
                           );
@@ -1155,7 +1155,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             ),
                           );
                         } else {
-                          String errorMessage = result['message'] ?? 'Break end failed. Please try again.';
+                          String errorMessage = result['message'] ?? tr('break_end_failed_try_again');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(errorMessage),
@@ -1169,7 +1169,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
                   // Clock-out
                   Obx(() => _buildActionButton(
-                    title: 'Clock-out',
+                    title: tr('clock_out_button'),
                     time: _getClockOutTime(),
                     isActive: _attendanceStatus?.attendanceData.clockOut != null,
                     isDisabled: !_canClockOut(),
@@ -1177,7 +1177,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                       if (!clockingController.canClockIn()) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Face recognition required to clock out. Please register face recognition first.'),
+                            content: Text(tr('face_recognition_required_clock_out_message')),
                             backgroundColor: ThemeService.instance.getWarningColor(),
                           ),
                         );
@@ -1200,7 +1200,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Clocked out successfully!'),
+                              content: Text(tr('clocked_out_successfully')),
                               backgroundColor: ThemeService.instance.getWarningColor(),
                             ),
                           );
@@ -1213,7 +1213,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                             ),
                           );
                         } else {
-                          String errorMessage = result['message'] ?? 'Clock out failed. Please try again.';
+                          String errorMessage = result['message'] ?? tr('clock_out_failed_try_again');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(errorMessage),

@@ -62,4 +62,36 @@ class DashboardRepository {
       rethrow;
     }
   }
+
+  Future<String> getGreeting({String? locale, String? datetime}) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$getGreetingUrl';
+      
+      Map<String, dynamic> queryParams = {};
+      
+      if (locale != null) {
+        queryParams['locale'] = locale;
+      }
+      
+      if (datetime != null) {
+        queryParams['datetime'] = datetime;
+      }
+      
+      var response = await dioClient
+          .get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
+      
+      return response.data['greeting'] ?? 'Good morning';
+    }
+    on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      return 'Good morning'; // Fallback greeting
+    }
+  }
 }

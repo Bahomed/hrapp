@@ -30,6 +30,7 @@ const Map<String, String> enTranslations = {
   'documents': 'Documents',
   'attendance': 'Attendance',
   'schedule': 'Schedule',
+  'approval': 'Approval',
   'profile': 'Profile',
   
   // Attendance
@@ -822,5 +823,34 @@ const Map<String, String> enTranslations = {
   'to':'To',
   'paid_on':'Paid on',
   'expiry_date':'Expiry Date',
-  'file_type':'File Type'
+  'file_type':'File Type',
+  
+  // Additional keys for clocking screen
+  'face_recognition_status': 'Face Recognition Status',
+  'register_face_recognition': 'Register Face Recognition',
+  'go_to_current_week': 'Go to current week',
+  'refresh_data': 'Refresh data',
+  'next_week': 'Next week',
+  'from':'From',
+  'amount':'Amount',
+  'instalment':'Instalment',
+  
+  // Clocking Controller Messages
+  'checking_embedding_status': 'Checking embedding status...',
+  'face_recognition_ready': 'Face recognition ready - Ready to clock in',
+  'face_recognition_not_set_up': 'Face recognition not set up - Please register to clock in',
+  
+  // Clocking Screen Messages
+  'getting_gps_location_status': 'Getting GPS location...',
+  'clock_in_button': 'Clock-in',
+  'break_start_button': 'Break Start', 
+  'break_end_button': 'Break End',
+  'clock_out_button': 'Clock-out',
+  'face_recognition_required_clock_in_message': 'Face recognition required to clock in. Please register face recognition first.',
+  'face_recognition_required_break_message': 'Face recognition required for break. Please register face recognition first.',
+  'face_recognition_required_clock_out_message': 'Face recognition required to clock out. Please register face recognition first.',
+  'face_verified_clocked_in_at': 'Face verified and clocked in successfully at {time}!',
+  'break_start_failed_try_again': 'Break start failed. Please try again.',
+  'break_end_failed_try_again': 'Break end failed. Please try again.',
+  'clock_out_failed_try_again': 'Clock out failed. Please try again.'
 };

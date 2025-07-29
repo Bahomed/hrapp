@@ -29,6 +29,7 @@ class HomeScreenController extends SuperController {
   var userImage = "".obs;
   var userName = "".obs;
   var userEmail = "".obs;
+  var greetingText = "".obs;
 
   final controller = ScrollController();
 
@@ -43,6 +44,9 @@ class HomeScreenController extends SuperController {
 
     // Load user data
     await loadUserData();
+
+    // Load greeting
+    await loadGreeting();
 
     getDashboardFromApi();
     super.onInit();
@@ -84,6 +88,24 @@ class HomeScreenController extends SuperController {
   // Add method to refresh user data if needed
   Future<void> refreshUserData() async {
     await loadUserData();
+  }
+
+  // Add method to load greeting from API
+  Future<void> loadGreeting() async {
+    try {
+      final locale = Get.locale?.languageCode ?? 'en';
+      final datetime = DateTime.now().toIso8601String();
+      
+      final greeting = await repository.getGreeting(
+        locale: locale,
+        datetime: datetime,
+      );
+      
+      greetingText.value = greeting;
+    } catch (e) {
+      print('Error loading greeting: $e');
+      greetingText.value = 'Good morning'; // Fallback
+    }
   }
 
   RxInt bottomNavIndex = 1.obs;

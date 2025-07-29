@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:injazat_hr_app/data/local/preferences.dart';
 import 'package:injazat_hr_app/view/scan/AutoRecognitionScreen.dart';
 import 'package:injazat_hr_app/view/scan/AutoRegisterScreen.dart';
+import 'package:injazat_hr_app/utils/translation_helper.dart';
 
 class ClockingController extends GetxController {
   final Preferences preferences = Preferences();
@@ -74,13 +75,13 @@ class ClockingController extends GetxController {
   /// Get embedding message for user
   String getEmbeddingMessage() {
     if (isLoading.value) {
-      return 'Checking embedding status...';
+      return tr('checking_embedding_status');
     }
     
     if (hasEmbedding.value) {
-      return 'Face recognition ready - Ready to clock in';
+      return tr('face_recognition_ready');
     } else {
-      return 'Face recognition not set up - Please register to clock in';
+      return tr('face_recognition_not_set_up');
     }
   }
 
