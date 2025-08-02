@@ -112,6 +112,7 @@ class HomeScreenController extends SuperController {
     }
   }
 
+
   RxInt bottomNavIndex = 1.obs;
 
   final pages = [

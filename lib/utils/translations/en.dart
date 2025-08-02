@@ -31,6 +31,10 @@ const Map<String, String> enTranslations = {
   'attendance': 'Attendance',
   'schedule': 'Schedule',
   'approval': 'Approval',
+  'pending': 'Pending',
+  'unexecuted_requests': 'Unexecuted Requests',
+  'un_executed': 'Unexecuted',
+  'no_unexecuted_requests': 'No unexecuted requests found',
   'profile': 'Profile',
   
   // Attendance
@@ -405,7 +409,6 @@ const Map<String, String> enTranslations = {
   'leave_approval': 'Leave Approval',
   'leave_status': 'Leave Status',
   'approved': 'Approved',
-  'pending': 'Pending',
   'for_approval': 'For Approval',
   'rejected': 'Rejected',
   'approve': 'Approve',

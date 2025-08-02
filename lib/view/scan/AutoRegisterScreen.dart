@@ -69,8 +69,26 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   dynamic controller;
   bool isBusy = false;
   late Size size;
-  late CameraDescription description = cameras[1];
+  CameraDescription? description;
   CameraLensDirection camDirec = CameraLensDirection.front;
+  bool hasCameraError = false;
+  String cameraErrorMessage = '';
+
+  // Helper method to safely get front camera
+  CameraDescription? _getFrontCamera() {
+    if (cameras.isEmpty) {
+      return null;
+    }
+    
+    // Try to find front camera first
+    for (var camera in cameras) {
+      if (camera.lensDirection == CameraLensDirection.front) {
+        return camera;
+      }
+    }
+    // Fallback to first available camera if no front camera found
+    return cameras.first;
+  }
 
   late FaceDetector faceDetector;
   late Recognizer recognizer;
@@ -154,29 +172,58 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   void initializeComponents() async {
-    // Initialize face detector with landmarks for angle detection
-    faceDetector = FaceDetector(
-      options: FaceDetectorOptions(
-        enableClassification: false,
-        enableLandmarks: true,
-        enableContours: false,
-        enableTracking: true,
-      ),
-    );
+    try {
+      // Check if cameras are available
+      description = _getFrontCamera();
+      
+      if (description == null) {
+        setState(() {
+          hasCameraError = true;
+          cameraErrorMessage = 'No cameras available on this device';
+          isInitialized = true; // Set to true to stop loading indicator
+        });
+        return;
+      }
+      
+      // Initialize face detector with landmarks for angle detection
+      faceDetector = FaceDetector(
+        options: FaceDetectorOptions(
+          enableClassification: false,
+          enableLandmarks: true,
+          enableContours: false,
+          enableTracking: true,
+        ),
+      );
 
-    // Initialize face recognizer
-    recognizer = Recognizer();
+      // Initialize face recognizer
+      recognizer = Recognizer();
 
-    // Initialize anti-spoofing detector
-    antiSpoofingDetector = AntiSpoofingDetector();
+      // Initialize anti-spoofing detector
+      antiSpoofingDetector = AntiSpoofingDetector();
 
-    // Initialize camera
-    await initializeCamera();
+      // Initialize camera
+      await initializeCamera();
+    } catch (e) {
+      setState(() {
+        hasCameraError = true;
+        cameraErrorMessage = 'Failed to initialize camera: ${e.toString()}';
+        isInitialized = true;
+      });
+    }
   }
 
   initializeCamera() async {
+    if (description == null) {
+      setState(() {
+        hasCameraError = true;
+        cameraErrorMessage = 'No camera available for initialization';
+        isInitialized = true;
+      });
+      return;
+    }
+
     controller = CameraController(
-        description,
+        description!,
         ResolutionPreset.medium,
         imageFormatGroup: Platform.isAndroid
             ? ImageFormatGroup.nv21
@@ -699,7 +746,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   InputImage? getInputImage() {
-    final camera = camDirec == CameraLensDirection.front ? cameras[1] : cameras[0];
+    if (description == null) return null;
+    
+    final camera = description!; // Use the already selected camera description
     final sensorOrientation = camera.sensorOrientation;
 
     InputImageRotation? rotation;
@@ -757,9 +806,18 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   void dispose() {
     controller?.dispose();
     _arrowAnimationController.dispose();
-    faceDetector.close();
-    recognizer.close();
-    antiSpoofingDetector.close();
+    
+    // Only dispose if they were initialized
+    if (!hasCameraError) {
+      try {
+        faceDetector.close();
+        recognizer.close();
+        antiSpoofingDetector.close();
+      } catch (e) {
+        // Ignore disposal errors
+      }
+    }
+    
     super.dispose();
   }
 
@@ -784,6 +842,63 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       ),
       body: !isInitialized
           ? Center(child: CircularProgressIndicator(color: themeService.getSuccessColor()))
+          : hasCameraError
+          ? Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      size: 80,
+                      color: Colors.white54,
+                    ),
+                    SizedBox(height: 24),
+                    Text(
+                      'Camera Error',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      cameraErrorMessage,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeService.getErrorColor(),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Go Back',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : Column(
         children: [
           Expanded(

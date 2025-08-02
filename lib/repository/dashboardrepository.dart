@@ -4,6 +4,7 @@ import 'package:injazat_hr_app/data/local/preferences.dart';
 import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
 import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
 import 'package:injazat_hr_app/data/remote/response/getdasboard_response.dart';
+import 'package:injazat_hr_app/data/remote/response/unexecuted_requests_response.dart';
 import 'package:injazat_hr_app/repository/logoutrepository.dart';
 import 'package:dio/dio.dart';
 
@@ -77,6 +78,28 @@ class DashboardRepository {
       }
     } catch (e) {
       return 'Good morning'; // Fallback greeting
+    }
+  }
+
+  Future<UnexecutedRequestsResponse> getUnexecutedRequests() async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$getUnexecutedRequestsUrl';
+      
+      var response = await dioClient
+          .get(apiUrl, {'Authorization': 'Bearer $token'}, {});
+      
+      return UnexecutedRequestsResponse.fromJson(response.data);
+    }
+    on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      throw e.toString();
     }
   }
 }

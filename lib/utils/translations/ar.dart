@@ -31,6 +31,10 @@ const Map<String, String> arTranslations = {
   'attendance': 'الحضور',
   'schedule': 'الجدولة',
   'approval': 'الموافقة',
+  'pending': 'معلقة',
+  'unexecuted_requests': 'الطلبات غير المنفذة',
+  'un_executed': 'غير منفذة',
+  'no_unexecuted_requests': 'لا توجد طلبات غير منفذة',
   'profile': 'الملف الشخصي',
 
   // Attendance
@@ -405,7 +409,6 @@ const Map<String, String> arTranslations = {
   'leave_approval': 'موافقة الإجازة',
   'leave_status': 'حالة الإجازة',
   'approved': 'موافق عليه',
-  'pending': 'قيد الانتظار',
   'for_approval': 'في انتظار الموافقة',
   'rejected': 'مرفوض',
   'approve': 'موافقة',

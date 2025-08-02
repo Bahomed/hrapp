@@ -7,13 +7,13 @@ import 'package:injazat_hr_app/utils/app_theme.dart';
 import 'package:injazat_hr_app/utils/screen_themes.dart';
 import 'package:injazat_hr_app/utils/responsive_utils.dart';
 
-import '../../../data/local/preferences.dart';
 import '../../attendance/clocking_screen.dart';
 import '../../document/document_screen.dart';
 import '../../schedule/schedule_screen.dart';
 import '../homescreen_controller.dart';
 import 'package:injazat_hr_app/view/request_leave/request_home_screen.dart';
 import 'package:injazat_hr_app/view/approval/approval_screen.dart';
+import 'package:injazat_hr_app/view/unexecuted_requests/unexecuted_requests_screen.dart';
 
 class HomeScreenWidget extends StatelessWidget {
   const HomeScreenWidget({super.key});
@@ -25,6 +25,7 @@ class HomeScreenWidget extends StatelessWidget {
       onRefresh: () async {
        /// await model.getDashboardFromApi();
         await model.loadGreeting();
+
       },
       child: ScreenThemes.buildHomeScreenContainer(
         child: SafeArea(
@@ -34,48 +35,7 @@ class HomeScreenWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top Header
-                const SizedBox(height: 30),
-
-                // Welcome Section
-                ScreenThemes.buildWelcomeCard(
-                  child: Obx(() =>
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${tr('welcome')} 👋',
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                              color: Theme
-                                  .of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            model.userName.value.isNotEmpty ? model.userName
-                                .value : tr('user'),
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                              color: Theme
-                                  .of(context)
-                                  .primaryColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      )),
-                ),
-
-                const SizedBox(height: 25),
+                const SizedBox(height: 5),
 
                 // Face ID Attendance Section
                 _buildFaceIdAttendanceSection(),
@@ -209,6 +169,11 @@ class HomeScreenWidget extends StatelessWidget {
         'key': 'approval'
       },
       {
+        'icon': Icons.pending_actions_outlined,
+        'label': tr('un_executed'),
+        'key': 'unexecuted_requests'
+      },
+      {
         'icon': Icons.person_outline_rounded,
         'label': tr('profile'),
         'key': 'profile'
@@ -223,6 +188,7 @@ class HomeScreenWidget extends StatelessWidget {
           () => Get.find<HomeScreenController>().goToAttendanceDetailScreen(),
           () => Get.to(const ScheduleScreen()),
           () => Get.to(const ApprovalScreen()),
+          () => Get.to(const UnexecutedRequestsScreen()),
           () => Get.find<HomeScreenController>().goToProfileScreen(),
     ];
 
@@ -238,13 +204,17 @@ class HomeScreenWidget extends StatelessWidget {
       itemCount: actions.length,
       itemBuilder: (context, index) {
         final action = actions[index];
-        return AppTheme.buildActionButton(
+        Widget actionButton = AppTheme.buildActionButton(
           icon: action['icon'] as IconData,
           label: action['label'] as String,
           color: AppTheme.getActionColor(action['key'] as String),
           onTap: navigationFunctions[index],
         );
+
+
+        return actionButton;
       },
     );
   }
+
 }
