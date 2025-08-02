@@ -15,6 +15,8 @@ import '../../data/local/preferences.dart';
 import '../../repository/face_registration_repository.dart';
 import '../../main.dart';
 import '../../utils/Util.dart';
+import '../../services/theme_service.dart';
+import '../../utils/translation_helper.dart';
 // Custom painter to create overlay with transparent circle
 class CircleOverlayPainter extends CustomPainter {
   final Offset circleCenter;
@@ -87,7 +89,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   // Angle verification variables
   bool isAngleCorrect = false;
-  String angleStatus = "Position your face";
+  String angleStatus = "";
   int correctAngleCount = 0;
   static const int requiredStableFrames = 8; // Reduced for faster response
 
@@ -111,20 +113,20 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   static const double circleSize = 280;
   static const double circleRadius = circleSize / 2;
 
-  final List<String> instructions = [
-    "Look straight ahead",
-    "Look up",
-    "Look down",
-    "Look to your left",
-    "Look to your right"
+  List<String> get instructions => [
+    tr('look_straight_ahead'),
+    tr('look_up'),
+    tr('look_down'),
+    tr('look_to_your_left'),
+    tr('look_to_your_right')
   ];
 
-  final List<String> subInstructions = [
-    "Hold your phone still and look directly at the camera",
-    "Tilt your head up slightly",
-    "Tilt your head down slightly",
-    "Turn your head to the left",
-    "Turn your head to the right"
+  List<String> get subInstructions => [
+    tr('hold_phone_still_look_camera'),
+    tr('tilt_head_up_slightly'),
+    tr('tilt_head_down_slightly'),
+    tr('turn_head_to_left'),
+    tr('turn_head_to_right')
   ];
 
   @override
@@ -242,7 +244,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           setState(() {
             isAngleCorrect = true;
             isFaceQualityGood = true;
-            angleStatus = "Hold steady... ${correctAngleCount}/${requiredStableFrames}";
+            angleStatus = tr('hold_steady_count').replaceAll('{current}', correctAngleCount.toString()).replaceAll('{total}', requiredStableFrames.toString());
           });
         }
       } else {
@@ -263,7 +265,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       setState(() {
         isAngleCorrect = false;
         isFaceQualityGood = false;
-        angleStatus = faces.isEmpty ? "No face detected" : "Multiple faces detected";
+        angleStatus = faces.isEmpty ? tr('no_face_detected') : tr('multiple_faces_detected');
       });
     }
 
@@ -281,7 +283,13 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     return faceWidth > 80 && faceHeight > 80 &&
         faceWidth < 500 && faceHeight < 500;
   }
-  bool isCorrectAngleForStep(Face face) {
+  //
+  // | Platform | Direction | Head Yaw (`headEulerAngleY`) | Flip?        |
+  // | -------- | --------- | ---------------------------- | ------------ |
+  // | Android  | Front cam | Mirrored (needs flip)        | ✅ Flip       |
+  // | iOS      | Front cam | Already mirrored             | ❌ Don’t flip |
+  //
+   bool isCorrectAngleForStep(Face face) {
     // Get head pose angles
     double? headEulerAngleX = face.headEulerAngleX; // Up/Down (pitch)
     double? headEulerAngleY = face.headEulerAngleY; // Left/Right (yaw)
@@ -331,55 +339,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     }
   }
 
-  bool oldIsCorrectAngleForStep(Face face) {
-    // Get head pose angles
-    double? headEulerAngleX = face.headEulerAngleX; // Up/Down (pitch)
-    double? headEulerAngleY = face.headEulerAngleY; // Left/Right (yaw)
-    double? headEulerAngleZ = face.headEulerAngleZ; // Tilt (roll)
-
-    if (headEulerAngleX == null || headEulerAngleY == null || headEulerAngleZ == null) {
-      return false;
-    }
-
-    // For front camera, we need to adjust the angles because the image is mirrored
-    if (camDirec == CameraLensDirection.front) {
-      headEulerAngleY = -headEulerAngleY;
-    }
-
-    // More lenient angle thresholds
-    const double tolerance = 15.0;
-    const double rollTolerance = 25.0;
-
-    switch (currentStep) {
-      case 0: // Straight ahead
-        return headEulerAngleX.abs() < tolerance &&
-            headEulerAngleY.abs() < tolerance &&
-            headEulerAngleZ.abs() < rollTolerance;
-
-      case 1: // Look up - SWAPPED: Try positive X values
-        return headEulerAngleX > 8 && headEulerAngleX < 50 &&
-            headEulerAngleY.abs() < tolerance &&
-            headEulerAngleZ.abs() < rollTolerance;
-
-      case 2: // Look down - SWAPPED: Try negative X values
-        return headEulerAngleX < -8 && headEulerAngleX > -50 &&
-            headEulerAngleY.abs() < tolerance &&
-            headEulerAngleZ.abs() < rollTolerance;
-
-      case 3: // Look left
-        return headEulerAngleY < -8 && headEulerAngleY > -50 &&
-            headEulerAngleX.abs() < tolerance &&
-            headEulerAngleZ.abs() < rollTolerance;
-
-      case 4: // Look right
-        return headEulerAngleY > 8 && headEulerAngleY < 50 &&
-            headEulerAngleX.abs() < tolerance &&
-            headEulerAngleZ.abs() < rollTolerance;
-
-      default:
-        return false;
-    }
-  }
 
   bool assessFaceQuality(Face face) {
     // Get frame dimensions
@@ -399,7 +358,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (faceSize < minFaceSize) {
       setState(() {
         isFaceQualityGood = false;
-        angleStatus = "Move closer to camera";
+        angleStatus = tr('move_closer_to_camera');
       });
       return false;
     }
@@ -407,7 +366,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (faceSize > maxFaceSize) {
       setState(() {
         isFaceQualityGood = false;
-        angleStatus = "Move away from camera";
+        angleStatus = tr('move_away_from_camera');
       });
       return false;
     }
@@ -456,7 +415,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         if (!result.isReal) {
           setState(() {
             isFaceQualityGood = false;
-            angleStatus = "Spoofing detected! Use your real face";
+            angleStatus = tr('spoofing_detected_real_face');
           });
         }
       } catch (e) {
@@ -474,17 +433,17 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     // Return specific guidance based on current step
     switch (currentStep) {
       case 0:
-        return "Look straight at the camera";
+        return tr('look_straight_at_camera');
       case 1:
-        return "Tilt your head up";
+        return tr('tilt_head_up');
       case 2:
-        return "Tilt your head down";
+        return tr('tilt_head_down');
       case 3:
-        return "Turn your head left";
+        return tr('turn_head_left');
       case 4:
-        return "Turn your head right";
+        return tr('turn_head_right');
       default:
-        return "Position your face in the circle";
+        return tr('position_face_in_circle');
     }
   }
 
@@ -564,7 +523,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         isCapturing = false;
         isAngleCorrect = false;
         isFaceQualityGood = false;
-        angleStatus = "Position your face";
+        angleStatus = tr('position_your_face');
         correctAngleCount = 0;
       });
 
@@ -630,11 +589,10 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           print('OKkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
           // Show success message first
           Get.snackbar(
-            'Success',
+            tr('success'),
             result?.message ??
-                'Face registered successfully as $name with ${capturedFaces
-                    .length} angles!',
-            backgroundColor: Colors.green,
+                tr('face_registered_successfully').replaceAll('{name}', name).replaceAll('{count}', capturedFaces.length.toString()),
+            backgroundColor: Get.find<ThemeService>().getSuccessColor(),
             colorText: Colors.white,
           );
 
@@ -649,9 +607,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         // Show error message
 
         Get.snackbar(
-          'Error',
-          'Failed to register face: ${e.toString()}',
-          backgroundColor: Colors.red,
+          tr('error'),
+          '${tr('failed_to_register_face')}: ${e.toString()}',
+          backgroundColor: Get.find<ThemeService>().getErrorColor(),
           colorText: Colors.white,
         );
       } finally {
@@ -790,7 +748,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       isCapturing = true;
       isAngleCorrect = false;
       isFaceQualityGood = false;
-      angleStatus = "Position your face";
+      angleStatus = tr('position_face_in_circle');
       correctAngleCount = 0;
     });
   }
@@ -808,6 +766,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
+    final themeService = Get.find<ThemeService>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -818,13 +777,13 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Auto Face Registration',
+          tr('auto_face_registration'),
           style: TextStyle(color: Colors.white),
         ),
         elevation: 0,
       ),
       body: !isInitialized
-          ? Center(child: CircularProgressIndicator(color: Colors.green))
+          ? Center(child: CircularProgressIndicator(color: themeService.getSuccessColor()))
           : Column(
         children: [
           Expanded(
@@ -849,7 +808,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                             300) / 2 + MediaQuery.of(context).padding.top + kToolbarHeight, // Center in available camera area
                       ),
                       circleRadius: circleRadius,
-                      overlayColor: Colors.black.withValues(alpha: 0.7),
+                      overlayColor: Colors.black.withOpacity(0.7),
                     ),
                   ),
                 ),
@@ -868,7 +827,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isCapturing
-                            ? (isAngleCorrect && isFaceQualityGood ? Colors.green : Colors.orange)
+                            ? (isAngleCorrect && isFaceQualityGood ? themeService.getSuccessColor() : themeService.getWarningColor())
                             : Colors.white,
                         width: 4,
                       ),
@@ -1045,7 +1004,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                       ),
                     ),
                     child: Text(
-                      'Start Auto Registration',
+                      tr('start_auto_registration'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -1056,7 +1015,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                 // Status text
                 if (isCapturing)
                   Text(
-                    (isAngleCorrect && isFaceQualityGood) ? 'Perfect! Hold that position...' : angleStatus,
+                    (isAngleCorrect && isFaceQualityGood) ? tr('perfect_hold_position') : angleStatus,
                     style: TextStyle(
                       color: (isAngleCorrect && isFaceQualityGood) ? Colors.green : Colors.orange,
                       fontSize: 16,
@@ -1070,7 +1029,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Text(
-                      'Captured: ${capturedFaces.length}/${instructions.length} angles',
+                      tr('captured_angles_count').replaceAll('{current}', capturedFaces.length.toString()).replaceAll('{total}', instructions.length.toString()),
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14,

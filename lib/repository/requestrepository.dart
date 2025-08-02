@@ -12,6 +12,7 @@ import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart
 import 'package:injazat_hr_app/data/remote/response/request_summary_response.dart';
 import 'package:injazat_hr_app/data/remote/response/request_response.dart' show LoanTypesResponse, LetterTypesResponse;
 import 'package:injazat_hr_app/data/remote/response/approval_request_response.dart';
+import 'package:injazat_hr_app/data/remote/response/employee_dropdown_response.dart';
 import 'package:injazat_hr_app/repository/logoutrepository.dart';
 import 'package:injazat_hr_app/utils/api_helper.dart';
 import 'package:dio/dio.dart';
@@ -819,19 +820,52 @@ class RequestRepository {
     }
   }
 
+  Future<EmployeeDropdownResponse> getEmployeesDropdown() async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl/api/get-employees-dropdown';
+      
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return EmployeeDropdownResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<BaseResponse> updateRequestStatus({
     required int requestId,
     required String status,
+    int? replacementEmployeeId,
+    String? remarks,
   }) async {
     try {
       final token = await preferences.getToken();
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl/api/update-request-status';
       
-      var data = {
+      var data = <String, dynamic>{
         'request_id': requestId,
         'status': status,
       };
+      
+      // Add optional parameters for leave approval
+      if (replacementEmployeeId != null) {
+        data['replacement_employee_id'] = replacementEmployeeId;
+      }
+      if (remarks != null && remarks.isNotEmpty) {
+        data['remarks'] = remarks;
+      }
       
       var response = await dioClient.post(
         apiUrl,

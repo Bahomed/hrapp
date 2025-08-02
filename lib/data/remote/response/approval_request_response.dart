@@ -32,6 +32,15 @@ class ApprovalRequest {
   final String requestType;
   final String requestDateG;
   final String requestNumber;
+  final String? leaveStartDate;
+  final String? leaveEndDate;
+  final String? reason;
+  final String? loanAmount;
+  final int? loanRepaymentMonths;
+  final String? permitRemarks;
+  final String? permitDate;
+  final String? permitFrom;
+  final String? permitTo;
   final String? leaveType;
   final String requestStatus;
   final String employeeNo;
@@ -39,8 +48,10 @@ class ApprovalRequest {
   final String? positionName;
   final String? nationality;
   final String? departmentName;
+  final String? sectionName;
   final String? addBy;
   final String? requestBcs;
+  final int? days;
 
   ApprovalRequest({
     required this.id,
@@ -48,6 +59,15 @@ class ApprovalRequest {
     required this.requestType,
     required this.requestDateG,
     required this.requestNumber,
+    this.leaveStartDate,
+    this.leaveEndDate,
+    this.reason,
+    this.loanAmount,
+    this.loanRepaymentMonths,
+    this.permitRemarks,
+    this.permitDate,
+    this.permitFrom,
+    this.permitTo,
     this.leaveType,
     required this.requestStatus,
     required this.employeeNo,
@@ -55,8 +75,10 @@ class ApprovalRequest {
     this.positionName,
     this.nationality,
     this.departmentName,
+    this.sectionName,
     this.addBy,
     this.requestBcs,
+    this.days,
   });
 
   factory ApprovalRequest.fromJson(Map<String, dynamic> json) {
@@ -66,6 +88,15 @@ class ApprovalRequest {
       requestType: json['request_type'] ?? '',
       requestDateG: json['request_date_g'] ?? '',
       requestNumber: json['request_number'] ?? '',
+      leaveStartDate: json['leave_start_date'],
+      leaveEndDate: json['leave_end_date'],
+      reason: json['reason'],
+      loanAmount: json['loan_amount'],
+      loanRepaymentMonths: json['loan_repayment_months'],
+      permitRemarks: json['permit_remarks'],
+      permitDate: json['permit_date'],
+      permitFrom: json['permit_from'],
+      permitTo: json['permit_to'],
       leaveType: json['leave_type'],
       requestStatus: json['request_status'] ?? '',
       employeeNo: json['employee_no'] ?? '',
@@ -73,8 +104,10 @@ class ApprovalRequest {
       positionName: json['position_name'],
       nationality: json['nationality'],
       departmentName: json['department_name'],
+      sectionName: json['section_name'],
       addBy: json['add_by'],
       requestBcs: json['request_bcs'],
+      days: json['days'],
     );
   }
 
@@ -85,6 +118,15 @@ class ApprovalRequest {
       'request_type': requestType,
       'request_date_g': requestDateG,
       'request_number': requestNumber,
+      'leave_start_date': leaveStartDate,
+      'leave_end_date': leaveEndDate,
+      'reason': reason,
+      'loan_amount': loanAmount,
+      'loan_repayment_months': loanRepaymentMonths,
+      'permit_remarks': permitRemarks,
+      'permit_date': permitDate,
+      'permit_from': permitFrom,
+      'permit_to': permitTo,
       'leave_type': leaveType,
       'request_status': requestStatus,
       'employee_no': employeeNo,
@@ -92,8 +134,10 @@ class ApprovalRequest {
       'position_name': positionName,
       'nationality': nationality,
       'department_name': departmentName,
+      'section_name': sectionName,
       'add_by': addBy,
       'request_bcs': requestBcs,
+      'days': days,
     };
   }
 }

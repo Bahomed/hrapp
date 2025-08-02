@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:injazat_hr_app/data/remote/response/approval_request_response.dart';
+import 'package:injazat_hr_app/data/remote/response/employee_dropdown_response.dart';
 import 'package:injazat_hr_app/repository/requestrepository.dart';
 import 'package:injazat_hr_app/services/theme_service.dart';
 import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:injazat_hr_app/widgets/saudi_riyal_display.dart';
 
 class ApprovalController extends GetxController {
   final RequestRepository _requestRepository = RequestRepository();
@@ -25,7 +27,7 @@ class ApprovalController extends GetxController {
   List<Map<String, dynamic>> get filters => [
     {'name': tr('all'), 'key': 'all', 'color': getFilterColor('all')},
     {'name': tr('leave'), 'key': 'Leave', 'color': getFilterColor('leave')},
-    {'name': tr('permission'), 'key': 'Permission', 'color': getFilterColor('permission')},
+    {'name': tr('permission'), 'key': 'Permit', 'color': getFilterColor('permission')},
     {'name': tr('loan'), 'key': 'Loan', 'color': getFilterColor('loan')},
     {'name': tr('letter'), 'key': 'Letter', 'color': getFilterColor('letter')},
   ];
@@ -67,13 +69,13 @@ class ApprovalController extends GetxController {
     if (filter == 'all') {
       // Separate all requests by type
       leaveRequests.value = allRequests.where((r) => r.requestType == 'Leave').toList();
-      permissionRequests.value = allRequests.where((r) => r.requestType == 'Permission').toList();
+      permissionRequests.value = allRequests.where((r) => r.requestType == 'Permit').toList();
       loanRequests.value = allRequests.where((r) => r.requestType == 'Loan').toList();
       letterRequests.value = allRequests.where((r) => r.requestType == 'Letter').toList();
     } else {
       // Filter by specific request type
       leaveRequests.value = filter == 'Leave' ? allRequests.where((r) => r.requestType == 'Leave').toList() : [];
-      permissionRequests.value = filter == 'Permission' ? allRequests.where((r) => r.requestType == 'Permission').toList() : [];
+      permissionRequests.value = filter == 'Permit' ? allRequests.where((r) => r.requestType == 'Permit').toList() : [];
       loanRequests.value = filter == 'Loan' ? allRequests.where((r) => r.requestType == 'Loan').toList() : [];
       letterRequests.value = filter == 'Letter' ? allRequests.where((r) => r.requestType == 'Letter').toList() : [];
     }
@@ -102,7 +104,7 @@ class ApprovalController extends GetxController {
       if (response.success) {
         Get.snackbar(
           tr('success'),
-          'Request ${status.toLowerCase()} successfully',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: ThemeService.instance.getSuccessColor(),
           colorText: Colors.white,
@@ -124,11 +126,79 @@ class ApprovalController extends GetxController {
 
   // Show approval confirmation dialog
   void showApprovalDialog(ApprovalRequest request) {
+    if (request.requestType.toLowerCase() == 'leave') {
+      _showLeaveApprovalDialog(request);
+    } else {
+      _showSimpleApprovalDialog(request);
+    }
+  }
+
+  // Show enhanced approval dialog for leave requests
+  void _showLeaveApprovalDialog(ApprovalRequest request) {
+    final RxList<EmployeeDropdownItem> employees = <EmployeeDropdownItem>[].obs;
+    final Rx<EmployeeDropdownItem?> selectedEmployee = Rx<EmployeeDropdownItem?>(null);
+    final TextEditingController remarksController = TextEditingController();
+    final RxBool isLoadingEmployees = false.obs;
+
+    // Load employees dropdown
+    _loadEmployees(employees, isLoadingEmployees);
+
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(tr('approval')),
-        content: Text('Approve ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
+        content: SizedBox(
+          width: Get.width * 0.8,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Approve leave request for:'),
+                const SizedBox(height: 20),
+                Text(request.employeeName),
+                const SizedBox(height: 20),
+                // Employee Dropdown with Search
+                Text(
+                  tr('replacement_employee'),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Obx(() => isLoadingEmployees.value
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildSearchableDropdown(employees, selectedEmployee),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Remarks
+                Text(
+                  '${tr('remarks')} (${tr('optional')})',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: remarksController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    hintText: tr('enter_remarks'),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -137,7 +207,11 @@ class ApprovalController extends GetxController {
           TextButton(
             onPressed: () {
               Get.back();
-              approveRequest(request);
+              _approveLeaveRequest(
+                request,
+                selectedEmployee.value?.id,
+                remarksController.text.trim(),
+              );
             },
             child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
           ),
@@ -146,13 +220,49 @@ class ApprovalController extends GetxController {
     );
   }
 
-  // Show rejection confirmation dialog
-  void showRejectionDialog(ApprovalRequest request) {
+  // Show simple approval dialog for non-leave requests (with remarks only)
+  void _showSimpleApprovalDialog(ApprovalRequest request) {
+    final TextEditingController remarksController = TextEditingController();
+
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Reject Request'),
-        content: Text('Reject ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
+        title: Text(tr('approval')),
+        content: SizedBox(
+          width: Get.width * 0.8,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Approve ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
+                const SizedBox(height: 20),
+                
+                // Remarks
+                Text(
+                  '${tr('remarks')} (${tr('optional')})',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: remarksController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    hintText: tr('enter_remarks'),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -161,7 +271,67 @@ class ApprovalController extends GetxController {
           TextButton(
             onPressed: () {
               Get.back();
-              rejectRequest(request);
+              _approveOtherRequest(request, remarksController.text.trim());
+            },
+            child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show rejection confirmation dialog with remarks
+  void showRejectionDialog(ApprovalRequest request) {
+    final TextEditingController remarksController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Reject Request'),
+        content: SizedBox(
+          width: Get.width * 0.8,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Reject ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
+                const SizedBox(height: 20),
+                
+                // Remarks
+                Text(
+                  '${tr('remarks')} (${tr('optional')})',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: remarksController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    hintText: tr('enter_remarks'),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _rejectRequestWithRemarks(request, remarksController.text.trim());
             },
             child: Text(tr('rejected'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
           ),
@@ -172,50 +342,433 @@ class ApprovalController extends GetxController {
 
   // View request details
   void viewRequestDetails(ApprovalRequest request) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('${request.requestType} Request Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDetailRow('Employee', request.employeeName),
-              _buildDetailRow('Employee No', request.employeeNo),
-              _buildDetailRow('Request Type', request.requestType),
-              if (request.leaveType != null) _buildDetailRow('Leave Type', request.leaveType!),
-              _buildDetailRow('Request Date', request.requestDateG),
-              _buildDetailRow('Request Number', request.requestNumber),
-              if (request.positionName != null) _buildDetailRow('Position', request.positionName!),
-              if (request.departmentName != null) _buildDetailRow('Department', request.departmentName!),
-              if (request.nationality != null) _buildDetailRow('Nationality', request.nationality!),
-              _buildDetailRow('Status', request.requestStatus),
-            ],
-          ),
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.9,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: ThemeService.instance.getSurfaceColor(),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(tr('close')),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              showRejectionDialog(request);
-            },
-            child: Text(tr('rejected'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              showApprovalDialog(request);
-            },
-            child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 50,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: ThemeService.instance.getDividerColor(),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${request.requestType} ${tr('request_details')}',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: ThemeService.instance.getTextPrimaryColor(),
+                        ),
+                      ),
+                      Text(
+                        request.employeeName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: ThemeService.instance.getTextSecondaryColor(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildRequestStatusChip(request.requestStatus),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+
+                    // Combined Request Information Section
+                    _buildCombinedRequestSection(request),
+                    // Employee Information Section
+                    _buildSection(
+                      tr('employee_information'),
+                      [
+                        _buildDetailRow(tr('#_name'), request.employeeName),
+                        if (request.positionName != null) _buildDetailRow(tr('position'), request.positionName!),
+                        if (request.departmentName != null) _buildDetailRow(tr('department'), request.departmentName!),
+                        if (request.sectionName != null) _buildDetailRow(tr('section'), request.sectionName!),
+                        if (request.nationality != null) _buildDetailRow(tr('nationality'), request.nationality!),
+                      ],
+                    ),
+
+
+                  ],
+                ),
+              ),
+            ),
+
+            // Action Buttons
+            const SizedBox(height: 20),
+            _buildActionButtons(request),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  Widget _buildRequestStatusChip(String status) {
+    Color backgroundColor;
+    Color textColor;
+    IconData icon;
+
+    switch (status.toLowerCase()) {
+      case 'approved':
+        backgroundColor = ThemeService.instance.getSuccessColor().withOpacity(0.1);
+        textColor = ThemeService.instance.getSuccessColor();
+        icon = Icons.check_circle_outline;
+        break;
+      case 'pending':
+      case 'for approval':
+        backgroundColor = ThemeService.instance.getWarningColor().withOpacity(0.1);
+        textColor = ThemeService.instance.getWarningColor();
+        icon = Icons.schedule;
+        break;
+      case 'rejected':
+        backgroundColor = ThemeService.instance.getErrorColor().withOpacity(0.1);
+        textColor = ThemeService.instance.getErrorColor();
+        icon = Icons.cancel_outlined;
+        break;
+      default:
+        backgroundColor = ThemeService.instance.getTextSecondaryColor().withOpacity(0.1);
+        textColor = ThemeService.instance.getTextSecondaryColor();
+        icon = Icons.circle;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: textColor),
+          const SizedBox(width: 6),
+          Text(
+            status,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: ThemeService.instance.getCardColor(),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: ThemeService.instance.getDividerColor(),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: ThemeService.instance.getTextPrimaryColor(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  // Build combined request section (combines general info and specific details)
+  Widget _buildCombinedRequestSection(ApprovalRequest request) {
+    List<Widget> allDetails = [
+      // General request information
+      _buildDetailRow(tr('req#'), request.requestNumber),
+      _buildDetailRow(tr('submitted'), _formatDateTime(request.requestDateG)),
+    //  _buildDetailRow(tr('status'), request.requestStatus),
+     // if (request.addBy != null && request.addBy!.isNotEmpty) _buildDetailRow(tr('added_by'), request.addBy!),
+      ///if (request.requestBcs != null && request.requestBcs!.trim().isNotEmpty) _buildDetailRow(tr('approved_by'), request.requestBcs!.trim()),
+    ];
+
+    // Add request-specific details based on type
+    switch (request.requestType.toLowerCase()) {
+      case 'leave':
+        if (request.leaveType != null) allDetails.add(_buildDetailRow(tr('type'), request.leaveType!));
+        if (request.leaveStartDate != null) allDetails.add(_buildDetailRow(tr('start_date'), _formatDateTime(request.leaveStartDate!)));
+        if (request.leaveEndDate != null) allDetails.add(_buildDetailRow(tr('end_date'), _formatDateTime(request.leaveEndDate!)));
+        if (request.days != null && request.days! > 0) allDetails.add(_buildDetailRow(tr('days'), '${request.days}'));
+        if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
+        break;
+      
+      case 'loan':
+        if (request.leaveType != null) allDetails.add(_buildDetailRow(tr('loan_type'), request.leaveType!));
+        if (request.loanAmount != null && request.loanAmount != '0' && request.loanAmount != '0.00') {
+          allDetails.add(_buildDetailRowWithWidget(
+            tr('loan_amount'), 
+            SaudiRiyalDisplay(
+              amount: double.tryParse(request.loanAmount!) ?? 0.0,
+              style: TextStyle(
+                color: ThemeService.instance.getTextSecondaryColor(),
+              ),
+            ),
+          ));
+        }
+        if (request.loanRepaymentMonths != null && request.loanRepaymentMonths! > 0) {
+          allDetails.add(_buildDetailRow(tr('instalment'), '${request.loanRepaymentMonths} ${tr('months')}'));
+        }
+        if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
+        break;
+      
+      case 'permission':
+      case 'permit':
+        if (request.leaveType != null) allDetails.add(_buildDetailRow(tr('permission_type'), request.leaveType!));
+        if (request.permitDate != null) allDetails.add(_buildDetailRow(tr('date'), _formatDateTime(request.permitDate!)));
+        if (request.permitFrom != null && request.permitFrom!.isNotEmpty) allDetails.add(_buildDetailRow(tr('time'), '${ _formatTimeDisplay(request.permitFrom!)} ${tr('to')} ${ _formatTimeDisplay(request.permitTo ?? "")}'));
+        if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
+        break;
+      
+      case 'letter':
+        if (request.leaveType != null) allDetails.add(_buildDetailRow(tr('letter_type'), request.leaveType!));
+        if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
+        break;
+    }
+
+    return Column(
+      children: [
+        _buildSection(
+          tr('request_information'),
+          allDetails,
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(ApprovalRequest request) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () {
+                  Get.back();
+                  showRejectionDialog(request);
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: ThemeService.instance.getErrorColor()),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.cancel_outlined, color: ThemeService.instance.getErrorColor()),
+                    const SizedBox(width: 8),
+                    Text(
+                      tr('reject'),
+                      style: TextStyle(
+                        color: ThemeService.instance.getErrorColor(),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back();
+                  showApprovalDialog(request);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeService.instance.getSuccessColor(),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.check_circle_outline, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      tr('approve'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => Get.back(),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: ThemeService.instance.getTextSecondaryColor()),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(
+              tr('close'),
+              style: TextStyle(
+                color: ThemeService.instance.getTextSecondaryColor(),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Build request-specific details section based on request type
+  Widget _buildRequestSpecificSection(ApprovalRequest request) {
+    List<Widget> specificDetails = [];
+
+    switch (request.requestType.toLowerCase()) {
+      case 'leave':
+        specificDetails = [
+          if (request.leaveStartDate != null) _buildDetailRow(tr('leave_start_date'), _formatDateTime(request.leaveStartDate!)),
+          if (request.leaveEndDate != null) _buildDetailRow(tr('leave_end_date'), _formatDateTime(request.leaveEndDate!)),
+          if (request.days != null && request.days! > 0) _buildDetailRow(tr('days'), '${request.days}'),
+          if (request.reason != null && request.reason!.isNotEmpty) _buildDetailRow(tr('reason'), request.reason!),
+        ];
+        break;
+      
+      case 'loan':
+        specificDetails = [
+          if (request.loanAmount != null && request.loanAmount != '0' && request.loanAmount != '0.00') 
+            _buildDetailRow(tr('loan_amount'), '${request.loanAmount} ${tr('sar')}'),
+          if (request.loanRepaymentMonths != null && request.loanRepaymentMonths! > 0) 
+            _buildDetailRow(tr('installment'), '${request.loanRepaymentMonths} ${tr('months')}'),
+          if (request.reason != null && request.reason!.isNotEmpty) _buildDetailRow(tr('reason'), request.reason!),
+        ];
+        break;
+      
+      case 'permission':
+      case 'permit':
+        specificDetails = [
+          if (request.permitDate != null) _buildDetailRow(tr('date'), _formatDateTime(request.permitDate!)),
+          if (request.permitFrom != null && request.permitFrom!.isNotEmpty) _buildDetailRow(tr('time'),  _formatTimeDisplay(request.permitFrom!)),
+          if (request.reason != null && request.reason!.isNotEmpty) _buildDetailRow(tr('reason'), request.reason!),
+        ];
+        break;
+    }
+
+    // Only show section if there are specific details to display
+    if (specificDetails.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildSection(
+      '${request.requestType} ${tr('specific_details')}',
+      specificDetails,
+    );
+  }
+
+  // Format datetime string for display
+  String _formatDateTime(String dateTimeString) {
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
+      return dateTimeString; // Return original string if parsing fails
+    }
+  }
+
+
+  String _formatTimeDisplay(String timeString) {
+    try {
+      // Handle different time formats and remove seconds
+      timeString = timeString.trim();
+
+      // If it contains AM/PM (12-hour format)
+      if (timeString.contains('AM') || timeString.contains('PM')) {
+        final isAM = timeString.contains('AM');
+        final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)'), '');
+        final parts = timePart.split(':');
+
+        if (parts.length >= 2) {
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+
+          // Format as HH:MM AM/PM without seconds
+          final formattedHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+          final formattedMinute = minute.toString().padLeft(2, '0');
+          return '$formattedHour:$formattedMinute ${isAM ? 'AM' : 'PM'}';
+        }
+      } else {
+        // 24-hour format or contains seconds
+        final parts = timeString.split(':');
+        if (parts.length >= 2) {
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+
+          // Format as HH:MM in 24-hour format without seconds
+          final formattedHour = hour.toString().padLeft(2, '0');
+          final formattedMinute = minute.toString().padLeft(2, '0');
+          return '$formattedHour:$formattedMinute';
+        }
+      }
+
+      // If parsing fails, return original string
+      return timeString;
+    } catch (e) {
+      // Return original string if any error occurs
+      return timeString;
+    }
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -241,6 +794,30 @@ class ApprovalController extends GetxController {
                 color: ThemeService.instance.getTextSecondaryColor(),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRowWithWidget(String label, Widget valueWidget) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: ThemeService.instance.getTextPrimaryColor(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: valueWidget,
           ),
         ],
       ),
@@ -321,5 +898,249 @@ class ApprovalController extends GetxController {
       default:
         return requestType;
     }
+  }
+
+  // Load employees for dropdown
+  Future<void> _loadEmployees(RxList<EmployeeDropdownItem> employees, RxBool isLoadingEmployees) async {
+    try {
+      isLoadingEmployees.value = true;
+      final response = await _requestRepository.getEmployeesDropdown();
+      
+      if (response.statusCode == 200) {
+        employees.value = response.data;
+      } else {
+        _showErrorSnackbar('Failed to load employees: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('Error loading employees: $e');
+    } finally {
+      isLoadingEmployees.value = false;
+    }
+  }
+
+  // Approve leave request with employee and remarks
+  Future<void> _approveLeaveRequest(ApprovalRequest request, int? replacementEmployeeId, String remarks) async {
+    try {
+      isLoading.value = true;
+      
+      final response = await _requestRepository.updateRequestStatus(
+        requestId: request.id,
+        status: 'approved',
+        replacementEmployeeId: replacementEmployeeId,
+        remarks: remarks.isNotEmpty ? remarks : null,
+      );
+
+      if (response.success) {
+        Get.snackbar(
+          tr('success'),
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        
+        // Remove from local list and refresh
+        allRequests.removeWhere((r) => r.id == request.id);
+        _applyCurrentFilter();
+      } else {
+        _showErrorSnackbar('Failed to approve request: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('Error approving request: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Approve other requests (Permission, Loan, Letter) with remarks only
+  Future<void> _approveOtherRequest(ApprovalRequest request, String remarks) async {
+    try {
+      isLoading.value = true;
+      
+      final response = await _requestRepository.updateRequestStatus(
+        requestId: request.id,
+        status: 'approved',
+        remarks: remarks.isNotEmpty ? remarks : null,
+      );
+
+      if (response.success) {
+        Get.snackbar(
+          tr('success'),
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        
+        // Remove from local list and refresh
+        allRequests.removeWhere((r) => r.id == request.id);
+        _applyCurrentFilter();
+      } else {
+        _showErrorSnackbar('Failed to approve request: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('Error approving request: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Reject request with remarks
+  Future<void> _rejectRequestWithRemarks(ApprovalRequest request, String remarks) async {
+    try {
+      isLoading.value = true;
+      
+      final response = await _requestRepository.updateRequestStatus(
+        requestId: request.id,
+        status: 'rejected',
+        remarks: remarks.isNotEmpty ? remarks : null,
+      );
+
+      if (response.success) {
+        Get.snackbar(
+          tr('success'),
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        
+        // Remove from local list and refresh
+        allRequests.removeWhere((r) => r.id == request.id);
+        _applyCurrentFilter();
+      } else {
+        _showErrorSnackbar('Failed to reject request: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('Error rejecting request: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Build searchable dropdown for employees
+  Widget _buildSearchableDropdown(RxList<EmployeeDropdownItem> employees, Rx<EmployeeDropdownItem?> selectedEmployee) {
+    final TextEditingController searchController = TextEditingController();
+    final RxList<EmployeeDropdownItem> filteredEmployees = <EmployeeDropdownItem>[].obs;
+    final RxBool isDropdownOpen = false.obs;
+
+    // Initialize filtered list
+    filteredEmployees.value = employees;
+
+    void filterEmployees(String query) {
+      if (query.isEmpty) {
+        filteredEmployees.value = employees;
+      } else {
+        filteredEmployees.value = employees
+            .where((employee) => 
+                employee.employeeName.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Search field that looks like a dropdown
+        GestureDetector(
+          onTap: () {
+            isDropdownOpen.value = !isDropdownOpen.value;
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: ThemeService.instance.getDividerColor()),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Obx(() => Text(
+                    selectedEmployee.value?.employeeName ?? tr('select_replacement'),
+                    style: TextStyle(
+                      color: selectedEmployee.value != null 
+                          ? ThemeService.instance.getTextPrimaryColor()
+                          : ThemeService.instance.getTextSecondaryColor(),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Dropdown list
+        Obx(() => isDropdownOpen.value
+            ? Container(
+                margin: const EdgeInsets.only(top: 4),
+                constraints: const BoxConstraints(maxHeight: 200),
+                decoration: BoxDecoration(
+                  border: Border.all(color: ThemeService.instance.getDividerColor()),
+                  borderRadius: BorderRadius.circular(8),
+                  color: ThemeService.instance.getCardColor(),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Search field
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: tr('search'),
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          isDense: true,
+                        ),
+                        onChanged: filterEmployees,
+                      ),
+                    ),
+                    
+                    // Employee list
+                    Flexible(
+                      child: Obx(() => ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filteredEmployees.length,
+                        itemBuilder: (context, index) {
+                          final employee = filteredEmployees[index];
+                          return ListTile(
+                            dense: true,
+                            title: Text(
+                              employee.employeeName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: ThemeService.instance.getTextPrimaryColor(),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onTap: () {
+                              selectedEmployee.value = employee;
+                              isDropdownOpen.value = false;
+                              searchController.clear();
+                              filteredEmployees.value = employees;
+                            },
+                          );
+                        },
+                      )),
+                    ),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink(),
+        ),
+      ],
+    );
   }
 }
