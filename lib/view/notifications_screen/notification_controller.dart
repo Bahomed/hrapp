@@ -1,7 +1,7 @@
-import 'package:injazat_hr_app/model/birthdaymodel.dart';
-import 'package:injazat_hr_app/model/noticemodel.dart';
-import 'package:injazat_hr_app/repository/noticerepository.dart';
-import 'package:injazat_hr_app/utils/alertbox.dart';
+import 'package:com.injazatsoftware.injazathr/model/birthdaymodel.dart';
+import 'package:com.injazatsoftware.injazathr/model/noticemodel.dart';
+import 'package:com.injazatsoftware.injazathr/repository/noticerepository.dart';
+import 'package:com.injazatsoftware.injazathr/utils/alertbox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

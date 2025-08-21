@@ -1,5 +1,5 @@
-import 'package:injazat_hr_app/utils/backgrounddecoration.dart';
-import 'package:injazat_hr_app/view/notifications_screen/notification_controller.dart';
+import 'package:com.injazatsoftware.injazathr/utils/backgrounddecoration.dart';
+import 'package:com.injazatsoftware.injazathr/view/notifications_screen/notification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
