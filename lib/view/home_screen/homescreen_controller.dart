@@ -1,10 +1,10 @@
-import 'package:injazat_hr_app/utils/alertbox.dart';
-import 'package:injazat_hr_app/view/attendance/attendance_detail_screen.dart';
-import 'package:injazat_hr_app/view/attendance/attendance_calendar_screen.dart';
-import 'package:injazat_hr_app/view/holidayscreen/holiday_screen.dart';
-import 'package:injazat_hr_app/view/home_screen/widget/homescreenwidget.dart';
-import 'package:injazat_hr_app/view/notifications_screen/notification_screen.dart';
-import 'package:injazat_hr_app/view/settings/settings_screen.dart';
+import 'package:com.injazatsoftware.injazathr/utils/alertbox.dart';
+import 'package:com.injazatsoftware.injazathr/view/attendance/attendance_detail_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/attendance/attendance_calendar_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/holidayscreen/holiday_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/home_screen/widget/homescreenwidget.dart';
+import 'package:com.injazatsoftware.injazathr/view/notifications_screen/notification_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/settings/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -88,6 +88,7 @@ class HomeScreenController extends SuperController {
   // Add method to refresh user data if needed
   Future<void> refreshUserData() async {
     await loadUserData();
+    await loadGreeting(); // Also refresh greeting when refreshing user data
   }
 
   // Add method to load greeting from API
@@ -95,20 +96,19 @@ class HomeScreenController extends SuperController {
     try {
       final locale = Get.locale?.languageCode ?? 'en';
       final datetime = DateTime.now().toIso8601String();
-      
+
       print('Loading greeting with locale: $locale, datetime: $datetime');
-      
+
       final greeting = await repository.getGreeting(
         locale: locale,
         datetime: datetime,
       );
-      
+
       print('Greeting received: "$greeting"');
       greetingText.value = greeting;
       print('Greeting set to observable: "${greetingText.value}"');
     } catch (e) {
       print('Error loading greeting: $e');
-      greetingText.value = 'Good morning'; // Fallback
     }
   }
 

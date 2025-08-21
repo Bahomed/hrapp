@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/base_response.dart';
-import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/base_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 
 import '../request_controller.dart';

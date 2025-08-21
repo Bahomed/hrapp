@@ -1,10 +1,10 @@
-import 'package:injazat_hr_app/utils/appconstants.dart';
-import 'package:injazat_hr_app/utils/image.dart';
-import 'package:injazat_hr_app/utils/theme_toggle_widget.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/responsive_utils.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
-import 'package:injazat_hr_app/view/home_screen/homescreen_controller.dart';
+import 'package:com.injazatsoftware.injazathr/utils/appconstants.dart';
+import 'package:com.injazatsoftware.injazathr/utils/image.dart';
+import 'package:com.injazatsoftware.injazathr/utils/theme_toggle_widget.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/view/home_screen/homescreen_controller.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +13,12 @@ import '../../data/local/preferences.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  bool _isArabicText(String text) {
+    if (text.isEmpty) return false;
+    // Check if text contains Arabic characters (Unicode range 0x0600-0x06FF)
+    return text.runes.any((rune) => rune >= 0x0600 && rune <= 0x06FF);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,20 +92,27 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Obx(() => Text(
-                          model.greetingText.value.isNotEmpty 
+                        Obx(() {
+                          final greeting = model.greetingText.value.isNotEmpty 
                               ? model.greetingText.value
-                              : '',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        )),
+                              : '';
+                          final isArabic = _isArabicText(greeting);
+                          
+                          return Text(
+                            greeting,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+                            textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                          );
+                        }),
                         Obx(() => Text(
                           model.userName.value.isNotEmpty ? model.userName.value : tr('user'),
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 12,
                             color: Theme.of(context).textTheme.titleLarge?.color,
                             fontWeight: FontWeight.w600,
                           ),
@@ -112,34 +125,17 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              // Theme toggle with better padding
-
-
+              // Logo replacement for removed buttons
               Padding(
-                padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
-                child: IconButton(
-                  onPressed: () => Get.find<ThemeService>().toggleTheme(),
-                  icon: Icon(
-                    Get.find<ThemeService>().isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                    color: Theme.of(context).iconTheme.color,
-                    size: ResponsiveUtils.responsiveIconSize(context, mobile: 20, tablet: 22, desktop: 24),
-                  ),
-                  tooltip: tr('theme'),
+                padding: EdgeInsets.only(
+                  right: ResponsiveUtils.responsiveWidth(context, 4),
+                  left: ResponsiveUtils.responsiveWidth(context, 4),
+                  top: ResponsiveUtils.responsiveHeight(context, 1),
+                  bottom: ResponsiveUtils.responsiveHeight(context, 1),
                 ),
-              ),
-              // Settings Icon with better styling
-              Padding(
-                padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
-                child: IconButton(
-                  onPressed: () {
-                    model.goToSettingsScreen();
-                  },
-                  icon: Icon(
-                    Icons.settings_outlined,
-                    color: Theme.of(context).iconTheme.color,
-                    size: ResponsiveUtils.responsiveIconSize(context, mobile: 20, tablet: 22, desktop: 24),
-                  ),
-                  tooltip: tr('settings'),
+                child: Image.asset(
+                  themeService.isDarkMode ? enLogoWhite : enLogoBlack,
+                  height: ResponsiveUtils.responsiveHeight(context, 4),
                 ),
               ),
             ],

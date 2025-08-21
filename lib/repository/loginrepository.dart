@@ -1,9 +1,10 @@
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
-import 'package:injazat_hr_app/data/remote/response/login_response.dart' as login_response;
-import 'package:injazat_hr_app/utils/exceptionhandler.dart';
-import 'package:injazat_hr_app/utils/api_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/login_response.dart' as login_response;
+import 'package:com.injazatsoftware.injazathr/utils/exceptionhandler.dart';
+import 'package:com.injazatsoftware.injazathr/utils/api_helper.dart';
+import 'package:com.injazatsoftware.injazathr/services/fcm_service.dart';
 import 'package:dio/dio.dart';
 
 class LoginRepository {
@@ -21,17 +22,65 @@ class LoginRepository {
     preferences.clearWorkspace();
   }
 
+  Future<bool> updateFCMToken() async {
+    try {
+      // Get workspace URL and construct update FCM URL
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final updateFcmUrl = '$workspaceUrl/api/update-fcm-token';
+
+      // Get FCM token
+      String? fcmToken = await FCMService.getFCMToken();
+      
+      if (fcmToken == null) {
+        return false;
+      }
+
+      // Prepare data
+      Map<String, dynamic> data = {
+        'fcm_id': fcmToken
+      };
+      data = ApiHelper.instance.addLocaleToData(data);
+
+      // Get authentication token
+      String? authToken = await preferences.getToken();
+      Map<String, String> headers = {};
+      if (authToken != null) {
+        headers['Authorization'] = 'Bearer $authToken';
+      }
+
+      var response = await dioClient.post(
+          updateFcmUrl,
+          data,
+          headers,
+          {}
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<login_response.LoginResponse?> loginApi(String email, String password) async {
     try {
       // Get workspace URL and construct login URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final loginUrl = '$workspaceUrl/api/login';
 
-      // Prepare login data with dynamic locale
+      // Get FCM token
+      String? fcmToken = await FCMService.getFCMToken();
+
+      // Prepare login data with dynamic locale and FCM token
       Map<String, dynamic> loginData = {
         'mobile_no': email, 
         'password': password
       };
+      
+      // Add FCM token if available
+      if (fcmToken != null) {
+        loginData['fcm_id'] = fcmToken;
+      }
+      
       loginData = ApiHelper.instance.addLocaleToData(loginData);
 
       var response = await dioClient.post(

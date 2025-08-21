@@ -1,4 +1,4 @@
-package com.example.com.injazatsoftware.injazathr;
+package com.injazatsoftware.injazathr;
 
 import io.flutter.embedding.android.FlutterActivity;
 

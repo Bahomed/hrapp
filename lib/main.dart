@@ -1,11 +1,16 @@
-import 'package:injazat_hr_app/view/splash_screen/splash_screen.dart';
-import 'package:injazat_hr_app/utils/language_service.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/view/splash_screen/splash_screen.dart';
+import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/services/fcm_service.dart';
+import 'package:com.injazatsoftware.injazathr/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:camera/camera.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 
 late List<CameraDescription> cameras;
 
@@ -13,10 +18,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      // Firebase already initialized, continue
+      print('Firebase already initialized');
+    } else {
+      rethrow;
+    }
+  }
+  
+  // Initialize FCM
+  await FCMService.initialize();
+  
+  // Initialize Notification Service
+  await NotificationService.initialize();
+  
   // Initialize services
   await initLanguageService();
   Get.put(ThemeService());
-  WidgetsFlutterBinding.ensureInitialized();
   cameras = await availableCameras();
   runApp(const MyApp());
 }

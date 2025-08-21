@@ -2,17 +2,31 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/view/payroll/payroll_controller.dart';
-import 'package:injazat_hr_app/view/payroll/payroll_widgets.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_controller.dart';
+import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_widgets.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../services/theme_service.dart';
 
 class PayrollScreen extends StatelessWidget {
-  const PayrollScreen({super.key});
+  final String? payrollId;
+  
+  const PayrollScreen({super.key, this.payrollId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PayrollController());
+    
+    // If payrollId is provided, handle specific payroll details
+    if (payrollId != null) {
+      print('PayrollScreen: Received payrollId: $payrollId');
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        print('PayrollScreen: About to call navigateToPayrollDetail with ID: $payrollId');
+        
+        // Wait a bit for data to load, then try to navigate
+        await Future.delayed(const Duration(milliseconds: 1500));
+        controller.navigateToPayrollDetail(payrollId!);
+      });
+    }
     final themeService = ThemeService.instance;
 
     return Scaffold(

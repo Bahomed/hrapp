@@ -173,6 +173,7 @@ class PayrollController extends GetxController {
 
   // View payroll details
   void viewPayrollDetails(PayrollRecordResponseData record) {
+    print('viewPayrollDetails called for record ID: ${record.id}');
     Get.bottomSheet(
       Container(
         height: Get.height * 0.9,
@@ -666,6 +667,64 @@ class PayrollController extends GetxController {
   // Get status color
   Color getStatusColor(String status) {
     return _themeService.getStatusColor(status);
+  }
+
+  // Navigate to specific payroll detail by ID
+  void navigateToPayrollDetail(String payrollId) {
+    print('PayrollController.navigateToPayrollDetail: Searching for payroll ID: $payrollId');
+    print('PayrollController: Current payrollRecords count: ${payrollRecords.length}');
+    
+    // Debug print all available record IDs
+    for (var record in payrollRecords) {
+      print('PayrollController: Available record ID: ${record.id}');
+    }
+    
+    // Find the payroll record with the matching ID
+    final PayrollRecordResponseData? record = payrollRecords.firstWhereOrNull(
+      (record) => record.id == payrollId,
+    );
+    
+    if (record != null) {
+      print('PayrollController: Found matching record! Calling viewPayrollDetails for ID: ${record.id}');
+      // Show the payroll details
+      viewPayrollDetails(record);
+    } else {
+      print('PayrollController: Record NOT found in current records. payrollId: $payrollId');
+      // If not found in current records, show a message
+      Get.snackbar(
+        tr('info'),
+        'Payroll record not found in current year. Loading details...',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getWarningColor(),
+        colorText: Colors.white,
+      );
+      
+      // Could potentially load specific payroll by ID from server here
+      _loadSpecificPayroll(payrollId);
+    }
+  }
+
+  // Load specific payroll by ID (if not in current list)
+  Future<void> _loadSpecificPayroll(String payrollId) async {
+    try {
+      // This would need a new API endpoint to get specific payroll by ID
+      // For now, just show a message
+      Get.snackbar(
+        tr('info'),
+        'Feature to load specific payroll details coming soon',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getSurfaceColor(),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        tr('error'),
+        'Failed to load payroll details: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getErrorColor(),
+        colorText: Colors.white,
+      );
+    }
   }
 
 }

@@ -28,11 +28,13 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
+  
+  # Force link TensorFlow Lite for all builds
+   pod 'TensorFlowLiteSwift', '~> 2.12.0'
+   pod 'TensorFlowLiteC', '~> 2.12.0'
 end
 
 post_install do |installer|
@@ -40,8 +42,31 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
       config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+      
+      # Global settings to prevent symbol stripping
+      config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'NO'
+      config.build_settings['COPY_PHASE_STRIP'] = 'NO'
+      config.build_settings['DEAD_CODE_STRIPPING'] = 'NO'
+      config.build_settings['SEPARATE_STRIP'] = 'NO'
+      
+      # Fix TensorFlow Lite and MLKit for all builds
+      if target.name.include?('tflite') || target.name.include?('TensorFlow') || target.name.include?('MLKit')
+        config.build_settings['GCC_OPTIMIZATION_LEVEL'] = '0'
+        config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = '-Onone'
+        config.build_settings['OTHER_LDFLAGS'] ||= []
+        config.build_settings['OTHER_LDFLAGS'] << '-force_load $(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/TensorFlowLiteC/TensorFlowLiteC.framework/TensorFlowLiteC'
+      end
+      
+      # Force link TensorFlow Lite C for Runner target
+      if target.name == 'Runner'
+        config.build_settings['OTHER_LDFLAGS'] ||= []
+        config.build_settings['OTHER_LDFLAGS'] << '-lc++'
+        config.build_settings['OTHER_LDFLAGS'] << '-framework TensorFlowLiteC'
+        config.build_settings['OTHER_LDFLAGS'] << '-Wl,-force_load,$(SRCROOT)/Pods/TensorFlowLiteC/Frameworks/TensorFlowLiteC.xcframework/ios-arm64/TensorFlowLiteC.framework/TensorFlowLiteC'
+        config.build_settings['OTHER_LDFLAGS'] << '-Wl,-force_load,$(SRCROOT)/Pods/TensorFlowLiteC/Frameworks/TensorFlowLiteCMetal.xcframework/ios-arm64/TensorFlowLiteCMetal.framework/TensorFlowLiteCMetal'
+        config.build_settings['OTHER_LDFLAGS'] << '-Wl,-force_load,$(SRCROOT)/Pods/TensorFlowLiteC/Frameworks/TensorFlowLiteCCoreML.xcframework/ios-arm64/TensorFlowLiteCCoreML.framework/TensorFlowLiteCCoreML'
+      end
     end
   end
   

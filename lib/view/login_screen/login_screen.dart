@@ -1,9 +1,9 @@
-import 'package:injazat_hr_app/utils/appconstants.dart';
-import 'package:injazat_hr_app/view/login_screen/login_controller.dart';
-import 'package:injazat_hr_app/utils/screen_themes.dart';
-import 'package:injazat_hr_app/utils/input_widgets.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/responsive_utils.dart';
+import 'package:com.injazatsoftware.injazathr/utils/appconstants.dart';
+import 'package:com.injazatsoftware.injazathr/view/login_screen/login_controller.dart';
+import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
+import 'package:com.injazatsoftware.injazathr/utils/input_widgets.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,8 +1,8 @@
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
-import 'package:injazat_hr_app/data/remote/response/notice_response.dart';
-import 'package:injazat_hr_app/utils/exceptionhandler.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/notice_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/exceptionhandler.dart';
 import 'package:dio/dio.dart';
 
 class NoticeRepository {

@@ -2,22 +2,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/base_response.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
-import 'package:injazat_hr_app/data/remote/response/leave_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/permission_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/request_summary_response.dart';
-import 'package:injazat_hr_app/repository/requestrepository.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/create_leave_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/create_permission_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/create_loan_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/create_letter_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/edit_letter_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/edit_loan_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/edit_permission_request_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/create_request/edit_leave_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/base_response.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/leave_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/permission_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/loan_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/request_summary_response.dart';
+import 'package:com.injazatsoftware.injazathr/repository/requestrepository.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/create_leave_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/create_permission_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/create_loan_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/create_letter_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/edit_letter_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/edit_loan_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/edit_permission_request_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/create_request/edit_leave_request_screen.dart';
 
 import '../../utils/translation_helper.dart';
 
@@ -858,6 +858,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     required String purpose,
     required double amount,
     required int repaymentMonths,
+    String? startDate,
   }) async {
     try {
       isLoading.value = true;
@@ -866,6 +867,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         purpose: purpose,
         amount: amount,
         repaymentMonths: repaymentMonths,
+        startDate: startDate,
       );
 
       if (response.success) {
@@ -897,6 +899,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     required String purpose,
     required double amount,
     required int repaymentMonths,
+    String? startDate,
   }) async {
     try {
       isLoading.value = true;
@@ -906,6 +909,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         purpose: purpose,
         amount: amount,
         repaymentMonths: repaymentMonths,
+        startDate: startDate,
       );
 
       if (response.success) {

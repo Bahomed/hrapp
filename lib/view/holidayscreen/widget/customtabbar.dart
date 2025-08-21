@@ -1,4 +1,7 @@
-import 'package:injazat_hr_app/view/holidayscreen/holidayscreencontroller.dart';
+import 'package:com.injazatsoftware.injazathr/view/holidayscreen/holidayscreencontroller.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -8,195 +11,288 @@ class CustomTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HolidayScreenController model = Get.put(HolidayScreenController());
-    return Padding(
-      padding: const EdgeInsets.all(15),
-      child: DefaultTabController(
-        length: 2,
-        child: Column(
+    final controller = Get.put(HolidayScreenController());
+    final themeService = ThemeService.instance;
+
+    return Column(
+      children: [
+        _buildFilterSection(context, controller),
+        Expanded(
+          child: Obx(() {
+            if (controller.isLoading.value && controller.filteredholidaylist.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (controller.filteredholidaylist.isEmpty) {
+              return _buildEmptyState(context, controller);
+            }
+
+            return _buildHolidaysList(context, controller);
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterSection(BuildContext context, HolidayScreenController controller) {
+    final themeService = ThemeService.instance;
+    
+    return Container(
+      padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 16, tablet: 20, desktop: 24)
+          .add(ResponsiveUtils.responsiveVerticalPadding(context, mobile: 12, tablet: 14, desktop: 16)),
+      decoration: BoxDecoration(
+        color: themeService.getSurfaceColor(),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Obx(() => Row(
           children: [
-            const SizedBox(
-              width: 200,
-              child: TabBar(
-                dividerColor: Colors.transparent,
-                unselectedLabelColor: Colors.grey,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorColor: Colors.white12,
-                indicator: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(0),
-                        bottomLeft: Radius.circular(0),
-                        bottomRight: Radius.circular(10)),
-                    color: Colors.white12),
-                labelPadding: EdgeInsets.zero,
+            // Upcoming filter
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.event_available,
+                      size: 16,
+                      color: controller.selectedFilter.value == 'upcoming' 
+                          ? themeService.getSuccessColor() 
+                          : themeService.getTextSecondaryColor(),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(tr('upcoming')),
+                  ],
+                ),
+                selected: controller.selectedFilter.value == 'upcoming',
+                onSelected: (_) => controller.filterByType('upcoming'),
+                backgroundColor: themeService.getSurfaceColor(),
+                selectedColor: themeService.getSuccessColor().withOpacity(0.2),
+                checkmarkColor: themeService.getSuccessColor(),
                 labelStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontFamily: "google_sans"),
-                tabs: [
-                  Tab(text: 'Upcoming'),
-                  Tab(text: 'Past'),
-                ],
+                  color: controller.selectedFilter.value == 'upcoming' 
+                      ? themeService.getSuccessColor() 
+                      : themeService.getTextSecondaryColor(),
+                  fontWeight: controller.selectedFilter.value == 'upcoming' ? FontWeight.w600 : FontWeight.normal,
+                ),
+                side: BorderSide(
+                  color: controller.selectedFilter.value == 'upcoming' 
+                      ? themeService.getSuccessColor() 
+                      : themeService.getTextSecondaryColor().withOpacity(0.3),
+                  width: 1,
+                ),
               ),
             ),
-            Obx(
-              () => Expanded(
-                child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
+            // Past filter
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        await model.getAllholiday();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListView.builder(
-                            itemCount: model.upcomingholidaylist.length,
-                            itemBuilder: (BuildContext context, index) {
-                              final upcommingholiday =
-                                  model.upcomingholidaylist[index];
-                              return Container(
-                                margin: const EdgeInsets.only(top: 15),
-                                decoration: const BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(10),
-                                      topRight: Radius.circular(0),
-                                      bottomLeft: Radius.circular(0),
-                                      bottomRight: Radius.circular(10)),
-                                  color: Colors.white12,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        height: 60,
-                                        width: 60,
-                                        decoration: const BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              topRight: Radius.circular(0),
-                                              bottomLeft: Radius.circular(0),
-                                              bottomRight: Radius.circular(10)),
-                                          color: Colors.blueAccent,
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              DateFormat('dd').format(
-                                                  upcommingholiday.dateTime),
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 24),
-                                            ),
-                                            Text(
-                                              DateFormat(' MMM ').format(
-                                                  upcommingholiday.dateTime),
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 15),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 15,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          upcommingholiday.title,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                      ),
+                    Icon(
+                      Icons.history,
+                      size: 16,
+                      color: controller.selectedFilter.value == 'past' 
+                          ? themeService.getTextSecondaryColor() 
+                          : themeService.getTextSecondaryColor(),
                     ),
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        model.getAllholiday();
-                      },
-                      child: ListView.builder(
-                          itemCount: model.pastholidaylist.length,
-                          itemBuilder: (BuildContext context, index) {
-                            final pastholiday = model.pastholidaylist[index];
-                            return Container(
-                              margin: const EdgeInsets.only(top: 15),
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(0),
-                                    bottomLeft: Radius.circular(0),
-                                    bottomRight: Radius.circular(10)),
-                                color: Colors.white12,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      height: 60,
-                                      width: 60,
-                                      decoration: const BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(10),
-                                            topRight: Radius.circular(0),
-                                            bottomLeft: Radius.circular(0),
-                                            bottomRight: Radius.circular(10)),
-                                        color: Colors.blueAccent,
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            DateFormat('dd')
-                                                .format(pastholiday.dateTime),
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 24),
-                                          ),
-                                          Text(
-                                            DateFormat(' MMM ')
-                                                .format(pastholiday.dateTime),
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        pastholiday.title,
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 20),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
+                    const SizedBox(width: 4),
+                    Text(tr('past')),
                   ],
+                ),
+                selected: controller.selectedFilter.value == 'past',
+                onSelected: (_) => controller.filterByType('past'),
+                backgroundColor: themeService.getSurfaceColor(),
+                selectedColor: themeService.getTextSecondaryColor().withOpacity(0.2),
+                checkmarkColor: themeService.getTextSecondaryColor(),
+                labelStyle: TextStyle(
+                  color: themeService.getTextSecondaryColor(),
+                  fontWeight: controller.selectedFilter.value == 'past' ? FontWeight.w600 : FontWeight.normal,
+                ),
+                side: BorderSide(
+                  color: controller.selectedFilter.value == 'past' 
+                      ? themeService.getTextSecondaryColor() 
+                      : themeService.getTextSecondaryColor().withOpacity(0.3),
+                  width: 1,
                 ),
               ),
             ),
           ],
+        )),
+      ),
+    );
+  }
+
+  Widget _buildHolidaysList(BuildContext context, HolidayScreenController controller) {
+    return RefreshIndicator(
+      onRefresh: controller.refreshHolidays,
+      child: ListView.builder(
+        padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 16, tablet: 20, desktop: 24),
+        itemCount: controller.filteredholidaylist.length,
+        itemBuilder: (context, index) {
+          final holiday = controller.filteredholidaylist[index];
+          final isUpcoming = holiday.date.isAfter(DateTime.now()) || 
+                            holiday.date.isAtSameMomentAs(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+          return _buildHolidayCard(holiday, isUpcoming, ThemeService.instance);
+        },
+      ),
+    );
+  }
+
+  Widget _buildHolidayCard(dynamic holiday, bool isUpcoming, ThemeService themeService) {
+    final statusColor = isUpcoming 
+        ? themeService.getSuccessColor()
+        : themeService.getWarningColor();
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: themeService.getCardColor(),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: statusColor.withOpacity(0.2),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isUpcoming ? Icons.event_available : Icons.history,
+                  color: statusColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      holiday.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeService.getTextPrimaryColor(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  isUpcoming ? tr('upcoming') : tr('past'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DateFormat('dd').format(holiday.date),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('MMM').format(holiday.date),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  DateFormat('EEEE, MMMM d, y').format(holiday.date),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: themeService.getTextSecondaryColor(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, HolidayScreenController controller) {
+    final themeService = ThemeService.instance;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.event_note,
+            size: 64,
+            color: themeService.getTextSecondaryColor().withValues(alpha: 0.6),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            controller.selectedFilter.value == 'upcoming'
+                ? tr('no_upcoming_holidays')
+                : tr('no_past_holidays'),
+            style: TextStyle(
+              fontSize: 16,
+              color: themeService.getTextSecondaryColor(),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

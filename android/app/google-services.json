@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "615617259720",
+    "project_id": "injazathr-defdb",
+    "storage_bucket": "injazathr-defdb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615617259720:android:28c6d6ffdfc903335d5dfd",
+        "android_client_info": {
+          "package_name": "com.injazatsoftware.injazathr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6STdFWe28o20265Z-5c6HYQbfc35K1Wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/input_widgets.dart';
-import 'package:injazat_hr_app/utils/responsive_utils.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/input_widgets.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import '../../services/theme_service.dart';
 import 'document_upload_controller.dart';
 

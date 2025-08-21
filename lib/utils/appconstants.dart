@@ -9,6 +9,8 @@ const breakActive='assets/images/break_active.png';
 const breakInactive='assets/images/break_inactive.png';
 const logoWhite='assets/icons/Logo.png';
 const logoBlack='assets/icons/logo_black.png';
+const enLogoWhite='assets/icons/EnLogo.png';
+const enLogoBlack='assets/icons/EnLogo_black.png';
 const isDemo = true;
 
 //color

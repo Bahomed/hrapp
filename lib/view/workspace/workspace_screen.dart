@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/appconstants.dart';
-import 'package:injazat_hr_app/utils/input_widgets.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/language_service.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
-import 'package:injazat_hr_app/view/workspace/workspace_controller.dart';
+import 'package:com.injazatsoftware.injazathr/utils/appconstants.dart';
+import 'package:com.injazatsoftware.injazathr/utils/input_widgets.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/view/workspace/workspace_controller.dart';
 
 class WorkspaceScreen extends StatelessWidget {
   WorkspaceScreen({super.key});

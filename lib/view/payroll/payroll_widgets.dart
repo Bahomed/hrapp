@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/payroll_records_response.dart';
-import 'package:injazat_hr_app/data/remote/response/payroll_summary_response.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/utils/screen_themes.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/view/payroll/payroll_controller.dart';
-import 'package:injazat_hr_app/widgets/saudi_riyal_display.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/payroll_records_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/payroll_summary_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_controller.dart';
+import 'package:com.injazatsoftware.injazathr/widgets/saudi_riyal_display.dart';
 import '../../../services/theme_service.dart';
 
 class PayrollStatusChip extends StatelessWidget {
@@ -102,7 +102,10 @@ class PayrollCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => controller.viewPayrollDetails(record),
+          onTap: () {
+            print('PayrollCard tapped! Record ID: ${record.id}');
+            controller.viewPayrollDetails(record);
+          },
           borderRadius: BorderRadius.circular(16),
           child: ScreenThemes.buildPayrollCard(
             context: context,

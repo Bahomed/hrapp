@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/repository/workspacerepository.dart';
-import 'package:injazat_hr_app/utils/alertbox.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/view/login_screen/login_screen.dart';
+import 'package:com.injazatsoftware.injazathr/repository/workspacerepository.dart';
+import 'package:com.injazatsoftware.injazathr/utils/alertbox.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/view/login_screen/login_screen.dart';
 
 import '../../data/local/preferences.dart';
 

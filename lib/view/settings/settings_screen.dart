@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/language_service.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/utils/screen_themes.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
 import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends StatelessWidget {

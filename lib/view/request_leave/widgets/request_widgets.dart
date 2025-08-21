@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/leave_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/permission_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
-import 'package:injazat_hr_app/utils/screen_themes.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/leave_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/permission_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/loan_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 import '../../../widgets/saudi_riyal_display.dart';
 
@@ -521,6 +521,32 @@ class LoanRequestCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
+          // Start Date Display
+          if (request.startDate != null && request.startDate!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${tr('start_date')}: ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: ThemeService.instance.getTextPrimaryColor(),
+                    ),
+                  ),
+                  TextSpan(
+                    text: _formatDate(request.startDate!),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ThemeService.instance.getActionColor('requests'),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Row(
             children: [

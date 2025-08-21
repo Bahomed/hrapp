@@ -1,4 +1,4 @@
-import 'package:injazat_hr_app/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
 
 final Preferences preferences = Preferences();
 
@@ -13,7 +13,6 @@ const baseurl = 'http://injazatsoftware.net/api';
 const loginurl = '$baseurl=/api/v2/login';
 const logouturl = '$baseurl=/api/1.0v/logout';
 const getallnoticeurl = '$baseurl=/api/1.0v/get-all-notice';
-const getallholidayurl = '$baseurl=/api/1.0v/get-all-holiday';
 const getallshifturl = '$baseurl=/api/1.0v/get-shift';
 const saveUserurl='$baseurl=/api/1.0v/save-user';
 const getuserListurl='$baseurl=/api/1.0v/list-user';
@@ -50,3 +49,5 @@ const String documentBaseUrl='/api/documents';
 const dashBoardUrl='/api/get-dashboard';
 const getGreetingUrl='/api/greeting';
 const getUnexecutedRequestsUrl='/api/get-dashboard-unexecuted-approved-requests';
+const notificationsUrl='/api/notifications';
+const getallholidayurl = '/api/get-all-holiday';

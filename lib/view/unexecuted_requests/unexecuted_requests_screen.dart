@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
-import 'package:injazat_hr_app/utils/responsive_utils.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import '../../data/remote/response/unexecuted_requests_response.dart';
 import 'unexecuted_requests_controller.dart';
 

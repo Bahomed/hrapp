@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../utils/responsive_utils.dart';
 import 'profile_controller.dart';
 import '../../services/theme_service.dart';
+import '../settings/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -31,6 +32,34 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          // Theme Toggle Button
+          Padding(
+            padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
+            child: IconButton(
+              onPressed: () => Get.find<ThemeService>().toggleTheme(),
+              icon: Icon(
+                Get.find<ThemeService>().isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+                size: ResponsiveUtils.responsiveIconSize(context, mobile: 20, tablet: 22, desktop: 24),
+              ),
+              tooltip: tr('theme'),
+            ),
+          ),
+          // Settings Icon
+          Padding(
+            padding: EdgeInsets.only(right: ResponsiveUtils.responsiveWidth(context, 2)),
+            child: IconButton(
+              onPressed: () {
+                Get.to(const SettingsScreen());
+              },
+              icon: Icon(
+                Icons.settings_outlined,
+                color: Theme.of(context).iconTheme.color,
+                size: ResponsiveUtils.responsiveIconSize(context, mobile: 20, tablet: 22, desktop: 24),
+              ),
+              tooltip: tr('settings'),
+            ),
+          ),
           Obx(() => IconButton(
             icon: Icon(
               controller.isEditing.value ? Icons.close : Icons.edit,

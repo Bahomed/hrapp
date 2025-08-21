@@ -1,12 +1,11 @@
 import 'dart:async';
-
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/view/workspace/workspace_screen.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/view/workspace/workspace_screen.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/view/home_screen/home_screen.dart';
-import 'package:injazat_hr_app/view/request_leave/request_leave_screen.dart';
-import 'package:injazat_hr_app/view/attendance/clocking_screen.dart';
-import 'package:injazat_hr_app/view/login_screen/login_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/home_screen/home_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/login_screen/login_screen.dart';
+
+import '../../utils/fcm_token_helper.dart';
 
 class SplashController extends GetxController {
   final Preferences perferences = Preferences();
@@ -20,6 +19,18 @@ class SplashController extends GetxController {
   void goToNextPage() async {
     var token = await perferences.getToken();
     var workspaceUrl = await perferences.getWorkspaceUrl();
+    
+    /// Print FCM token for testing (remove in production)
+    // print('About to call FCMTokenHelper.printFCMToken()');
+    // try {
+    //   // Add delay to ensure Firebase is ready
+      //await Future.delayed(const Duration(seconds: 3));
+      //await FCMTokenHelper.printFCMToken();
+      //print('FCMTokenHelper.printFCMToken() completed');
+    // } catch (e) {
+    //   print('Error in FCMTokenHelper.printFCMToken(): $e');
+    //   print('Stack trace: $e');
+    // }*/
 
     Timer(
         const Duration(seconds: 1),

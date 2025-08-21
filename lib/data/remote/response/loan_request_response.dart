@@ -11,6 +11,7 @@ class LoanRequest {
   final String purpose;
   final String amount;
   final int repaymentMonths;
+  final String? startDate;
   final String status;
   final String submittedDate;
   final int? approvedBy;
@@ -27,6 +28,7 @@ class LoanRequest {
     required this.purpose,
     required this.amount,
     required this.repaymentMonths,
+    this.startDate,
     required this.status,
     required this.submittedDate,
     this.approvedBy,
@@ -45,6 +47,7 @@ class LoanRequest {
       purpose: json['purpose'] ?? '',
       amount: json['amount'] ?? '0.00',
       repaymentMonths: json['repayment_months'] ?? 0,
+      startDate: json['start_date'],
       status: json['status'] ?? '',
       submittedDate: json['submitted_date'] ?? '',
       approvedBy: json['approved_by'] != null ? int.tryParse(json['approved_by'].toString()) : null,
@@ -71,6 +74,7 @@ class LoanRequestDetails extends LoanRequest {
     required super.purpose,
     required super.amount,
     required super.repaymentMonths,
+    super.startDate,
     required super.status,
     required super.submittedDate,
     super.approvedBy,
@@ -91,6 +95,7 @@ class LoanRequestDetails extends LoanRequest {
       purpose: json['purpose'] ?? '',
       amount: json['amount'] ?? '0.00',
       repaymentMonths: json['repayment_months'] ?? 0,
+      startDate: json['start_date'],
       status: json['status'] ?? '',
       submittedDate: json['submitted_date'] ?? '',
       approvedBy: json['approved_by'] != null ? int.tryParse(json['approved_by'].toString()) : null,

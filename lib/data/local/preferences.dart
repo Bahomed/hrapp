@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:get_storage/get_storage.dart';
-import 'package:injazat_hr_app/data/remote/response/login_response.dart' as login_response;
+import 'package:com.injazatsoftware.injazathr/data/remote/response/login_response.dart' as login_response;
 
 class Preferences {
   final datacount = GetStorage();
@@ -19,6 +19,7 @@ class Preferences {
 
   // User data keys
   final userData = 'USER_DATA';
+  final notifications = 'NOTIFICATIONS';
 
   // ==================== USER DATA ====================
 
@@ -235,5 +236,23 @@ class Preferences {
       'embedding': faceData.embeddings!,
       'image': base64Decode(faceData.faceImageBase64!),
     };
+  }
+
+  // ==================== NOTIFICATIONS ====================
+
+  Future<void> saveNotifications(List<Map<String, dynamic>> notificationsList) async {
+    await datacount.write(notifications, notificationsList);
+  }
+
+  Future<List<Map<String, dynamic>>> getNotifications() async {
+    final data = datacount.read(notifications);
+    if (data != null && data is List) {
+      return List<Map<String, dynamic>>.from(data);
+    }
+    return [];
+  }
+
+  Future<void> clearNotifications() async {
+    await datacount.remove(notifications);
   }
 }

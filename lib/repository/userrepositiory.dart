@@ -1,5 +1,5 @@
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/utils/exceptionhandler.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/utils/exceptionhandler.dart';
 import 'package:dio/dio.dart';
 import '../data/local/preferences.dart';
 import '../data/remote/response/login_response.dart' as login_response;

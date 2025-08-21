@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
 import '../data/remote/response/schedule_models.dart';
 import '../utils/exceptionhandler.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 
 class ScheduleRepository {
   final Preferences preferences = Preferences();

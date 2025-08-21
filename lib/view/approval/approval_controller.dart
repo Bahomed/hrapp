@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/approval_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/employee_dropdown_response.dart';
-import 'package:injazat_hr_app/repository/requestrepository.dart';
-import 'package:injazat_hr_app/services/theme_service.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/widgets/saudi_riyal_display.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/approval_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/employee_dropdown_response.dart';
+import 'package:com.injazatsoftware.injazathr/repository/requestrepository.dart';
+import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/widgets/saudi_riyal_display.dart';
 
 class ApprovalController extends GetxController {
   final RequestRepository _requestRepository = RequestRepository();

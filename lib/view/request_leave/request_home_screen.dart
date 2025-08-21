@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/view/request_leave/request_controller.dart';
-import 'package:injazat_hr_app/view/request_leave/widgets/request_widgets.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/request_controller.dart';
+import 'package:com.injazatsoftware.injazathr/view/request_leave/widgets/request_widgets.dart';
 import '../../services/theme_service.dart';
 class RequestHomeScreen extends StatelessWidget {
   const RequestHomeScreen({super.key});

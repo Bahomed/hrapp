@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/base_response.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/base_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 
 import '../request_controller.dart';
@@ -21,6 +21,7 @@ class CreateLoanRequestScreen extends StatelessWidget {
     final purposeController = TextEditingController();
     final amountController = TextEditingController();
     final repaymentMonthsController = TextEditingController();
+    final startDateController = TextEditingController();
     final selectedLoanType = Rx<RequestTypeOption?>(null);
 
 
@@ -134,6 +135,21 @@ class CreateLoanRequestScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              // Start Date Field
+              _buildDateField(
+                label: tr('start_date'),
+                controller: startDateController,
+                context: context,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return tr('please_select_start_date');
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 20),
+
               // Repayment Months Number Input
               _buildTextField(
                 label: tr('repayment_period_months'),
@@ -191,6 +207,7 @@ class CreateLoanRequestScreen extends StatelessWidget {
                         purpose: purposeController.text,
                         amount: double.parse(amountController.text),
                         repaymentMonths: int.parse(repaymentMonthsController.text),
+                        startDate: startDateController.text.isNotEmpty ? startDateController.text : null,
                       );
                       
                       // Only navigate if request was successful

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../data/local/preferences.dart';
 import '../../data/remote/response/login_response.dart';
 import '../../repository/logoutrepository.dart';
@@ -370,8 +370,8 @@ class ProfileController extends GetxController {
       // WorkspaceController manages workspace settings that should remain across login/logout
       
       // Reset notification controller
-      if (Get.isRegistered<NotificatiionController>()) {
-        Get.delete<NotificatiionController>(force: true);
+      if (Get.isRegistered<NotificationController>()) {
+        Get.delete<NotificationController>(force: true);
       }
       
       // Reset holiday controller

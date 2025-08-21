@@ -1,5 +1,5 @@
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/utils/api_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:math';

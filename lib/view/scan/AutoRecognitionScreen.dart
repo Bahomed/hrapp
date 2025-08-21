@@ -52,6 +52,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   // Anti-spoofing variables
   bool isRealFace = true;
   double spoofingConfidence = 0.0;
+  DateTime lastAntiSpoofingCheck = DateTime.now();
+  static const int antiSpoofingIntervalMs = 1000; // Check every 1 second instead of every frame
 
   // Performance optimization
   int frameSkipCounter = 0;
@@ -179,8 +181,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
           width: width,
           height: height);
 
-      // Perform anti-spoofing check
-      await checkAntiSpoofing(croppedFace);
+      // Perform anti-spoofing check (throttled to reduce lag)
+      DateTime now = DateTime.now();
+      if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
+        await checkAntiSpoofing(croppedFace);
+        lastAntiSpoofingCheck = now;
+      }
 
       // Only proceed with recognition if face is real
       if (isRealFace) {

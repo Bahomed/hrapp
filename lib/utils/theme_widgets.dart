@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:injazat_hr_app/utils/app_theme.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../services/theme_service.dart';
 
 class ThemeWidgets {

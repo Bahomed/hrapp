@@ -1,4 +1,4 @@
-name: injazat_hr_app
+name: com.injazatsoftware.injazathr
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -67,6 +67,12 @@ dependencies:
   tflite_flutter: ^0.11.0
   image: ^4.3.0
   camera: ^0.10.5+9
+  firebase_messaging: ^16.0.0
+  firebase_core: ^4.0.0
+  flutter_local_notifications: ^18.0.1
+  rename: ^3.1.0
+  googleapis_auth: ^1.6.0
+
   # Face recognition and camera dependencies
  #google_mlkit_face_detection: ^0.10.0
 dev_dependencies:
@@ -110,6 +116,7 @@ flutter:
    - assets/icons/
    - assets/raw/
    - assets/
+   - assets/firebase-service-account.json
 
 
   fonts:

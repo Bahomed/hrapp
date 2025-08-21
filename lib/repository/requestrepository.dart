@@ -1,20 +1,20 @@
 
 // Fixed RequestRepository with Workspace URL support (matching original DioClient signatures)
 import 'dart:io';
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
-import 'package:injazat_hr_app/data/remote/response/base_response.dart';
-import 'package:injazat_hr_app/data/remote/response/leave_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/permission_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/letter_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/request_summary_response.dart';
-import 'package:injazat_hr_app/data/remote/response/request_response.dart' show LoanTypesResponse, LetterTypesResponse;
-import 'package:injazat_hr_app/data/remote/response/approval_request_response.dart';
-import 'package:injazat_hr_app/data/remote/response/employee_dropdown_response.dart';
-import 'package:injazat_hr_app/repository/logoutrepository.dart';
-import 'package:injazat_hr_app/utils/api_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/base_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/leave_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/permission_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/loan_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/request_summary_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/request_response.dart' show LoanTypesResponse, LetterTypesResponse;
+import 'package:com.injazatsoftware.injazathr/data/remote/response/approval_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/employee_dropdown_response.dart';
+import 'package:com.injazatsoftware.injazathr/repository/logoutrepository.dart';
+import 'package:com.injazatsoftware.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
 import '../utils/exceptionhandler.dart';
 import '../utils/translation_helper.dart';
@@ -377,6 +377,7 @@ class RequestRepository {
     required String purpose,
     required double amount,
     required int repaymentMonths,
+    String? startDate,
   }) async {
     try {
       final token = await preferences.getToken();
@@ -390,6 +391,10 @@ class RequestRepository {
         'amount': amount,
         'repayment_months': repaymentMonths,
       };
+      
+      if (startDate != null) {
+        data['start_date'] = startDate;
+      }
       
       var response = await dioClient.post(
         apiUrl,
@@ -415,6 +420,7 @@ class RequestRepository {
     required String purpose,
     required double amount,
     required int repaymentMonths,
+    String? startDate,
   }) async {
     try {
       final token = await preferences.getToken();
@@ -428,6 +434,10 @@ class RequestRepository {
         'amount': amount,
         'repayment_months': repaymentMonths,
       };
+      
+      if (startDate != null) {
+        data['start_date'] = startDate;
+      }
       
       var response = await dioClient.put(
         apiUrl,

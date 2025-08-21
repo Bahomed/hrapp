@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:injazat_hr_app/data/remote/response/base_response.dart';
-import 'package:injazat_hr_app/data/remote/response/loan_request_response.dart';
-import 'package:injazat_hr_app/utils/translation_helper.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/base_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/loan_request_response.dart';
+import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 
 import '../request_controller.dart';
@@ -23,6 +23,7 @@ class EditLoanRequestScreen extends StatelessWidget {
     final purposeController = TextEditingController(text: request.purpose);
     final amountController = TextEditingController(text: request.amount.toString());
     final repaymentMonthsController = TextEditingController(text: request.repaymentMonths.toString());
+    final startDateController = TextEditingController(text: request.startDate ?? '');
     final selectedLoanType = Rx<RequestTypeOption?>(null);
 
     // Find and set the current loan type from the dropdown options
@@ -190,6 +191,21 @@ class EditLoanRequestScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              // Start Date Field
+              _buildDateField(
+                label: tr('start_date'),
+                controller: startDateController,
+                context: context,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return tr('please_select_start_date');
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 20),
+
               // Repayment Months Number Input
               _buildTextField(
                 label: tr('repayment_period_months'),
@@ -248,6 +264,7 @@ class EditLoanRequestScreen extends StatelessWidget {
                         purpose: purposeController.text,
                         amount: double.parse(amountController.text),
                         repaymentMonths: int.parse(repaymentMonthsController.text),
+                        startDate: startDateController.text.isNotEmpty ? startDateController.text : null,
                       );
 
                       // Only navigate if request was successful
@@ -492,6 +509,94 @@ Widget _buildTextAreaField({
           contentPadding: const EdgeInsets.all(16),
           hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
         ),
+      ),
+    ],
+  );
+}
+
+Widget _buildDateField({
+  required String label,
+  required TextEditingController controller,
+  required BuildContext context,
+  String? Function(String?)? validator,
+}) {
+  final themeService = ThemeService.instance;
+  
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: themeService.getTextPrimaryColor(),
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: controller,
+        validator: validator,
+        readOnly: true,
+        style: TextStyle(color: themeService.getTextPrimaryColor()),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: themeService.getCardColor(),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: themeService.getSuccessColor()),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: themeService.getErrorColor()),
+          ),
+          contentPadding: const EdgeInsets.all(16),
+          suffixIcon: Icon(
+            Icons.calendar_today,
+            color: themeService.getTextSecondaryColor(),
+          ),
+          hintText: 'Select $label',
+          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
+        ),
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: themeService.isDarkMode 
+                    ? ColorScheme.dark(
+                        primary: themeService.getSuccessColor(),
+                        onPrimary: Colors.white,
+                        surface: themeService.getCardColor(),
+                        onSurface: themeService.getTextPrimaryColor(),
+                      )
+                    : ColorScheme.light(
+                        primary: themeService.getSuccessColor(),
+                        onPrimary: Colors.white,
+                        surface: themeService.getCardColor(),
+                        onSurface: themeService.getTextPrimaryColor(),
+                      ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (picked != null) {
+            controller.text = picked.toIso8601String().split('T')[0];
+          }
+        },
       ),
     ],
   );

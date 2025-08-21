@@ -1,6 +1,6 @@
 {
-    "name": "injazat_hr_app",
-    "short_name": "injazat_hr_app",
+    "name": "com.injazatsoftware.injazathr",
+    "short_name": "com.injazatsoftware.injazathr",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

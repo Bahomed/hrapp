@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:injazat_hr_app/data/local/preferences.dart';
-import 'package:injazat_hr_app/data/remote/dio_client/dio_client.dart';
-import 'package:injazat_hr_app/data/remote/network_url/network_url.dart';
-import 'package:injazat_hr_app/data/remote/response/getdasboard_response.dart';
-import 'package:injazat_hr_app/data/remote/response/unexecuted_requests_response.dart';
-import 'package:injazat_hr_app/repository/logoutrepository.dart';
+import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/getdasboard_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/unexecuted_requests_response.dart';
+import 'package:com.injazatsoftware.injazathr/repository/logoutrepository.dart';
 import 'package:dio/dio.dart';
 
 import '../utils/exceptionhandler.dart';
