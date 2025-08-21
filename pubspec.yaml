@@ -116,7 +116,6 @@ flutter:
    - assets/icons/
    - assets/raw/
    - assets/
-   - assets/firebase-service-account.json
 
 
   fonts:

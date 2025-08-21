@@ -189,10 +189,16 @@ class FCMTokenHelper {
     try {
       print('🔑 Getting access token from service account...');
       
-      // Load service account credentials from assets
-      final String serviceAccountJson = await rootBundle.loadString(
-        'assets/firebase-service-account.json'
+      // Load service account credentials from environment variables
+      const String serviceAccountJson = String.fromEnvironment(
+        'FIREBASE_SERVICE_ACCOUNT_JSON',
+        defaultValue: '{}',
       );
+      
+      if (serviceAccountJson == '{}') {
+        print('❌ Firebase service account JSON not found in environment variables');
+        return null;
+      }
       
       final Map<String, dynamic> serviceAccount = jsonDecode(serviceAccountJson);
       
