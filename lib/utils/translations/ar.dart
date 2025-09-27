@@ -670,6 +670,7 @@ const Map<String, String> arTranslations = {
   'unable_to_determine_location': 'غير قادر على تحديد الموقع الحالي',
   'n_a': 'غير متاح',
   'employee_no': 'رقم الموظف',
+  'emp#': 'رقم الموظف',
   'mobile': 'الجوال',
   'gender': 'الجنس',
   'age': 'العمر',
@@ -914,5 +915,20 @@ const Map<String, String> arTranslations = {
   'face_registered_successfully': 'تم تسجيل الوجه بنجاح لـ {name} بـ {count} زوايا',
   'start_auto_registration': 'بدء التسجيل التلقائي',
   'perfect_hold_position': 'ممتاز! اثبت على هذه الوضعية...',
-  'captured_angles_count': 'تم التقاط: {current}/{total} زوايا'
+  'captured_angles_count': 'تم التقاط: {current}/{total} زوايا',
+  'req#':'رقم الطلب',
+  '#_name':'# الاسم',
+  'type':'النوع',
+  
+  // Subordinates Data Screen
+  'subordinates_data': 'بيانات المرؤوسين',
+  'search_employees': 'البحث عن الموظفين...',
+  'no_employees_found': 'لم يتم العثور على موظفين',
+  'name': 'الاسم',
+  'inactive': 'غير نشط',
+  'search_results': 'نتائج البحث',
+  'page': 'صفحة',
+  'showing': 'عرض',
+  'of': 'من',
+  'total_employees': 'إجمالي الموظفين'
 };

@@ -51,3 +51,4 @@ const getGreetingUrl='/api/greeting';
 const getUnexecutedRequestsUrl='/api/get-dashboard-unexecuted-approved-requests';
 const notificationsUrl='/api/notifications';
 const getallholidayurl = '/api/get-all-holiday';
+const getEmployeesUrl = '/api/manager/employees';

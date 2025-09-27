@@ -34,13 +34,10 @@ class HomeScreenWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Header
-                const SizedBox(height: 5),
-
                 // Face ID Attendance Section
                 _buildFaceIdAttendanceSection(),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
                 // What would you like to do section
                 Text(
@@ -58,12 +55,12 @@ class HomeScreenWidget extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
                 // Action Buttons Grid
                 _buildActionGrid(),
 
-                const SizedBox(height: 40),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 120),
 
 
 
@@ -137,7 +134,9 @@ class HomeScreenWidget extends StatelessWidget {
     );
   }
   Widget _buildActionGrid() {
-    final actions = [
+    return Builder(
+      builder: (context) {
+        final actions = [
       {
         'icon': Icons.assignment_outlined,
         'label': tr('requests'),
@@ -178,6 +177,11 @@ class HomeScreenWidget extends StatelessWidget {
         'label': tr('profile'),
         'key': 'profile'
       },
+      {
+        'icon': Icons.people_outline,
+        'label': tr('subordinates_data'),
+        'key': 'subordinates_data'
+      },
     ];
 
     // List of navigation functions - Fixed to match the number of actions
@@ -190,16 +194,22 @@ class HomeScreenWidget extends StatelessWidget {
           () => Get.to(const ApprovalScreen()),
           () => Get.to(const UnexecutedRequestsScreen()),
           () => Get.find<HomeScreenController>().goToProfileScreen(),
+          () => Get.find<HomeScreenController>().goToSubordinatesDataScreen(),
     ];
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        childAspectRatio: 1,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveUtils.getResponsiveValue<int>(
+          context, 
+          mobile: 3, 
+          tablet: 4, 
+          desktop: 5
+        ),
+        mainAxisSpacing: 15,
+        crossAxisSpacing: 15,
+        childAspectRatio: 1.0,
       ),
       itemCount: actions.length,
       itemBuilder: (context, index) {
@@ -209,10 +219,13 @@ class HomeScreenWidget extends StatelessWidget {
           label: action['label'] as String,
           color: AppTheme.getActionColor(action['key'] as String),
           onTap: navigationFunctions[index],
+          context: context,
         );
 
 
         return actionButton;
+      },
+    );
       },
     );
   }

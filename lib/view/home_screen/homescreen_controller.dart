@@ -13,6 +13,7 @@ import '../../data/local/preferences.dart';
 import '../../repository/dashboardrepository.dart';
 import '../profile/profile_screen.dart';
 import '../document/document_upload_controller.dart';
+import '../subordinates/subordinates_data_screen.dart';
 
 class HomeScreenController extends SuperController {
   final repository = DashboardRepository();
@@ -144,6 +145,10 @@ class HomeScreenController extends SuperController {
 
   void goToSettingsScreen() {
     Get.to(const SettingsScreen());
+  }
+
+  void goToSubordinatesDataScreen() {
+    Get.to(const SubordinatesDataScreen());
   }
 
 

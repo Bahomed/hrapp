@@ -647,6 +647,7 @@ const Map<String, String> enTranslations = {
   'unable_to_determine_location': 'Unable to determine current location',
   'n_a': 'N/A',
   'employee_no': 'Employee No',
+  'emp#': 'Emp.#',
   'mobile': 'Mobile',
   'gender': 'Gender',
   'age': 'Age',
@@ -910,5 +911,17 @@ const Map<String, String> enTranslations = {
   'captured_angles_count': 'Captured: {current}/{total} angles',
   'req#':'Req#',
   '#_name':'# Name',
-  'type':'Type'
+  'type':'Type',
+  
+  // Subordinates Data Screen
+  'subordinates_data': 'Subordinates Data',
+  'search_employees': 'Search employees...',
+  'no_employees_found': 'No employees found',
+  'name': 'Name',
+  'inactive': 'Inactive',
+  'search_results': 'Search Results',
+  'page': 'Page',
+  'showing': 'Showing',
+  'of': 'of',
+  'total_employees': 'Total Employees',
 };
