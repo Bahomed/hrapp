@@ -51,6 +51,11 @@ class SubordinatesDataController extends GetxController {
       currentPage.value = response.employees.currentPage;
       hasMorePages.value = currentPage.value < response.employees.lastPage;
       
+      // Debug: Print first employee image data
+      if (employees.isNotEmpty) {
+        print('First employee image: ${employees.first.image}');
+      }
+      
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {

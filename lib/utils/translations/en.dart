@@ -924,4 +924,7 @@ const Map<String, String> enTranslations = {
   'showing': 'Showing',
   'of': 'of',
   'total_employees': 'Total Employees',
+  'send_message': 'Send Message',
+  'call_employee': 'Call Employee',
+  'feature_coming_soon': 'Feature Coming Soon',
 };

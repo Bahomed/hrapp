@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../services/theme_service.dart';
 import 'subordinates_data_controller.dart';
+import 'employee_detail_screen.dart';
 
 class SubordinatesDataScreen extends StatelessWidget {
   const SubordinatesDataScreen({super.key});
@@ -161,6 +162,7 @@ class SubordinatesDataScreen extends StatelessWidget {
                           
                           return DataTable(
                             columnSpacing: 16,
+                            showCheckboxColumn: false,
                             headingRowColor: WidgetStateProperty.all(
                               Theme.of(context).primaryColor.withValues(alpha: 0.1),
                             ),
@@ -184,6 +186,9 @@ class SubordinatesDataScreen extends StatelessWidget {
                         ],
                         rows: controller.employees.map((employee) {
                           return DataRow(
+                            onSelectChanged: (selected) {
+                              Get.to(() => EmployeeDetailScreen(employee: employee));
+                            },
                             cells: [
                               DataCell(Text(employee.employeeNo)),
                               DataCell(

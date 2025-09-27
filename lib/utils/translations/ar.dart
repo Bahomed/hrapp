@@ -930,5 +930,8 @@ const Map<String, String> arTranslations = {
   'page': 'صفحة',
   'showing': 'عرض',
   'of': 'من',
-  'total_employees': 'إجمالي الموظفين'
+  'total_employees': 'إجمالي الموظفين',
+  'send_message': 'إرسال رسالة',
+  'call_employee': 'الاتصال بالموظف',
+  'feature_coming_soon': 'الميزة قادمة قريباً',
 };

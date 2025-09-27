@@ -7,6 +7,7 @@ class Employee {
   final String sectionName;
   final String nationalityName;
   final String empStatus;
+  final String? image;
 
   Employee({
     required this.id,
@@ -17,6 +18,7 @@ class Employee {
     required this.sectionName,
     required this.nationalityName,
     required this.empStatus,
+    this.image,
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class Employee {
       sectionName: json['section_name'] ?? '',
       nationalityName: json['nationality_name'] ?? '',
       empStatus: json['emp_status'] ?? '',
+      image: json['image'],
     );
   }
 
@@ -42,6 +45,7 @@ class Employee {
       'section_name': sectionName,
       'nationality_name': nationalityName,
       'emp_status': empStatus,
+      'image': image,
     };
   }
 }
