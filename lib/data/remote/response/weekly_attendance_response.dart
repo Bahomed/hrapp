@@ -60,7 +60,7 @@ class WeeklyAttendanceItem {
   String get formattedDate {
     try {
       final date = DateTime.parse(this.date);
-      return '${date.day}/${date.month}';
+      return '${date.day}-${date.month}-${date.year}';
     } catch (e) {
       return this.date;
     }

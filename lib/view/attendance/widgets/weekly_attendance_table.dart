@@ -10,12 +10,18 @@ class WeeklyAttendanceTable extends StatelessWidget {
   final RxList<WeeklyAttendanceItem> attendanceData;
   final String weekPeriod;
   final bool isLoading;
+  final VoidCallback? onDateTap;
+  final VoidCallback? onPreviousWeek;
+  final VoidCallback? onNextWeek;
 
   const WeeklyAttendanceTable({
     super.key,
     required this.attendanceData,
     required this.weekPeriod,
     this.isLoading = false,
+    this.onDateTap,
+    this.onPreviousWeek,
+    this.onNextWeek,
   });
 
   @override
@@ -63,12 +69,34 @@ class WeeklyAttendanceTable extends StatelessWidget {
                           ),
                           if (weekPeriod.isNotEmpty) ...[
                             const SizedBox(height: 4),
-                            Text(
-                              weekPeriod,
-                              style: TextStyle(
-                                fontSize: isTablet ? 14 : 13,
-                                color: ThemeService.instance.getTextSecondaryColor(),
-                                fontWeight: FontWeight.w400,
+                            GestureDetector(
+                              onTap: onDateTap,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 12,
+                                    color: ThemeService.instance.getVioletStart(),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    weekPeriod,
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 13,
+                                      color: ThemeService.instance.getVioletStart(),
+                                      fontWeight: FontWeight.w500,
+                                      decoration: onDateTap != null ? TextDecoration.underline : null,
+                                    ),
+                                  ),
+                                  if (onDateTap != null) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.edit,
+                                      size: 12,
+                                      color: ThemeService.instance.getVioletStart(),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           ],
@@ -569,23 +597,27 @@ class WeeklyAttendanceTable extends StatelessWidget {
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.all(40),
-      child: Column(
-        children: [
-          Icon(
-            Icons.event_busy,
-            size: 48,
-            color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.6),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No attendance data available',
-            style: TextStyle(
-              fontSize: 14,
-              color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.8),
-              fontWeight: FontWeight.w500,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.event_busy,
+              size: 48,
+              color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.6),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'No attendance data available',
+              style: TextStyle(
+                fontSize: 14,
+                color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.8),
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -608,7 +640,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
           // Previous Week Button
           _buildNavButton(
             icon: Icons.chevron_left,
-            onPressed: controller.loadPreviousWeek,
+            onPressed: onPreviousWeek ?? controller.loadPreviousWeek,
             tooltip: 'Previous Week',
           ),
           
@@ -639,9 +671,9 @@ class WeeklyAttendanceTable extends StatelessWidget {
           // Next Week Button
           Obx(() => _buildNavButton(
             icon: Icons.chevron_right,
-            onPressed: controller.canGoToNextWeek ? controller.loadNextWeek : null,
+            onPressed: onNextWeek ?? (controller.canGoToNextWeek ? controller.loadNextWeek : null),
             tooltip: tr('next_week'),
-            isDisabled: !controller.canGoToNextWeek,
+            isDisabled: onNextWeek == null && !controller.canGoToNextWeek,
           )),
         ],
       ),

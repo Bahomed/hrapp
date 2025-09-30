@@ -8,11 +8,18 @@ import 'attendance_calendar_controller.dart';
 import 'attendance_detail_screen.dart';
 
 class AttendanceCalendarScreen extends StatelessWidget {
-  const AttendanceCalendarScreen({super.key});
+  final int? employeeId;
+  
+  const AttendanceCalendarScreen({super.key, this.employeeId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AttendanceCalendarController());
+    
+    // Initialize with employee ID if provided
+    if (employeeId != null) {
+      controller.initializeWithEmployeeId(employeeId!);
+    }
     final themeService = ThemeService.instance;
 
     return Scaffold(

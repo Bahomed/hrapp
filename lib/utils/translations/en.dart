@@ -36,6 +36,11 @@ const Map<String, String> enTranslations = {
   'un_executed': 'Unexecuted',
   'no_unexecuted_requests': 'No unexecuted requests found',
   'profile': 'Profile',
+  'employee_profile': 'Employee Profile',
+  'employee_requests': 'Employee Requests',
+  'search_by_request_number': 'Search by request number...',
+  'clear_filters': 'Clear Filters',
+  'no_employee_requests_message': 'This employee has not submitted any requests yet.',
   
   // Attendance
   'attendance_calendar': 'Attendance Calendar',

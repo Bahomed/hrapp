@@ -6,11 +6,21 @@ import '../../data/remote/response/schedule_models.dart';
 import '../../services/theme_service.dart';
 
 class ScheduleScreen extends StatelessWidget {
-  const ScheduleScreen({super.key});
+  final int? employeeId;
+  
+  const ScheduleScreen({super.key, this.employeeId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ScheduleController());
+    
+    // Initialize with employee ID if provided, otherwise load general schedules
+    if (employeeId != null) {
+      controller.initializeWithEmployeeId(employeeId!);
+    } else if (controller.availableSchedules.isEmpty && !controller.isLoading.value) {
+      controller.loadSchedules();
+    }
+    
     final themeService = ThemeService.instance;
 
     return Scaffold(

@@ -10,10 +10,19 @@ class WeeklyAttendanceController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString currentWeekPeriod = ''.obs;
   final Rx<DateTime> selectedWeekStart = DateTime.now().obs;
+  final Rx<DateTime> selectedWeekEnd = DateTime.now().obs;
+  final RxnInt employeeId = RxnInt();
 
   @override
   void onInit() {
     super.onInit();
+    // Don't auto-load data here - let the screen handle initialization
+  }
+
+  // Initialize with specific employee ID for viewing subordinate attendance
+  Future<void> initializeWithEmployeeId(int empId) async {
+    employeeId.value = empId;
+    print('WeeklyAttendanceController: Initializing with employee ID: $empId');
     loadCurrentWeekData();
   }
 
@@ -30,14 +39,24 @@ class WeeklyAttendanceController extends GetxController {
     try {
       isLoading.value = true;
       
+      // Store the actual dates being loaded
+      selectedWeekStart.value = startDate;
+      selectedWeekEnd.value = endDate;
+      
       // Update week period display
       currentWeekPeriod.value = _formatWeekPeriod(startDate, endDate);
       
-      // Call API
-      final response = await _attendanceRepository.getWeeklyAttendance(
-        startDate: _formatDateForAPI(startDate),
-        endDate: _formatDateForAPI(endDate),
-      );
+      // Call API with conditional employee ID
+      final response = employeeId.value != null
+          ? await _attendanceRepository.getWeeklyAttendanceForEmployee(
+              startDate: _formatDateForAPI(startDate),
+              endDate: _formatDateForAPI(endDate),
+              employeeId: employeeId.value!,
+            )
+          : await _attendanceRepository.getWeeklyAttendance(
+              startDate: _formatDateForAPI(startDate),
+              endDate: _formatDateForAPI(endDate),
+            );
       
       if (response.success) {
         currentWeekData.assignAll(response.data);
@@ -75,6 +94,7 @@ class WeeklyAttendanceController extends GetxController {
     loadWeekData(startOfWeek, endOfWeek);
   }
 
+
   // Helper methods
   DateTime _getStartOfWeek(DateTime date) {
     // Get Monday as start of week
@@ -91,10 +111,11 @@ class WeeklyAttendanceController extends GetxController {
   }
 
   String _formatWeekPeriod(DateTime start, DateTime end) {
-    final startStr = '${start.day}/${start.month}/${start.year}';
-    final endStr = '${end.day}/${end.month}/${end.year}';
+    final startStr = '${start.day}-${start.month}-${start.year}';
+    final endStr = '${end.day}-${end.month}-${end.year}';
     return '$startStr - $endStr';
   }
+
 
   void _showErrorMessage(String message) {
     Get.snackbar(

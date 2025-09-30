@@ -13,6 +13,7 @@ class AttendanceCalendarController extends GetxController {
   final RxList<AttendanceEntry> attendanceEntries = <AttendanceEntry>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxnInt employeeId = RxnInt(); // Employee ID for viewing subordinate attendance
   
   // Calendar state
   final RxInt currentMonth = DateTime.now().month.obs;
@@ -28,6 +29,13 @@ class AttendanceCalendarController extends GetxController {
     super.onInit();
     loadAttendanceData();
   }
+
+  // Initialize with specific employee ID for viewing subordinate attendance
+  Future<void> initializeWithEmployeeId(int empId) async {
+    employeeId.value = empId;
+    print('AttendanceCalendarController: Initializing with employee ID: $empId');
+    await loadAttendanceDataForEmployee();
+  }
   
   /// Load attendance data for current month/year
   Future<void> loadAttendanceData() async {
@@ -35,10 +43,21 @@ class AttendanceCalendarController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       
-      final response = await _attendanceRepository.getUserAttendanceByMonthYear(
-        currentMonth.value,
-        currentYear.value,
-      );
+      AttendanceCalendarResponse response;
+      
+      // Check if we're loading for a specific employee
+      if (employeeId.value != null) {
+        response = await _attendanceRepository.getUserAttendanceByMonthYearForEmployee(
+          currentMonth.value,
+          currentYear.value,
+          employeeId.value!,
+        );
+      } else {
+        response = await _attendanceRepository.getUserAttendanceByMonthYear(
+          currentMonth.value,
+          currentYear.value,
+        );
+      }
       
       if (response.success) {
         attendanceEntries.assignAll(response.data);
@@ -53,6 +72,37 @@ class AttendanceCalendarController extends GetxController {
       _showErrorSnackbar(tr('error'), tr('failed_to_load_attendance_data'));
       // Use debugPrint instead of print for better logging
       debugPrint('Error loading attendance data: $errorMsg');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Load attendance data for specific employee
+  Future<void> loadAttendanceDataForEmployee() async {
+    if (employeeId.value == null) return; // Guard clause
+
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      final response = await _attendanceRepository.getUserAttendanceByMonthYearForEmployee(
+        currentMonth.value,
+        currentYear.value,
+        employeeId.value!,
+      );
+      
+      if (response.success) {
+        attendanceEntries.assignAll(response.data);
+        _calculateAttendanceCounts();
+      } else {
+        errorMessage.value = response.message.isNotEmpty ? response.message : tr('failed_to_load_attendance_data');
+        _showErrorSnackbar(tr('error'), errorMessage.value);
+      }
+    } catch (e) {
+      final errorMsg = e.toString();
+      errorMessage.value = errorMsg;
+      _showErrorSnackbar(tr('error'), tr('failed_to_load_attendance_data'));
+      debugPrint('Error loading employee attendance data: $errorMsg');
     } finally {
       isLoading.value = false;
     }

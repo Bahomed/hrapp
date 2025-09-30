@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import '../../services/theme_service.dart';
 import '../../data/remote/response/schedule_models.dart';
@@ -9,7 +11,9 @@ import 'weekly_attendance_controller.dart';
 import 'widgets/weekly_attendance_table.dart';
 
 class AttendanceDetailScreen extends StatefulWidget {
-  const AttendanceDetailScreen({super.key});
+  final int? employeeId;
+  
+  const AttendanceDetailScreen({super.key, this.employeeId});
 
   @override
   State<AttendanceDetailScreen> createState() => _AttendanceDetailScreenState();
@@ -22,6 +26,13 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
   void initState() {
     super.initState();
     weeklyController = Get.put(WeeklyAttendanceController());
+    
+    // Initialize with employee ID if provided, otherwise load current user data
+    if (widget.employeeId != null) {
+      weeklyController.initializeWithEmployeeId(widget.employeeId!);
+    } else if (weeklyController.currentWeekData.isEmpty && !weeklyController.isLoading.value) {
+      weeklyController.loadCurrentWeekData();
+    }
   }
 
   @override
@@ -54,7 +65,7 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              Get.to(() => const AttendanceCalendarScreen());
+              Get.to(() => AttendanceCalendarScreen(employeeId: widget.employeeId));
             },
             icon: Icon(
               Icons.table_chart,
@@ -74,6 +85,9 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
                 attendanceData: weeklyController.currentWeekData,
                 weekPeriod: weeklyController.currentWeekPeriod.value,
                 isLoading: weeklyController.isLoading.value,
+                onDateTap: () => _showDateRangePicker(),
+                onPreviousWeek: weeklyController.loadPreviousWeek,
+                onNextWeek: weeklyController.canGoToNextWeek ? weeklyController.loadNextWeek : null,
               )),
             ),
           ],
@@ -82,9 +96,250 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
     );
   }
 
+
+  Future<void> _showDateRangePicker() async {
+    final themeService = ThemeService.instance;
+    final now = DateTime.now();
+    
+    // Show custom date range dialog
+    final DateTimeRange? picked = await _showCustomDateRangeDialog();
+
+    if (picked != null) {
+      // Use the exact selected date range (can be any number of days)
+      weeklyController.selectedWeekStart.value = picked.start;
+      weeklyController.loadWeekData(picked.start, picked.end);
+    }
+  }
+
+  Future<DateTimeRange?> _showCustomDateRangeDialog() async {
+    final themeService = ThemeService.instance;
+    final now = DateTime.now();
+    
+    // Use the exact dates from the controller (what's actually being displayed)
+    final currentStartDate = weeklyController.selectedWeekStart.value;
+    final currentEndDate = weeklyController.selectedWeekEnd.value;
+    
+    DateTime? startDate = currentStartDate;
+    DateTime? endDate = currentEndDate;
+
+    return showDialog<DateTimeRange>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: themeService.getCardColor(),
+              title: Text(
+                tr('select_date_range'),
+                style: TextStyle(
+                  color: themeService.getTextPrimaryColor(),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Start Date
+                  Text(
+                    tr('start_date'),
+                    style: TextStyle(
+                      color: themeService.getTextSecondaryColor(),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: startDate ?? now,
+                        firstDate: DateTime(1998, 1, 1),
+                        lastDate: now,
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: themeService.getVioletStart(),
+                                onPrimary: Colors.white,
+                                surface: themeService.getCardColor(),
+                                onSurface: themeService.getTextPrimaryColor(),
+                              ),
+                            ),
+                            child: Localizations(
+                              locale: const Locale('en', 'US'),
+                              delegates: const [
+                                DefaultMaterialLocalizations.delegate,
+                                DefaultWidgetsLocalizations.delegate,
+                              ],
+                              child: child!,
+                            ),
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          startDate = picked;
+                          // Don't auto-change end date, let user choose freely
+                          // Only ensure end date is not before start date
+                          if (endDate != null && endDate!.isBefore(picked)) {
+                            endDate = picked;
+                          }
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: themeService.getDividerColor()),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            startDate != null 
+                                ? '${startDate!.day}-${startDate!.month}-${startDate!.year}'
+                                : 'Select start date',
+                            style: TextStyle(
+                              color: themeService.getTextPrimaryColor(),
+                              fontSize: 16,
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_today,
+                            color: themeService.getVioletStart(),
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // End Date
+                  Text(
+                    tr('end_date'),
+                    style: TextStyle(
+                      color: themeService.getTextSecondaryColor(),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? now,
+                        firstDate: startDate ?? DateTime(1998, 1, 1),
+                        lastDate: now,
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: themeService.getVioletStart(),
+                                onPrimary: Colors.white,
+                                surface: themeService.getCardColor(),
+                                onSurface: themeService.getTextPrimaryColor(),
+                              ),
+                            ),
+                            child: Localizations(
+                              locale: const Locale('en', 'US'),
+                              delegates: const [
+                                DefaultMaterialLocalizations.delegate,
+                                DefaultWidgetsLocalizations.delegate,
+                              ],
+                              child: child!,
+                            ),
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          endDate = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: themeService.getDividerColor()),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            endDate != null 
+                                ? '${endDate!.day}-${endDate!.month}-${endDate!.year}'
+                                : 'Select end date',
+                            style: TextStyle(
+                              color: themeService.getTextPrimaryColor(),
+                              fontSize: 16,
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_today,
+                            color: themeService.getVioletStart(),
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    tr('cancel'),
+                    style: TextStyle(color: themeService.getTextSecondaryColor()),
+                  ),
+                ),
+                TextButton(
+                  onPressed: startDate != null && endDate != null
+                      ? () {
+                          Navigator.of(context).pop(
+                            DateTimeRange(start: startDate!, end: endDate!),
+                          );
+                        }
+                      : null,
+                  child: Text(
+                    tr('ok'),
+                    style: TextStyle(
+                      color: startDate != null && endDate != null
+                          ? themeService.getVioletStart()
+                          : themeService.getTextSecondaryColor().withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  DateTime _getStartOfWeek(DateTime date) {
+    // Get Monday as start of week
+    final monday = date.subtract(Duration(days: date.weekday - 1));
+    return DateTime(monday.year, monday.month, monday.day);
+  }
+
   Widget _buildCompactScheduleSection() {
     final scheduleController = Get.put(ScheduleController());
     final themeService = ThemeService.instance;
+    
+    // Initialize schedule controller with employee ID if provided
+    if (widget.employeeId != null) {
+      scheduleController.initializeWithEmployeeId(widget.employeeId!);
+    } else if (scheduleController.availableSchedules.isEmpty && !scheduleController.isLoading.value) {
+      scheduleController.loadSchedules();
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -296,13 +551,13 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: workDay.isWorking
-            ? themeService.getSuccessColor().withOpacity(0.1)
-            : themeService.getErrorColor().withOpacity(0.1),
+            ? themeService.getSuccessColor().withValues(alpha: 0.1)
+            : themeService.getErrorColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: workDay.isWorking
-              ? themeService.getSuccessColor().withOpacity(0.3)
-              : themeService.getErrorColor().withOpacity(0.3),
+              ? themeService.getSuccessColor().withValues(alpha: 0.3)
+              : themeService.getErrorColor().withValues(alpha: 0.3),
         ),
       ),
       child: Column(

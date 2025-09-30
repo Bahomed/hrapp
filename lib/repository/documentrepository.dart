@@ -319,4 +319,102 @@ class DocumentRepository {
       rethrow;
     }
   }
+
+  // Employee-specific methods for viewing subordinate documents
+
+  // Get all documents for specific employee
+  Future<DocumentResponse> getAllDocumentsForEmployee(int employeeId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      return DocumentResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get documents by status for specific employee
+  Future<DocumentResponse> getDocumentsByStatusForEmployee(String status, int employeeId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/status/$status';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      return DocumentResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get documents by category for specific employee
+  Future<DocumentResponse> getDocumentsByCategoryForEmployee(String category, int employeeId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/category/$category';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      return DocumentResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get document summary for specific employee
+  Future<DocumentSummaryResponse> getDocumentSummaryForEmployee(int employeeId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/summary/dashboard';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      return DocumentSummaryResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -36,6 +36,11 @@ const Map<String, String> arTranslations = {
   'un_executed': 'غير منفذة',
   'no_unexecuted_requests': 'لا توجد طلبات غير منفذة',
   'profile': 'الملف الشخصي',
+  'employee_profile': 'ملف الموظف الشخصي',
+  'employee_requests': 'طلبات الموظف',
+  'search_by_request_number': 'البحث برقم الطلب...',
+  'clear_filters': 'مسح الفلاتر',
+  'no_employee_requests_message': 'لم يقدم هذا الموظف أي طلبات بعد.',
 
   // Attendance
   'attendance_calendar': 'تقويم الحضور',

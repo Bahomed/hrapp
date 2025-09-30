@@ -11,18 +11,47 @@ class ScheduleController extends GetxController {
   final Rx<ScheduleTemplate?> currentSchedule = Rx<ScheduleTemplate?>(null);
   final RxList<ScheduleTemplate> availableSchedules = <ScheduleTemplate>[].obs;
   final RxInt selectedTemplateIndex = 0.obs;
+  final RxnInt employeeId = RxnInt(); // Employee ID for viewing subordinate schedule
 
   @override
   void onInit() {
     super.onInit();
-    loadSchedules();
+    // Don't auto-load schedules here - let the screen handle initialization
   }
 
-  // Load schedule templates from the API
+  // Initialize with specific employee ID for viewing subordinate schedule
+  Future<void> initializeWithEmployeeId(int empId) async {
+    employeeId.value = empId;
+    print('ScheduleController: Initializing with employee ID: $empId');
+    await loadSchedulesForEmployee();
+  }
+
+  // Load schedule templates from the API (for general use, no employee ID)
   Future<void> loadSchedules() async {
     try {
       isLoading.value = true;
       final templates = await _repository.getScheduleTemplates();
+      
+      if (templates.isNotEmpty) {
+        availableSchedules.assignAll(templates);
+        currentSchedule.value = templates.first;
+      } else {
+        _showErrorSnackbar(tr('no_schedules_available'));
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_loading_schedules')}: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Load schedule templates for specific employee
+  Future<void> loadSchedulesForEmployee() async {
+    if (employeeId.value == null) return; // Guard clause
+
+    try {
+      isLoading.value = true;
+      final templates = await _repository.getScheduleTemplates(employeeId.value);
       if (templates.isNotEmpty) {
         availableSchedules.assignAll(templates);
         currentSchedule.value = templates.first;
@@ -178,7 +207,11 @@ class ScheduleController extends GetxController {
 
   // Refresh data
   void refreshSchedule() {
-    loadSchedules();
+    if (employeeId.value != null) {
+      loadSchedulesForEmployee();
+    } else {
+      loadSchedules();
+    }
     _showSuccessSnackbar(tr('schedule_refreshed'));
   }
 

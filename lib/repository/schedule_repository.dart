@@ -11,17 +11,22 @@ class ScheduleRepository {
   final Preferences preferences = Preferences();
   final DioClient dioClient = DioClient();
 
-  // Get all schedule templates
-  Future<List<ScheduleTemplate>> getScheduleTemplates() async {
+  // Get all schedule templates (optionally for specific employee)
+  Future<List<ScheduleTemplate>> getScheduleTemplates([int? employeeId]) async {
     try {
       final token = await preferences.getToken();
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl/api/schedule-templates';
 
+      final queryParams = {'locale': getCurrentLanguage()};
+      if (employeeId != null) {
+        queryParams['emp_id'] = employeeId.toString();
+      }
+
       var response = await dioClient.get(
         apiUrl,
         {'Authorization': 'Bearer $token'},
-        {'locale': getCurrentLanguage()},
+        queryParams,
       );
 
       final data = response.data['data'] as List;
@@ -51,6 +56,32 @@ class ScheduleRepository {
       );
 
       return ScheduleTemplate.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get schedule templates for specific employee
+  Future<List<ScheduleTemplate>> getScheduleTemplatesForEmployee(int employeeId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl/api/schedule-templates';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+
+      final data = response.data['data'] as List;
+      return data.map((e) => ScheduleTemplate.fromJson(e)).toList();
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';

@@ -9,11 +9,18 @@ import 'document_controller.dart';
 import 'document_widgets.dart';
 
 class DocumentScreen extends StatelessWidget {
-  const DocumentScreen({super.key});
+  final int? employeeId;
+  
+  const DocumentScreen({super.key, this.employeeId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(DocumentController());
+    
+    // Initialize with employee ID if provided
+    if (employeeId != null) {
+      controller.initializeWithEmployeeId(employeeId!);
+    }
 
     return Scaffold(
       appBar: AppBar(

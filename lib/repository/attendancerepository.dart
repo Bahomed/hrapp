@@ -259,4 +259,64 @@ class AttendanceRepository {
       rethrow;
     }
   }
+
+  // Employee-specific methods for viewing subordinate attendance
+
+  /// Get user attendance for calendar by month and year for specific employee
+  Future<AttendanceCalendarResponse> getUserAttendanceByMonthYearForEmployee(int month, int year, int employeeId) async {
+    final token = await preferences.getToken();
+    final workspaceUrl = await preferences.getWorkspaceUrl();
+    
+    try {
+      final apiUrl = '$workspaceUrl/api/attendance/calendar/$month/$year';
+      
+      print('Calling employee attendance API: $apiUrl');
+      print('Employee ID: $employeeId');
+      print('Token: ${token.isNotEmpty ? "Present" : "Missing"}');
+      
+      final response = await dioclient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      
+      print('Employee attendance API response: ${response.statusCode}');
+      print('Response data: ${response.data}');
+      
+      return AttendanceCalendarResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      print('Dio error in employee attendance API: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      throw exceptionHandler(e);
+    } catch (e) {
+      print('General error in employee attendance API: $e');
+      rethrow;
+    }
+  }
+
+  /// Get weekly attendance data for specific employee
+  Future<WeeklyAttendanceResponse> getWeeklyAttendanceForEmployee({
+    required String startDate,
+    required String endDate,
+    required int employeeId,
+  }) async {
+    final token = await preferences.getToken();
+    final workspaceUrl = await preferences.getWorkspaceUrl();
+    
+    try {
+      final apiUrl = '$workspaceUrl/api/attendance/between-dates/$startDate/$endDate';
+      
+      final response = await dioclient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage(), 'emp_id': employeeId},
+      );
+      
+      return WeeklyAttendanceResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

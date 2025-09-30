@@ -26,6 +26,7 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
   final RxList<DocumentResponseData> documents = <DocumentResponseData>[].obs;
   final Rx<DocumentSummaryResponseData?> documentSummary = Rx<DocumentSummaryResponseData?>(null);
   final RxList<DocumentCategoryData> availableCategories = <DocumentCategoryData>[].obs;
+  final RxnInt employeeId = RxnInt(); // Employee ID for viewing subordinate documents
 
   // Tab controller
   late TabController tabController;
@@ -53,6 +54,26 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
     ]);
   }
 
+  // Initialize with specific employee ID for viewing subordinate documents
+  Future<void> initializeWithEmployeeId(int empId) async {
+    employeeId.value = empId;
+    print('DocumentController: Initializing with employee ID: $empId');
+    
+    isLoading.value = true;
+    try {
+      // Load document data for the specific employee
+      await Future.wait([
+        loadDocumentsForEmployee(),
+        loadDocumentSummaryForEmployee(),
+        loadAvailableCategories(),
+      ]);
+    } catch (e) {
+      _showErrorSnackbar('Error', 'Failed to load employee documents: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     tabController.dispose();
@@ -66,11 +87,21 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
 
       DocumentResponse response;
 
-      // Apply status filter
-      if (selectedFilter.value != 'All') {
-        response = await _documentRepository.getDocumentsByStatus(selectedFilter.value.toLowerCase());
+      // Check if we're loading for a specific employee
+      if (employeeId.value != null) {
+        // Apply status filter for employee
+        if (selectedFilter.value != 'All') {
+          response = await _documentRepository.getDocumentsByStatusForEmployee(selectedFilter.value.toLowerCase(), employeeId.value!);
+        } else {
+          response = await _documentRepository.getAllDocumentsForEmployee(employeeId.value!);
+        }
       } else {
-        response = await _documentRepository.getAllDocuments();
+        // Apply status filter for current user
+        if (selectedFilter.value != 'All') {
+          response = await _documentRepository.getDocumentsByStatus(selectedFilter.value.toLowerCase());
+        } else {
+          response = await _documentRepository.getAllDocuments();
+        }
       }
 
       if (response.success) {
@@ -98,12 +129,67 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
 
   Future<void> loadDocumentSummary() async {
     try {
-      final response = await _documentRepository.getDocumentSummary();
+      final response = employeeId.value != null 
+          ? await _documentRepository.getDocumentSummaryForEmployee(employeeId.value!)
+          : await _documentRepository.getDocumentSummary();
       if (response.success) {
         documentSummary.value = response.data;
       }
     } catch (e) {
       // Error loading document summary: $e
+    }
+  }
+
+  // Load documents for specific employee
+  Future<void> loadDocumentsForEmployee() async {
+    if (employeeId.value == null) return; // Guard clause
+
+    try {
+      isLoading.value = true;
+
+      DocumentResponse response;
+
+      // Apply status filter
+      if (selectedFilter.value != 'All') {
+        response = await _documentRepository.getDocumentsByStatusForEmployee(selectedFilter.value.toLowerCase(), employeeId.value!);
+      } else {
+        response = await _documentRepository.getAllDocumentsForEmployee(employeeId.value!);
+      }
+
+      if (response.success) {
+        List<DocumentResponseData> filteredDocuments = response.data;
+
+        // Apply search filter
+        if (searchQuery.value.isNotEmpty) {
+          final query = searchQuery.value.toLowerCase();
+          filteredDocuments = filteredDocuments.where((doc) =>
+          doc.name.toLowerCase().contains(query) ||
+              doc.description.toLowerCase().contains(query)
+          ).toList();
+        }
+
+        documents.value = filteredDocuments;
+      } else {
+        _showErrorSnackbar(tr('failed_to_load_documents'), response.message);
+      }
+    } catch (e) {
+      _showErrorSnackbar(tr('error_loading_documents'), e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Load document summary for specific employee
+  Future<void> loadDocumentSummaryForEmployee() async {
+    if (employeeId.value == null) return; // Guard clause
+
+    try {
+      final response = await _documentRepository.getDocumentSummaryForEmployee(employeeId.value!);
+      if (response.success) {
+        documentSummary.value = response.data;
+      }
+    } catch (e) {
+      // Error loading employee document summary: $e
     }
   }
 

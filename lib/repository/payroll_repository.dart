@@ -235,4 +235,76 @@ throw exceptionHandler(e);
 rethrow;
 }
 }
+
+// Get available years for specific employee
+Future<PayrollYearsResponse> getAvailableYearsForEmployee(int employeeId) async {
+try {
+final token = await preferences.getToken();
+final workspaceUrl = await preferences.getWorkspaceUrl();
+final apiUrl = '$workspaceUrl$payrollBaseUrl/filter/years';
+
+var response = await dioClient.get(
+apiUrl,
+{'Authorization': 'Bearer $token'},
+{'locale': getCurrentLanguage(), 'emp_id': employeeId},
+);
+return PayrollYearsResponse.fromJson(response.data);
+} on DioException catch (e) {
+if (e.error is SocketException) {
+throw 'No Internet Connection';
+} else {
+throw exceptionHandler(e);
+}
+} catch (e) {
+rethrow;
+}
+}
+
+// Get payroll records by year for specific employee
+Future<PayrollRecordsResponse> getPayrollRecordsByYearForEmployee(String year, int employeeId) async {
+try {
+final token = await preferences.getToken();
+final workspaceUrl = await preferences.getWorkspaceUrl();
+final apiUrl = '$workspaceUrl$payrollBaseUrl/year/$year';
+
+var response = await dioClient.get(
+apiUrl,
+{'Authorization': 'Bearer $token'},
+{'locale': getCurrentLanguage(), 'emp_id': employeeId},
+);
+return PayrollRecordsResponse.fromJson(response.data);
+} on DioException catch (e) {
+if (e.error is SocketException) {
+throw 'No Internet Connection';
+} else {
+throw exceptionHandler(e);
+}
+} catch (e) {
+rethrow;
+}
+}
+
+// Get payroll summary for specific employee
+Future<PayrollSummaryResponse> getPayrollSummaryForEmployee(String year, int employeeId) async {
+try {
+final token = await preferences.getToken();
+final workspaceUrl = await preferences.getWorkspaceUrl();
+final apiUrl = '$workspaceUrl$payrollBaseUrl/summary/dashboard/$year';
+
+var response = await dioClient.get(
+apiUrl,
+{'Authorization': 'Bearer $token'},
+{'locale': getCurrentLanguage(), 'emp_id': employeeId},
+);
+return PayrollSummaryResponse.fromJson(response.data);
+} on DioException catch (e) {
+if (e.error is SocketException) {
+throw 'No Internet Connection';
+} else {
+throw exceptionHandler(e);
+}
+} catch (e) {
+rethrow;
+}
+}
 }

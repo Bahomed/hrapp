@@ -21,6 +21,7 @@ class PayrollController extends GetxController {
   final RxList<PayrollRecordResponseData> payrollRecords = <
       PayrollRecordResponseData>[].obs;
   final RxList<PayrollSummaryItem> payrollSummary = <PayrollSummaryItem>[].obs;
+  final RxnInt employeeId = RxnInt(); // Employee ID for viewing subordinate payroll
 
   @override
   void onInit() {
@@ -62,14 +63,54 @@ class PayrollController extends GetxController {
     }
   }
 
+  // Initialize with specific employee ID for viewing subordinate payroll
+  Future<void> initializeWithEmployeeId(int empId) async {
+    employeeId.value = empId;
+    print('PayrollController: Initializing with employee ID: $empId');
+    
+    isLoading.value = true;
+    try {
+      // Get available years and select the highest one
+      final years = await getAvailableYearsForEmployee(empId);
+      if (years.isNotEmpty) {
+        selectedYear.value =
+            years.reduce((a, b) => int.parse(a) > int.parse(b) ? a : b);
+      } else {
+        selectedYear.value = DateTime
+            .now()
+            .year
+            .toString(); // Fallback to current year
+      }
+
+      // Load payroll data and summary for the selected year and employee
+      await Future.wait([
+        loadPayrollDataForEmployee(),
+        loadPayrollSummaryForEmployee(),
+      ]);
+    } catch (e) {
+      Get.snackbar(
+        tr('error'),
+        'Failed to load employee payroll data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getErrorColor(),
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Load payroll data
   Future<void> loadPayrollData() async {
     if (selectedYear.value.isEmpty) return; // Guard clause
 
     isLoading.value = true;
     try {
-      final response = await _payrollRepository.getPayrollRecordsByYear(
-          selectedYear.value);
+      final response = employeeId.value != null
+          ? await _payrollRepository.getPayrollRecordsByYearForEmployee(
+              selectedYear.value, employeeId.value!)
+          : await _payrollRepository.getPayrollRecordsByYear(
+              selectedYear.value);
       if (response.success) {
         payrollRecords.value = response.data;
       } else {
@@ -98,7 +139,9 @@ class PayrollController extends GetxController {
   Future<void> loadPayrollSummary([String? year]) async {
     try {
       final yearToUse = year ?? selectedYear.value;
-      final response = await _payrollRepository.getPayrollSummary(yearToUse);
+      final response = employeeId.value != null
+          ? await _payrollRepository.getPayrollSummaryForEmployee(yearToUse, employeeId.value!)
+          : await _payrollRepository.getPayrollSummary(yearToUse);
       if (response.success) {
         payrollSummary.value = response.data;
       } else {
@@ -132,7 +175,9 @@ class PayrollController extends GetxController {
   Future<void> loadPayrollRecordsByYear(String year) async {
     isLoading.value = true;
     try {
-      final response = await _payrollRepository.getPayrollRecordsByYear(year);
+      final response = employeeId.value != null
+          ? await _payrollRepository.getPayrollRecordsByYearForEmployee(year, employeeId.value!)
+          : await _payrollRepository.getPayrollRecordsByYear(year);
       if (response.success) {
         payrollRecords.value = response.data;
       } else {
@@ -168,6 +213,81 @@ class PayrollController extends GetxController {
       }
     } catch (e) {
       return [];
+    }
+  }
+
+  // Get available years for specific employee
+  Future<List<String>> getAvailableYearsForEmployee(int empId) async {
+    try {
+      final response = await _payrollRepository.getAvailableYearsForEmployee(empId);
+      if (response.success) {
+        return response.data;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Load payroll data for specific employee
+  Future<void> loadPayrollDataForEmployee() async {
+    if (selectedYear.value.isEmpty || employeeId.value == null) return; // Guard clause
+
+    isLoading.value = true;
+    try {
+      final response = await _payrollRepository.getPayrollRecordsByYearForEmployee(
+          selectedYear.value, employeeId.value!);
+      if (response.success) {
+        payrollRecords.value = response.data;
+      } else {
+        Get.snackbar(
+          tr('error'),
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: _themeService.getErrorColor(),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        tr('error'),
+        'Failed to load employee payroll records: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getErrorColor(),
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Load payroll summary for specific employee
+  Future<void> loadPayrollSummaryForEmployee([String? year]) async {
+    if (employeeId.value == null) return; // Guard clause
+
+    try {
+      final yearToUse = year ?? selectedYear.value;
+      final response = await _payrollRepository.getPayrollSummaryForEmployee(yearToUse, employeeId.value!);
+      if (response.success) {
+        payrollSummary.value = response.data;
+      } else {
+        Get.snackbar(
+          tr('error'),
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: _themeService.getErrorColor(),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        tr('error'),
+        'Failed to load employee payroll summary: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: _themeService.getErrorColor(),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -559,7 +679,9 @@ class PayrollController extends GetxController {
 
   // Show year picker
   void showYearPicker() async {
-    final years = await getAvailableYears();
+    final years = employeeId.value != null
+        ? await getAvailableYearsForEmployee(employeeId.value!)
+        : await getAvailableYears();
 
     Get.bottomSheet(
       Container(

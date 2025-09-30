@@ -9,12 +9,21 @@ import '../../services/theme_service.dart';
 
 class PayrollScreen extends StatelessWidget {
   final String? payrollId;
+  final int? employeeId;
   
-  const PayrollScreen({super.key, this.payrollId});
+  const PayrollScreen({super.key, this.payrollId, this.employeeId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PayrollController());
+    
+    // Initialize controller with employee ID if provided
+    if (employeeId != null) {
+      print('PayrollScreen: Received employeeId: $employeeId');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initializeWithEmployeeId(employeeId!);
+      });
+    }
     
     // If payrollId is provided, handle specific payroll details
     if (payrollId != null) {

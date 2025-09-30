@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/data/remote/response/employees_response.dart';
-import '../../services/theme_service.dart';
-import '../../utils/responsive_utils.dart';
-import '../payroll/payroll_screen.dart';
-import '../document/document_screen.dart';
-import '../attendance/attendance_calendar_screen.dart';
-import '../attendance/attendance_detail_screen.dart';
-import '../schedule/schedule_screen.dart';
-import '../profile/employee_profile_screen.dart';
-import '../requests/employee_requests_screen.dart';
+import '../../../services/theme_service.dart';
+import '../../../utils/responsive_utils.dart';
+import '../../payroll/payroll_screen.dart';
+import '../../document/document_screen.dart';
+import '../../attendance/attendance_detail_screen.dart';
+import '../../schedule/schedule_screen.dart';
+import '../../profile/employee_profile_screen.dart';
+import '../../requests/employee_requests_screen.dart';
 
 class EmployeeDetailScreen extends StatelessWidget {
   final Employee employee;
