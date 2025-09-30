@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/data/remote/response/employees_response.dart';
 import '../../services/theme_service.dart';
 import '../../utils/responsive_utils.dart';
+import '../payroll/payroll_screen.dart';
+import '../document/document_screen.dart';
+import '../attendance/attendance_calendar_screen.dart';
+import '../attendance/attendance_detail_screen.dart';
+import '../schedule/schedule_screen.dart';
+import '../profile/employee_profile_screen.dart';
+import '../requests/employee_requests_screen.dart';
 
 class EmployeeDetailScreen extends StatelessWidget {
   final Employee employee;
@@ -432,12 +440,12 @@ class EmployeeDetailScreen extends StatelessWidget {
         ];
 
         final List<VoidCallback> navigationFunctions = [
-          () => _showMessage(context, tr('feature_coming_soon')), // requests
-          () => _showMessage(context, tr('feature_coming_soon')), // payroll
-          () => _showMessage(context, tr('feature_coming_soon')), // documents
-          () => _showMessage(context, tr('feature_coming_soon')), // attendance
-          () => _showMessage(context, tr('feature_coming_soon')), // schedule
-          () => _showMessage(context, tr('feature_coming_soon')), // profile
+          () => Get.to(() => EmployeeRequestsScreen(employeeId: employee.id)), // requests
+          () => Get.to(() => PayrollScreen(employeeId: employee.id)), // payroll
+          () => Get.to(() => DocumentScreen(employeeId: employee.id)), // documents
+          () => Get.to(() => AttendanceDetailScreen(employeeId: employee.id)), // attendance
+          () => Get.to(() => ScheduleScreen(employeeId: employee.id)), // schedule
+          () => Get.to(() => EmployeeProfileScreen(employeeId: employee.id)), // profile
         ];
 
         return GridView.builder(
@@ -520,3 +528,4 @@ class EmployeeDetailScreen extends StatelessWidget {
     );
   }
 }
+
