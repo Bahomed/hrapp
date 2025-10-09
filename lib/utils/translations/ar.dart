@@ -926,7 +926,7 @@ const Map<String, String> arTranslations = {
   'type':'النوع',
   
   // Subordinates Data Screen
-  'subordinates_data': 'بيانات المرؤوسين',
+  'subordinates_data': ' المرؤوسين',
   'search_employees': 'البحث عن الموظفين...',
   'no_employees_found': 'لم يتم العثور على موظفين',
   'name': 'الاسم',

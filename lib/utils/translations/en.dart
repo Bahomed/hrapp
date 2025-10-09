@@ -919,7 +919,7 @@ const Map<String, String> enTranslations = {
   'type':'Type',
   
   // Subordinates Data Screen
-  'subordinates_data': 'Subordinates Data',
+  'subordinates_data': 'Subordinates',
   'search_employees': 'Search employees...',
   'no_employees_found': 'No employees found',
   'name': 'Name',
