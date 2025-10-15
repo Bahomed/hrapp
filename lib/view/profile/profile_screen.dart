@@ -5,6 +5,8 @@ import '../../utils/responsive_utils.dart';
 import 'profile_controller.dart';
 import '../../services/theme_service.dart';
 import '../settings/settings_screen.dart';
+import 'benefitdeduction/benefit_detail_screen.dart';
+import 'benefitdeduction/deduction_detail_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -339,6 +341,91 @@ class ProfileScreen extends StatelessWidget {
               ),
             ],
           ),
+          // Add some spacing before buttons
+          SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2)),
+
+          // Buttons Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.to(() => const BenefitDetailScreen());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeService.getPrimaryColor(),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.card_giftcard,
+                        size: ResponsiveUtils.responsiveIconSize(context, mobile: 18, tablet: 20, desktop: 22),
+                      ),
+                      SizedBox(width: ResponsiveUtils.responsiveWidth(context, 1.5)),
+                      Flexible(
+                        child: Text(
+                          tr('benefit_details'),
+                          style: TextStyle(
+                            fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 12, tablet: 14, desktop: 16),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(width: ResponsiveUtils.responsiveWidth(context, 2)),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.to(() => const DeductionDetailScreen());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeService.getWarningColor(),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.remove_circle_outline,
+                        size: ResponsiveUtils.responsiveIconSize(context, mobile: 18, tablet: 20, desktop: 22),
+                      ),
+                      SizedBox(width: ResponsiveUtils.responsiveWidth(context, 1.5)),
+                      Flexible(
+                        child: Text(
+                          tr('deduction_details'),
+                          style: TextStyle(
+                            fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 12, tablet: 14, desktop: 16),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
         ],
       ),
     );

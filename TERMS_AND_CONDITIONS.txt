@@ -1,0 +1,506 @@
+TERMS AND CONDITIONS FOR INJAZAT HR APP
+
+Last Updated: October 9, 2025
+
+Please read these Terms and Conditions ("Terms", "Terms and Conditions") carefully before using the Injazat HR mobile application (the "App") operated by Injazat Software ("us", "we", or "our").
+
+Your access to and use of the App is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all employees, managers, and users who access or use the App.
+
+By accessing or using the App, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the App.
+
+================================================================================
+
+1. DEFINITIONS
+
+1.1 "App" refers to the Injazat HR mobile application for iOS and Android
+1.2 "User" refers to any employee using the App
+1.3 "Organization" refers to your employer who has deployed this App
+1.4 "Service" refers to the HR management services provided through the App
+1.5 "Content" refers to data, text, images, and other materials in the App
+1.6 "Workspace" refers to your organization's specific instance of the service
+
+================================================================================
+
+2. ACCEPTANCE OF TERMS
+
+2.1 Binding Agreement
+By downloading, installing, or using the Injazat HR App, you acknowledge that:
+- You have read and understood these Terms
+- You agree to be bound by these Terms
+- You are an authorized employee of the Organization
+- You are at least 18 years of age
+- You have the legal capacity to enter into this agreement
+
+2.2 Changes to Terms
+We reserve the right to modify these Terms at any time. We will notify users of any material changes through:
+- In-app notifications
+- Email communications
+- Updated Terms posted in the App
+
+Your continued use of the App after changes constitutes acceptance of the modified Terms.
+
+================================================================================
+
+3. ACCOUNT AND ACCESS
+
+3.1 Account Creation
+- Your employer creates and manages your account
+- You are provided with login credentials (mobile number and password)
+- You are responsible for maintaining the confidentiality of your credentials
+- You must not share your account with others
+- You must notify HR immediately if you suspect unauthorized access
+
+3.2 Account Security
+- You are responsible for all activities under your account
+- You must use a secure password
+- You must not allow others to use your account
+- Sharing credentials is strictly prohibited
+- You may be held liable for losses caused by unauthorized use
+
+3.3 Account Termination
+Your account will be terminated when:
+- Your employment ends
+- Your employer revokes access
+- You violate these Terms
+- At your employer's discretion
+
+================================================================================
+
+4. ACCEPTABLE USE
+
+4.1 Permitted Use
+You may use the App only for:
+- Clocking in/out for attendance
+- Viewing your work schedule
+- Requesting leave, permissions, loans, and letters
+- Viewing payroll information
+- Uploading and managing work-related documents
+- Viewing company announcements and holidays
+- Communicating with your manager regarding HR matters
+- Accessing your employee profile and information
+
+4.2 Prohibited Activities
+You must NOT:
+- Attempt to clock in/out on behalf of another employee
+- Falsify attendance records or location data
+- Submit fraudulent requests (leave, loan, permission, letter)
+- Use GPS spoofing or location manipulation tools
+- Use face recognition bypass techniques
+- Share your login credentials with others
+- Access another employee's account
+- Attempt to hack, reverse engineer, or modify the App
+- Upload malicious files or viruses
+- Use the App for any illegal purpose
+- Harass, abuse, or harm other users
+- Upload inappropriate or offensive content
+- Interfere with the App's operation or security
+- Scrape, crawl, or data mine the App
+- Use the App in any way that violates employment policies
+
+4.3 Consequences of Violation
+Violations may result in:
+- Account suspension or termination
+- Disciplinary action by your employer
+- Legal action for serious violations
+- Reporting to law enforcement if applicable
+
+================================================================================
+
+5. ATTENDANCE AND VERIFICATION
+
+5.1 Face Recognition
+- You consent to face recognition for attendance verification
+- You must provide a clear, recent photo for registration
+- You must present your actual face during clock-in/out
+- Attempting to bypass face verification is prohibited
+- Face data is used solely for identity verification
+
+5.2 Location Verification
+- You must enable location services for attendance
+- Your location is recorded during clock-in/out
+- You must be at an authorized work location
+- GPS spoofing or manipulation is strictly prohibited
+- Location data is used to verify workplace attendance
+
+5.3 Attendance Accuracy
+- You are responsible for accurate attendance records
+- Clock in/out only when actually starting/ending work
+- Report any attendance errors to HR immediately
+- Falsifying attendance is grounds for disciplinary action
+- All attendance data is logged and auditable
+
+================================================================================
+
+6. REQUESTS AND APPROVALS
+
+6.1 Leave Requests
+- You may submit leave requests through the App
+- Requests are subject to manager approval
+- You must provide accurate information
+- Approval is at your manager's and organization's discretion
+- Falsifying leave requests is prohibited
+
+6.2 Permission Requests
+- Short-term permissions must be requested through the App
+- Approval is required before taking permission time
+- You must return as specified in your request
+- Unauthorized absences may result in disciplinary action
+
+6.3 Loan Requests
+- Loan requests are subject to company policy
+- Approval is at the organization's discretion
+- You are responsible for loan repayment terms
+- Loan details are binding once approved
+
+6.4 Letter Requests
+- You may request official letters through the App
+- Letter generation is subject to HR approval
+- Letters are provided based on company policy
+- You must provide accurate information for letters
+
+================================================================================
+
+7. PAYROLL AND FINANCIAL INFORMATION
+
+7.1 Payroll Access
+- You can view your salary and payroll information
+- Payroll data is confidential and for your personal use only
+- You must not share payroll information with unauthorized persons
+- Payroll calculations are based on attendance and company policy
+
+7.2 Accuracy
+- The Organization is responsible for payroll accuracy
+- You should review payroll information regularly
+- Report any discrepancies to HR immediately
+- Final payroll decisions rest with the Organization
+
+7.3 Confidentiality
+- Your payroll information is confidential
+- You must not disclose salary details to other employees
+- Respect the privacy of others' payroll information
+
+================================================================================
+
+8. DOCUMENTS AND CONTENT
+
+8.1 Document Upload
+- You may upload work-related documents through the App
+- Documents must be legitimate and work-related
+- You must not upload illegal, offensive, or malicious content
+- The Organization may review uploaded documents
+- Documents are stored on the Organization's servers
+
+8.2 Intellectual Property
+- You retain ownership of content you upload
+- You grant the Organization a license to use uploaded content
+- You must not upload copyrighted material without permission
+- You must not upload confidential information inappropriately
+
+8.3 Content Removal
+The Organization reserves the right to:
+- Remove any uploaded content
+- Delete inappropriate documents
+- Restrict upload privileges
+- Take action for policy violations
+
+================================================================================
+
+9. PRIVACY AND DATA PROTECTION
+
+9.1 Data Collection
+- We collect personal and employment data as described in our Privacy Policy
+- You consent to data collection and processing by using the App
+- Your data is used for HR management purposes
+- Please review our Privacy Policy for complete details
+
+9.2 Data Use
+Your data is used for:
+- Attendance tracking and verification
+- HR management and administration
+- Payroll processing
+- Communication and notifications
+- Compliance with legal requirements
+
+9.3 Data Sharing
+- Your data is shared within the Organization as necessary
+- Data is shared with authorized personnel only
+- We do not sell your data to third parties
+- See Privacy Policy for complete data sharing details
+
+9.4 Your Rights
+- You can access your personal data through the App
+- You can request corrections to inaccurate data
+- You can request data deletion (subject to legal requirements)
+- Contact HR for data protection inquiries
+
+================================================================================
+
+10. NOTIFICATIONS
+
+10.1 Push Notifications
+- The App sends push notifications for important updates
+- Notifications include attendance reminders, request updates, and announcements
+- You can manage notification settings in the App
+- Some notifications may be mandatory based on employment requirements
+
+10.2 Communication Preferences
+- You can customize notification preferences
+- Critical notifications may not be disabled
+- Disabling notifications may affect your awareness of important updates
+
+================================================================================
+
+11. INTELLECTUAL PROPERTY
+
+11.1 App Ownership
+- The App and all its components are owned by Injazat Software
+- The App is licensed, not sold, to your Organization
+- You receive a limited license to use the App
+- This license does not transfer any ownership rights
+
+11.2 Restrictions
+You must NOT:
+- Copy, modify, or distribute the App
+- Reverse engineer or decompile the App
+- Remove or modify any proprietary notices
+- Create derivative works based on the App
+- Sell, rent, lease, or sublicense the App
+- Use the App's branding or trademarks
+
+11.3 Third-Party Services
+The App uses third-party services including:
+- Firebase (Google LLC)
+- Google ML Kit
+- Various open-source libraries
+These services are subject to their own terms and licenses.
+
+================================================================================
+
+12. DISCLAIMERS AND LIMITATIONS
+
+12.1 Service Availability
+- The App is provided "as is" and "as available"
+- We do not guarantee uninterrupted service
+- Service may be temporarily unavailable for maintenance
+- We are not liable for service interruptions
+- Your Organization manages the backend service availability
+
+12.2 Accuracy
+- We strive for accuracy but do not guarantee error-free operation
+- Attendance, payroll, and other data should be verified
+- Report any inaccuracies immediately
+- Final determinations rest with your Organization
+
+12.3 No Warranty
+TO THE MAXIMUM EXTENT PERMITTED BY LAW:
+- The App is provided without warranties of any kind
+- We disclaim all warranties, express or implied
+- We do not warrant that the App will meet your requirements
+- We do not warrant that the App will be error-free
+- You use the App at your own risk
+
+================================================================================
+
+13. LIMITATION OF LIABILITY
+
+13.1 Liability Limits
+TO THE MAXIMUM EXTENT PERMITTED BY LAW:
+- We shall not be liable for any indirect, incidental, special, or consequential damages
+- We shall not be liable for lost profits, data loss, or business interruption
+- Our total liability shall not exceed the amount paid for the service (if any)
+- These limitations apply even if we have been advised of the possibility of damages
+
+13.2 Exclusions
+Some jurisdictions do not allow certain limitations of liability. In such cases, our liability shall be limited to the maximum extent permitted by law.
+
+13.3 Organization Responsibility
+- Your Organization is responsible for employment decisions
+- Your Organization manages the service and your access
+- Disputes regarding employment matters should be directed to your Organization
+
+================================================================================
+
+14. INDEMNIFICATION
+
+You agree to indemnify, defend, and hold harmless Injazat Software, its officers, directors, employees, and agents from any claims, damages, liabilities, costs, and expenses (including legal fees) arising from:
+- Your use or misuse of the App
+- Your violation of these Terms
+- Your violation of any rights of another person
+- Your violation of employment policies
+- Any fraudulent or illegal activity
+
+================================================================================
+
+15. TERMINATION
+
+15.1 By Organization
+Your Organization may terminate your access at any time for:
+- End of employment
+- Violation of these Terms
+- Violation of employment policies
+- Any other reason at their discretion
+
+15.2 By You
+You may stop using the App at any time, but:
+- Your employment obligations continue
+- You may be required to use the App as a condition of employment
+- Some features may be mandatory based on your job
+
+15.3 Effects of Termination
+Upon termination:
+- Your access to the App will be revoked
+- Your data will be handled per the Organization's retention policy
+- Your obligations under these Terms survive termination
+- Confidentiality obligations continue after termination
+
+================================================================================
+
+16. GOVERNING LAW AND DISPUTES
+
+16.1 Governing Law
+These Terms shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.
+
+16.2 Dispute Resolution
+- Disputes should first be addressed with your Organization's HR department
+- Employment-related disputes are subject to your employment agreement
+- Technical issues should be reported to support
+- Legal disputes may be subject to arbitration or litigation as determined by applicable law
+
+16.3 Jurisdiction
+You agree to submit to the jurisdiction of the courts located in [Your Jurisdiction] for any disputes arising from these Terms.
+
+================================================================================
+
+17. SEVERABILITY
+
+If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited or eliminated to the minimum extent necessary so that these Terms shall otherwise remain in full force and effect.
+
+================================================================================
+
+18. WAIVER
+
+Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights. Any waiver must be in writing and signed by an authorized representative.
+
+================================================================================
+
+19. ENTIRE AGREEMENT
+
+These Terms, together with our Privacy Policy and any other legal notices published in the App, constitute the entire agreement between you and Injazat Software regarding the App and supersede any prior agreements.
+
+================================================================================
+
+20. ASSIGNMENT
+
+You may not assign or transfer these Terms or your rights under these Terms. We may assign our rights and obligations without restriction.
+
+================================================================================
+
+21. FORCE MAJEURE
+
+We shall not be liable for any failure or delay in performance due to circumstances beyond our reasonable control, including but not limited to:
+- Acts of God
+- Natural disasters
+- War or terrorism
+- Government actions
+- Internet or telecommunications failures
+- Third-party service failures
+
+================================================================================
+
+22. THIRD-PARTY BENEFICIARIES
+
+These Terms do not create any third-party beneficiary rights except as expressly stated herein.
+
+================================================================================
+
+23. EXPORT COMPLIANCE
+
+You agree to comply with all applicable export and import laws and regulations. You shall not export or re-export the App in violation of such laws.
+
+================================================================================
+
+24. CONTACT INFORMATION
+
+For questions about these Terms and Conditions, please contact:
+
+Injazat Software
+Email: [Your contact email]
+Phone: [Your contact phone]
+Address: [Your business address]
+
+For employment-related questions, contact your Organization's HR department.
+
+For technical support, contact: [Support email/phone]
+
+================================================================================
+
+25. ACKNOWLEDGMENT
+
+BY USING THE INJAZAT HR APP, YOU ACKNOWLEDGE THAT:
+
+1. You have read and understood these Terms and Conditions
+2. You agree to be bound by these Terms
+3. You understand that violating these Terms may result in account termination and disciplinary action
+4. You consent to the collection and use of your data as described in these Terms and the Privacy Policy
+5. You understand that you are responsible for maintaining the security of your account
+6. You will use the App only for legitimate HR and employment purposes
+7. You will not attempt to bypass security measures or falsify information
+8. You understand that the App is a work tool and subject to employer monitoring
+9. You agree to comply with all applicable laws and your Organization's policies
+10. You understand that these Terms may change and that continued use constitutes acceptance
+
+================================================================================
+
+SPECIAL PROVISIONS FOR SPECIFIC FEATURES
+
+26. FACE RECOGNITION TERMS
+
+By using face recognition features, you:
+- Consent to facial image capture and processing
+- Agree that face data will be used for attendance verification
+- Understand that face recognition is mandatory for attendance
+- Will not attempt to bypass or spoof face recognition
+- Will not use another person's face for verification
+- Acknowledge that face data is biometric information
+- Consent to storage of facial recognition data
+- Understand that face data is protected and used only for intended purposes
+
+27. LOCATION SERVICES TERMS
+
+By using location-based attendance features, you:
+- Consent to collection of GPS location data
+- Understand location is recorded during clock-in/out
+- Will not use GPS spoofing or location manipulation
+- Acknowledge that location verification is mandatory
+- Will only clock in/out from authorized locations
+- Consent to storage of location history
+- Understand location data is used to verify workplace attendance
+
+28. CAMERA PERMISSIONS TERMS
+
+By granting camera access, you:
+- Consent to use of device camera for App functions
+- Will use camera only for legitimate purposes (attendance, documents, profile)
+- Will not capture inappropriate or unauthorized content
+- Understand camera is required for face verification
+- Acknowledge that captured images are stored and processed
+
+29. NOTIFICATION TERMS
+
+By enabling notifications, you:
+- Consent to receiving push notifications
+- Understand notifications may include sensitive information
+- Will protect your device to prevent unauthorized access
+- Acknowledge that critical notifications may be mandatory
+- Can manage notification preferences in settings
+
+================================================================================
+
+END OF TERMS AND CONDITIONS
+
+Last Updated: October 9, 2025
+Version: 1.0
+
+Please retain a copy of these Terms for your records.
+
+By clicking "I Accept" or by using the Injazat HR App, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
