@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_screen.dart';
+import 'package:com.injazatsoftware.injazathr/view/compensation/compensation_screen.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
 import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
@@ -9,7 +10,6 @@ import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 
 import '../../attendance/clocking_screen.dart';
 import '../../document/document_screen.dart';
-import '../../schedule/schedule_screen.dart';
 import '../homescreen_controller.dart';
 import 'package:com.injazatsoftware.injazathr/view/request_leave/request_home_screen.dart';
 import 'package:com.injazatsoftware.injazathr/view/approval/approval_screen.dart';
@@ -158,9 +158,9 @@ class HomeScreenWidget extends StatelessWidget {
         'key': 'attendance'
       },
       {
-        'icon': Icons.calendar_month_outlined,
-        'label': tr('schedule'),
-        'key': 'schedule'
+        'icon': Icons.payments_outlined,
+        'label': tr('compensation'),
+        'key': 'compensation'
       },
       {
         'icon': Icons.check_circle_outline,
@@ -190,7 +190,7 @@ class HomeScreenWidget extends StatelessWidget {
           () => Get.to(const PayrollScreen()),
           () => Get.to(const DocumentScreen()),
           () => Get.find<HomeScreenController>().goToAttendanceDetailScreen(),
-          () => Get.to(const ScheduleScreen()),
+          () => Get.to(const CompensationScreen()),
           () => Get.to(const ApprovalScreen()),
           () => Get.to(const UnexecutedRequestsScreen()),
           () => Get.find<HomeScreenController>().goToProfileScreen(),

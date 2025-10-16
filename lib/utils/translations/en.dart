@@ -30,6 +30,7 @@ const Map<String, String> enTranslations = {
   'documents': 'Documents',
   'attendance': 'Attendance',
   'schedule': 'Schedule',
+  'compensation': 'Compensation',
   'approval': 'Approval',
   'pending': 'Pending',
   'unexecuted_requests': 'Unexecuted Requests',

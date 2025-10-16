@@ -30,6 +30,7 @@ const Map<String, String> arTranslations = {
   'documents': 'الوثائق',
   'attendance': 'الحضور',
   'schedule': 'الجدولة',
+  'compensation': 'المستحقات',
   'approval': 'الموافقة',
   'pending': 'معلقة',
   'unexecuted_requests': 'الطلبات غير المنفذة',

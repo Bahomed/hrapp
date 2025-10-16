@@ -797,13 +797,15 @@ class AppTheme {
                       child: Text(
                         label,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.w500,
                           color: isSelected ? Colors.white : textColor,
+                          height: 1.2,
                         ),
                         textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: TextOverflow.visible,
                         maxLines: 2,
+                        softWrap: true,
                       ),
                     ),
                   ],

@@ -4,6 +4,7 @@ import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
 import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
 import 'package:com.injazatsoftware.injazathr/data/remote/response/benefits_response.dart';
 import 'package:com.injazatsoftware.injazathr/data/remote/response/deductions_response.dart';
+import 'package:com.injazatsoftware.injazathr/data/remote/response/deduction_history_response.dart';
 import '../utils/exceptionhandler.dart';
 import '../utils/translation_helper.dart';
 
@@ -50,6 +51,31 @@ class BenefitDeductionRepository {
       );
 
       return DeductionsResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get deduction history by ID
+  Future<DeductionHistoryResponse> getDeductionHistory(int deductionId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl/api/get-deduction-history/$deductionId';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+
+      return DeductionHistoryResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';
