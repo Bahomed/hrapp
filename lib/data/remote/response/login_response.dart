@@ -123,6 +123,7 @@ class Data {
   String? reportToEmployee;
   String? hiredDate;
   FaceData? faceData;
+  bool? manager;
 
   Data({
     this.id,
@@ -154,6 +155,7 @@ class Data {
     this.reportToEmployee,
     this.hiredDate,
     this.faceData,
+    this.manager,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -186,6 +188,7 @@ class Data {
     reportToEmployee: json["report_to_employee"] ?? "",
     hiredDate: json["hireddate_g"] ?? "",
     faceData: json["face_data"] != null ? FaceData.fromJson(json["face_data"]) : null,
+    manager: json["manager"] ?? false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -218,5 +221,6 @@ class Data {
     "report_to_employee": reportToEmployee,
     'hireddate_g':hiredDate,
     "face_data": faceData?.toJson(),
+    "manager": manager,
   };
 }

@@ -5,7 +5,7 @@ import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
 import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
 import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'privacy_policy_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -15,6 +15,16 @@ class SettingsScreen extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
     final themeService = Get.find<ThemeService>();
     
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
+      Get.snackbar(
+        tr('error'),
+        'Could not open link',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -299,9 +309,8 @@ class SettingsScreen extends StatelessWidget {
                         size: 16,
                         color: Theme.of(context).iconTheme.color,
                       ),
-                      onTap: () {
-                        Get.to(() => const PrivacyPolicyScreen());
-                      },
+                     onTap: () => _launchURL('https://injazathr.com/en/privacy-policy/'),
+
                     ),
                     
                     const Divider(),
@@ -333,14 +342,8 @@ class SettingsScreen extends StatelessWidget {
                         size: 16,
                         color: Theme.of(context).iconTheme.color,
                       ),
-                      onTap: () {
-                        // Navigate to Terms of Service
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(tr('terms_coming_soon')),
-                          ),
-                        );
-                      },
+                      onTap: () => _launchURL('https://injazathr.com/en/terms/'),
+
                     ),
                   ],
                 ),

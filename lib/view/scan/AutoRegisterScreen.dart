@@ -17,6 +17,7 @@ import '../../main.dart';
 import '../../utils/Util.dart';
 import '../../services/theme_service.dart';
 import '../../utils/translation_helper.dart';
+
 // Custom painter to create overlay with transparent circle
 class CircleOverlayPainter extends CustomPainter {
   final Offset circleCenter;
@@ -35,15 +36,12 @@ class CircleOverlayPainter extends CustomPainter {
       ..color = overlayColor
       ..style = PaintingStyle.fill;
 
-    // Create a path for the entire screen
     final fullScreenPath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    // Create a path for the circle (hole)
     final circlePath = Path()
       ..addOval(Rect.fromCircle(center: circleCenter, radius: circleRadius));
 
-    // Subtract the circle from the full screen to create a hole
     final overlayPath = Path.combine(
       PathOperation.difference,
       fullScreenPath,
@@ -74,19 +72,14 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   bool hasCameraError = false;
   String cameraErrorMessage = '';
 
-  // Helper method to safely get front camera
   CameraDescription? _getFrontCamera() {
-    if (cameras.isEmpty) {
-      return null;
-    }
-    
-    // Try to find front camera first
+    if (cameras.isEmpty) return null;
+
     for (var camera in cameras) {
       if (camera.lensDirection == CameraLensDirection.front) {
         return camera;
       }
     }
-    // Fallback to first available camera if no front camera found
     return cameras.first;
   }
 
@@ -101,33 +94,26 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   List<Recognition> faceEmbeddings = [];
   CameraImage? frame;
 
-  // Animation controllers
   late AnimationController _arrowAnimationController;
   late Animation<double> _arrowAnimation;
 
-  // Angle verification variables
   bool isAngleCorrect = false;
   String angleStatus = "";
   int correctAngleCount = 0;
-  static const int requiredStableFrames = 8; // Reduced for faster response
+  static const int requiredStableFrames = 8;
 
-  // Quality assessment variables
   bool isFaceQualityGood = false;
   double faceConfidence = 0.0;
 
-  // Anti-spoofing variables
   bool isRealFace = true;
   double spoofingConfidence = 0.0;
 
-  // UI enhancement variables
   bool showCountdown = false;
   int countdownValue = 3;
 
-  // Performance optimization
   int frameSkipCounter = 0;
-  static const int frameSkipInterval = 2; // Process every 3rd frame
+  static const int frameSkipInterval = 2;
 
-  // Circle overlay dimensions
   static const double circleSize = 280;
   static const double circleRadius = circleSize / 2;
 
@@ -151,7 +137,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   void initState() {
     super.initState();
 
-    // Initialize animation controller
     _arrowAnimationController = AnimationController(
       duration: Duration(milliseconds: 1000),
       vsync: this,
@@ -165,7 +150,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       curve: Curves.easeInOut,
     ));
 
-    // Start repeating animation
     _arrowAnimationController.repeat(reverse: true);
 
     initializeComponents();
@@ -173,19 +157,17 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   void initializeComponents() async {
     try {
-      // Check if cameras are available
       description = _getFrontCamera();
-      
+
       if (description == null) {
         setState(() {
           hasCameraError = true;
           cameraErrorMessage = 'No cameras available on this device';
-          isInitialized = true; // Set to true to stop loading indicator
+          isInitialized = true;
         });
         return;
       }
-      
-      // Initialize face detector with landmarks for angle detection
+
       faceDetector = FaceDetector(
         options: FaceDetectorOptions(
           enableClassification: false,
@@ -195,13 +177,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         ),
       );
 
-      // Initialize face recognizer
       recognizer = Recognizer();
-
-      // Initialize anti-spoofing detector
       antiSpoofingDetector = AntiSpoofingDetector();
 
-      // Initialize camera
       await initializeCamera();
     } catch (e) {
       setState(() {
@@ -249,7 +227,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   doFaceDetectionOnFrame() async {
-    // Performance optimization - skip frames
     frameSkipCounter++;
     if (frameSkipCounter % frameSkipInterval != 0) {
       setState(() {
@@ -269,10 +246,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     List<Face> faces = await faceDetector.processImage(inputImage);
 
     if (faces.isNotEmpty && faces.length == 1) {
-      // Only proceed if exactly one face is detected
       Face face = faces.first;
 
-      // Check if face is well-positioned, angle is correct, quality is good, and is real
       bool faceWellPositioned = isFaceWellPositioned(face);
       bool angleCorrect = isCorrectAngleForStep(face);
       bool qualityGood = assessFaceQuality(face);
@@ -281,9 +256,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       if (faceWellPositioned && angleCorrect && qualityGood && isRealFace) {
         correctAngleCount++;
 
-        // Require stable detection for multiple frames
         if (correctAngleCount >= requiredStableFrames) {
-          // Haptic feedback for successful capture
           HapticFeedback.mediumImpact();
           await captureFaceForCurrentStep(face);
           correctAngleCount = 0;
@@ -298,9 +271,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         correctAngleCount = 0;
         setState(() {
           isAngleCorrect = false;
-          // Only update angleStatus if it wasn't already set by quality assessment
           if (isFaceQualityGood || !qualityGood) {
-            // Quality assessment sets its own status, so only override if quality is good
             if (qualityGood) {
               angleStatus = getAngleGuidanceMessage();
             }
@@ -322,61 +293,51 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   bool isFaceWellPositioned(Face face) {
-    // Check if face is within reasonable bounds and size
     double faceWidth = face.boundingBox.width;
     double faceHeight = face.boundingBox.height;
 
-    // Face should be reasonably sized (not too small or too large)
     return faceWidth > 80 && faceHeight > 80 &&
         faceWidth < 500 && faceHeight < 500;
   }
-  //
-  // | Platform | Direction | Head Yaw (`headEulerAngleY`) | Flip?        |
-  // | -------- | --------- | ---------------------------- | ------------ |
-  // | Android  | Front cam | Mirrored (needs flip)        | ✅ Flip       |
-  // | iOS      | Front cam | Already mirrored             | ❌ Don’t flip |
-  //
-   bool isCorrectAngleForStep(Face face) {
-    // Get head pose angles
-    double? headEulerAngleX = face.headEulerAngleX; // Up/Down (pitch)
-    double? headEulerAngleY = face.headEulerAngleY; // Left/Right (yaw)
-    double? headEulerAngleZ = face.headEulerAngleZ; // Tilt (roll)
+
+  bool isCorrectAngleForStep(Face face) {
+    double? headEulerAngleX = face.headEulerAngleX;
+    double? headEulerAngleY = face.headEulerAngleY;
+    double? headEulerAngleZ = face.headEulerAngleZ;
 
     if (headEulerAngleX == null || headEulerAngleY == null || headEulerAngleZ == null) {
       return false;
     }
 
-    // 👇 Flip yaw (Y) only on Android for front camera
     if (Platform.isAndroid && camDirec == CameraLensDirection.front) {
       headEulerAngleY = -headEulerAngleY;
     }
 
-    // Thresholds
     const double tolerance = 15.0;
     const double rollTolerance = 25.0;
 
     switch (currentStep) {
-      case 0: // Look straight
+      case 0:
         return headEulerAngleX.abs() < tolerance &&
             headEulerAngleY.abs() < tolerance &&
             headEulerAngleZ.abs() < rollTolerance;
 
-      case 1: // Look up
+      case 1:
         return headEulerAngleX > 8 && headEulerAngleX < 50 &&
             headEulerAngleY.abs() < tolerance &&
             headEulerAngleZ.abs() < rollTolerance;
 
-      case 2: // Look down
+      case 2:
         return headEulerAngleX < -8 && headEulerAngleX > -50 &&
             headEulerAngleY.abs() < tolerance &&
             headEulerAngleZ.abs() < rollTolerance;
 
-      case 3: // Look left
+      case 3:
         return headEulerAngleY < -8 && headEulerAngleY > -50 &&
             headEulerAngleX.abs() < tolerance &&
             headEulerAngleZ.abs() < rollTolerance;
 
-      case 4: // Look right
+      case 4:
         return headEulerAngleY > 8 && headEulerAngleY < 50 &&
             headEulerAngleX.abs() < tolerance &&
             headEulerAngleZ.abs() < rollTolerance;
@@ -386,22 +347,17 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     }
   }
 
-
   bool assessFaceQuality(Face face) {
-    // Get frame dimensions
     double frameWidth = frame?.width.toDouble() ?? 640;
     double frameHeight = frame?.height.toDouble() ?? 480;
 
-    // Assess face quality based on multiple factors
     double faceWidth = face.boundingBox.width;
     double faceHeight = face.boundingBox.height;
     double faceSize = faceWidth * faceHeight;
 
-    // More reasonable face size thresholds
-    double minFaceSize = 2500; // Very lenient minimum
-    double maxFaceSize = frameWidth * frameHeight * 0.8; // 80% of frame max
+    double minFaceSize = 2500;
+    double maxFaceSize = frameWidth * frameHeight * 0.8;
 
-    // Check face size - only reject if REALLY too small or too large
     if (faceSize < minFaceSize) {
       setState(() {
         isFaceQualityGood = false;
@@ -418,8 +374,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       return false;
     }
 
-    // Face quality is good - no other checks needed
-    // The visual circle guide is sufficient for user positioning
     setState(() {
       isFaceQualityGood = true;
     });
@@ -427,8 +381,32 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     return true;
   }
 
+  /// ✅ NEW: Validates that a cropped image actually contains a face
+  Future<bool> _validateCroppedFaceContainsFace(img.Image croppedFace) async {
+    try {
+      // Simple validation: just check if the cropped image has reasonable dimensions
+      // and looks like it could contain a face
+      if (croppedFace.width < 50 || croppedFace.height < 50) {
+        print('Cropped face too small: ${croppedFace.width}x${croppedFace.height}');
+        return false;
+      }
+
+      // Check aspect ratio is reasonable for a face (not too wide or tall)
+      double aspectRatio = croppedFace.width / croppedFace.height;
+      if (aspectRatio < 0.5 || aspectRatio > 2.0) {
+        print('Invalid aspect ratio: $aspectRatio');
+        return false;
+      }
+
+      // Validation passed
+      return true;
+    } catch (e) {
+      print('Error validating cropped face: $e');
+      return false;
+    }
+  }
+
   Future<void> checkAntiSpoofing(Face face) async {
-    // Convert camera image to img.Image for anti-spoofing detection
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
         : Util.convertNV21(frame!);
@@ -436,7 +414,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (image != null) {
       image = img.copyRotate(image, angle: camDirec == CameraLensDirection.front ? 270 : 90);
 
-      // Crop face with bounds checking
       Rect faceRect = face.boundingBox;
       int left = faceRect.left.toInt().clamp(0, image.width - 1);
       int top = faceRect.top.toInt().clamp(0, image.height - 1);
@@ -449,7 +426,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           width: width,
           height: height);
 
-      // Perform anti-spoofing detection
       try {
         AntiSpoofingResult result = await antiSpoofingDetector.detectSpoofing(croppedFace);
 
@@ -458,7 +434,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           spoofingConfidence = result.confidence;
         });
 
-        // Update UI status if face is detected as fake
         if (!result.isReal) {
           setState(() {
             isFaceQualityGood = false;
@@ -467,7 +442,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         }
       } catch (e) {
         print('Anti-spoofing detection error: $e');
-        // Default to real face if detection fails
         setState(() {
           isRealFace = true;
           spoofingConfidence = 0.5;
@@ -477,7 +451,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   String getAngleGuidanceMessage() {
-    // Return specific guidance based on current step
     switch (currentStep) {
       case 0:
         return tr('look_straight_at_camera');
@@ -496,19 +469,16 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   Future<void> captureFaceForCurrentStep(Face face) async {
     if (capturedFaces.length <= currentStep) {
-      // Show countdown before capture
       await _showCountdownAndCapture(face);
     }
   }
 
   Future<void> _showCountdownAndCapture(Face face) async {
-    // Show countdown
     setState(() {
       showCountdown = true;
       countdownValue = 3;
     });
 
-    // Countdown animation
     for (int i = 3; i > 0; i--) {
       setState(() {
         countdownValue = i;
@@ -516,30 +486,51 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       await Future.delayed(Duration(milliseconds: 700));
     }
 
-    // Capture the face
     await _performFaceCapture(face);
 
-    // Hide countdown
     setState(() {
       showCountdown = false;
     });
   }
 
   Future<void> _performFaceCapture(Face face) async {
-    // Convert camera image to img.Image
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
         : Util.convertNV21(frame!);
 
     if (image != null) {
+      // ✅ IMPORTANT: Rotate image first, THEN adjust face coordinates
       image = img.copyRotate(image, angle: camDirec == CameraLensDirection.front ? 270 : 90);
 
-      // Crop face with bounds checking
+      // ✅ After rotation, recalculate bounding box coordinates
       Rect faceRect = face.boundingBox;
-      int left = faceRect.left.toInt().clamp(0, image.width - 1);
-      int top = faceRect.top.toInt().clamp(0, image.height - 1);
-      int width = faceRect.width.toInt().clamp(1, image.width - left);
-      int height = faceRect.height.toInt().clamp(1, image.height - top);
+
+      // For front camera with 270° rotation, we need to transform coordinates
+      double rotatedLeft, rotatedTop, rotatedWidth, rotatedHeight;
+
+      if (camDirec == CameraLensDirection.front) {
+        // After 270° rotation: new coordinates
+        rotatedLeft = faceRect.top;
+        rotatedTop = image.height - (faceRect.left + faceRect.width);
+        rotatedWidth = faceRect.height;
+        rotatedHeight = faceRect.width;
+      } else {
+        // After 90° rotation
+        rotatedLeft = image.width - (faceRect.top + faceRect.height);
+        rotatedTop = faceRect.left;
+        rotatedWidth = faceRect.height;
+        rotatedHeight = faceRect.width;
+      }
+
+      // Add padding for better capture (15% on each side)
+      double padding = 0.15;
+      int paddingX = (rotatedWidth * padding).toInt();
+      int paddingY = (rotatedHeight * padding).toInt();
+
+      int left = (rotatedLeft.toInt() - paddingX).clamp(0, image.width - 1);
+      int top = (rotatedTop.toInt() - paddingY).clamp(0, image.height - 1);
+      int width = (rotatedWidth.toInt() + paddingX * 2).clamp(1, image.width - left);
+      int height = (rotatedHeight.toInt() + paddingY * 2).clamp(1, image.height - top);
 
       img.Image croppedFace = img.copyCrop(image,
           x: left,
@@ -547,17 +538,30 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           width: width,
           height: height);
 
-      // Get face embedding
-      Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+      // ✅ VALIDATE: Ensure the cropped image actually contains a face
+      bool isValidFace = await _validateCroppedFaceContainsFace(croppedFace);
 
-      // Store the captured face and embedding
-      capturedFaces.add(croppedFace);
+      if (!isValidFace) {
+        setState(() {
+          angleStatus = tr('face_not_captured_properly_retrying');
+          correctAngleCount = 0;
+          isBusy = false;
+        });
+
+        HapticFeedback.lightImpact();
+        return;
+      }
+
+      // ✅ Resize to standard size for consistency (optional but recommended)
+      img.Image resizedFace = img.copyResize(croppedFace, width: 300, height: 300);
+
+      Recognition recognition = recognizer.recognize(resizedFace, faceRect);
+
+      capturedFaces.add(resizedFace);
       faceEmbeddings.add(recognition);
 
-      // Success haptic feedback
       HapticFeedback.heavyImpact();
 
-      // Auto-advance to next step
       await Future.delayed(Duration(milliseconds: 800));
       _nextStep();
     }
@@ -574,7 +578,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         correctAngleCount = 0;
       });
 
-      // Start capturing after a short delay
       Future.delayed(Duration(milliseconds: 1500), () {
         if (mounted) {
           setState(() {
@@ -583,9 +586,147 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         }
       });
     } else {
-      // Complete registration
+      // ✅ For production: go directly to registration
       _completeRegistration();
+
+      // ✅ For debugging: uncomment this line to show preview dialog
+      // _showCapturedFacesPreview();
     }
+  }
+
+  /// ✅ NEW: Show preview dialog with all captured faces
+  Future<void> _showCapturedFacesPreview() async {
+    setState(() {
+      isCapturing = false;
+    });
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final themeService = Get.find<ThemeService>();
+        return AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: Text(
+            tr('verify_captured_faces'),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+          content: Container(
+            width: double.maxFinite,
+            constraints: BoxConstraints(maxHeight: 500),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  tr('review_faces_before_saving'),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                Expanded(
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: capturedFaces.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green, width: 2),
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                                child: Image.memory(
+                                  Uint8List.fromList(img.encodePng(capturedFaces[index])),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.2),
+                                borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+                              ),
+                              child: Text(
+                                instructions[index],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Retry
+              },
+              child: Text(
+                tr('retry'),
+                style: TextStyle(color: themeService.getErrorColor(), fontSize: 16),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Confirm
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: themeService.getSuccessColor(),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text(
+                tr('confirm_and_save'),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      // User confirmed, proceed with saving
+      _completeRegistration();
+    } else {
+      // User wants to retry
+      _resetRegistration();
+    }
+  }
+
+  /// ✅ NEW: Reset registration to start over
+  void _resetRegistration() {
+    setState(() {
+      currentStep = 0;
+      capturedFaces.clear();
+      faceEmbeddings.clear();
+      isCapturing = false;
+      isAngleCorrect = false;
+      isFaceQualityGood = false;
+      angleStatus = '';
+      correctAngleCount = 0;
+    });
   }
 
   void _completeRegistration() async {
@@ -599,42 +740,33 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     Get.back();
   }
 
-
-
-
   Future<void> _saveFaceRegistration(String name) async {
     if (faceEmbeddings.isNotEmpty) {
       try {
-        // Use the first face embedding as the primary one
         Recognition primaryRecognition = faceEmbeddings.first;
         img.Image primaryFace = capturedFaces.first;
 
-        // Get user ID from preferences
         final preferences = Preferences();
         final userId = await preferences.getUserId();
 
         if (userId != null) {
-          // Create repository instance
           final faceRepository = FaceRegistrationRepository();
 
-          // Register or update face on server (prevents duplicates)
           final result = await faceRepository.registerFaceApi(
             userId: userId.toString(),
             name: name,
             embeddings: primaryRecognition.embeddings,
             faceImage: Uint8List.fromList(img.encodeBmp(primaryFace)),
           );
-          // Register face in local database
+
           recognizer.registerFaceInDB(
             name,
             primaryRecognition.embeddings,
             Uint8List.fromList(img.encodeBmp(primaryFace)),
           );
 
-          // Refresh face data from storage
           recognizer.refreshRegisteredFaces();
-          print('OKkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
-          // Show success message first
+
           Get.snackbar(
             tr('success'),
             result?.message ??
@@ -643,16 +775,11 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             colorText: Colors.white,
           );
 
-
-
-          // Go back after a short delay to show the success message
           Future.delayed(Duration(milliseconds: 1500), () {
             Get.back();
           });
         }
       } catch (e) {
-        // Show error message
-
         Get.snackbar(
           tr('error'),
           '${tr('failed_to_register_face')}: ${e.toString()}',
@@ -660,7 +787,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           colorText: Colors.white,
         );
       } finally {
-        // Reset for next registration
         setState(() {
           currentStep = 0;
           capturedFaces.clear();
@@ -672,7 +798,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   Widget _buildAnimatedArrow() {
     if (currentStep == 0 || !isCapturing) {
-      // No arrow for straight ahead or when not capturing
       return Center(
         child: Container(
           width: 8,
@@ -688,14 +813,14 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     return AnimatedBuilder(
       animation: _arrowAnimation,
       builder: (context, child) {
-        double opacity = 0.4 + (_arrowAnimation.value * 0.6); // Fade between 0.4 and 1.0
-        double offset = _arrowAnimation.value * 20; // Move up to 20 pixels
+        double opacity = 0.4 + (_arrowAnimation.value * 0.6);
+        double offset = _arrowAnimation.value * 20;
 
         Widget arrowIcon;
         Offset arrowOffset = Offset.zero;
 
         switch (currentStep) {
-          case 1: // Look up
+          case 1:
             arrowIcon = Icon(
               Icons.keyboard_arrow_up_rounded,
               size: 60,
@@ -704,7 +829,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             arrowOffset = Offset(0, -offset);
             break;
 
-          case 2: // Look down
+          case 2:
             arrowIcon = Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 60,
@@ -713,7 +838,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             arrowOffset = Offset(0, offset);
             break;
 
-          case 3: // Look left
+          case 3:
             arrowIcon = Icon(
               Icons.keyboard_arrow_left_rounded,
               size: 60,
@@ -722,7 +847,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             arrowOffset = Offset(-offset, 0);
             break;
 
-          case 4: // Look right
+          case 4:
             arrowIcon = Icon(
               Icons.keyboard_arrow_right_rounded,
               size: 60,
@@ -747,8 +872,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   InputImage? getInputImage() {
     if (description == null) return null;
-    
-    final camera = description!; // Use the already selected camera description
+
+    final camera = description!;
     final sensorOrientation = camera.sensorOrientation;
 
     InputImageRotation? rotation;
@@ -806,8 +931,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   void dispose() {
     controller?.dispose();
     _arrowAnimationController.dispose();
-    
-    // Only dispose if they were initialized
+
     if (!hasCameraError) {
       try {
         faceDetector.close();
@@ -817,7 +941,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         // Ignore disposal errors
       }
     }
-    
+
     super.dispose();
   }
 
@@ -844,74 +968,72 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           ? Center(child: CircularProgressIndicator(color: themeService.getSuccessColor()))
           : hasCameraError
           ? Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      size: 80,
-                      color: Colors.white54,
-                    ),
-                    SizedBox(height: 24),
-                    Text(
-                      'Camera Error',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      cameraErrorMessage,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: themeService.getErrorColor(),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Go Back',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.camera_alt_outlined,
+                size: 80,
+                color: Colors.white54,
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Camera Error',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              Text(
+                cameraErrorMessage,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeService.getErrorColor(),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Go Back',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            )
+            ],
+          ),
+        ),
+      )
           : Column(
         children: [
           Expanded(
             child: Stack(
               children: [
-                // Camera preview
                 Positioned.fill(
                   child: controller.value.isInitialized
                       ? CameraPreview(controller)
                       : Container(color: Colors.grey[800]),
                 ),
 
-                // Overlay to darken surrounding area with transparent circle
                 Positioned.fill(
                   child: CustomPaint(
                     painter: CircleOverlayPainter(
@@ -920,7 +1042,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                         (MediaQuery.of(context).size.height -
                             MediaQuery.of(context).padding.top -
                             kToolbarHeight -
-                            300) / 2 + MediaQuery.of(context).padding.top + kToolbarHeight, // Center in available camera area
+                            300) / 2 + MediaQuery.of(context).padding.top + kToolbarHeight,
                       ),
                       circleRadius: circleRadius,
                       overlayColor: Colors.black.withOpacity(0.7),
@@ -928,7 +1050,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                   ),
                 ),
 
-                // Face detection overlay circle - positioned to match the transparent hole
                 Positioned(
                   left: (MediaQuery.of(context).size.width - circleSize) / 2,
                   top: (MediaQuery.of(context).size.height -
@@ -951,16 +1072,13 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                         ? Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        // Remove any background color to keep it transparent
                       ),
-                      // Add animated arrow inside the circle
                       child: _buildAnimatedArrow(),
                     )
                         : null,
                   ),
                 ),
 
-                // Center dot for guidance - positioned to match circle center
                 Positioned(
                   left: MediaQuery.of(context).size.width / 2 - 4,
                   top: (MediaQuery.of(context).size.height -
@@ -977,7 +1095,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                   ),
                 ),
 
-                // Countdown overlay
                 if (showCountdown)
                   Positioned.fill(
                     child: Container(
@@ -1015,7 +1132,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                     ),
                   ),
 
-                // Angle status indicator
                 if (isCapturing && !showCountdown)
                   Positioned(
                     top: MediaQuery.of(context).padding.top + kToolbarHeight + 20,
@@ -1043,7 +1159,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             ),
           ),
 
-          // Instructions section
           Container(
             padding: EdgeInsets.all(24),
             child: Column(
@@ -1068,7 +1183,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                 ),
                 SizedBox(height: 24),
 
-                // Enhanced progress indicator
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
@@ -1103,7 +1217,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
                 SizedBox(height: 32),
 
-                // Start/Status button
                 if (currentStep == 0 && !isCapturing)
                   ElevatedButton(
                     onPressed: _startCapture,
@@ -1127,7 +1240,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                     ),
                   ),
 
-                // Status text
                 if (isCapturing)
                   Text(
                     (isAngleCorrect && isFaceQualityGood) ? tr('perfect_hold_position') : angleStatus,
@@ -1139,7 +1251,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                     textAlign: TextAlign.center,
                   ),
 
-                // Captured faces count
                 if (capturedFaces.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 16),

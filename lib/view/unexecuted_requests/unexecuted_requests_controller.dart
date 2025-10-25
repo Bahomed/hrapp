@@ -21,9 +21,10 @@ class UnexecutedRequestsController extends GetxController {
   Future<void> loadUnexecutedRequests() async {
     try {
       isLoading.value = true;
-      
-      final response = await repository.getUnexecutedRequests();
-      
+
+      final locale = Get.locale?.languageCode ?? 'en';
+      final response = await repository.getUnexecutedRequests(locale: locale);
+
       unexecutedRequestsTotal.value = response.unexecutedRequestsTotal;
       unexecutedRequests.value = response.unexecutedRequests;
       

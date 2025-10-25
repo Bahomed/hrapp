@@ -31,6 +31,7 @@ class HomeScreenController extends SuperController {
   var userName = "".obs;
   var userEmail = "".obs;
   var greetingText = "".obs;
+  var isManager = false.obs;
 
   final controller = ScrollController();
 
@@ -74,12 +75,14 @@ class HomeScreenController extends SuperController {
         userImage.value = userData.image ?? '';
         userName.value = userData.employeeName ?? '';
         userEmail.value = userData.email ?? '';
+        isManager.value = userData.manager ?? false;
 
         // Debug print to verify data loading
         print('User data loaded:');
         print('Name: ${userName.value}');
         print('Email: ${userEmail.value}');
         print('Image: ${userImage.value}');
+        print('Is Manager: ${isManager.value}');
       }
     } catch (e) {
       print('Error loading user data: $e');

@@ -19,7 +19,7 @@ import '../../data/local/preferences.dart';
 class AutoRecognitionScreen extends StatefulWidget {
   final String attendanceType; // 'clock_in', 'clock_out', 'break_start', 'break_end'
   final Map<String, dynamic>? locationData;
-  
+
   const AutoRecognitionScreen({
     super.key,
     required this.attendanceType,
@@ -53,11 +53,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   bool isRealFace = true;
   double spoofingConfidence = 0.0;
   DateTime lastAntiSpoofingCheck = DateTime.now();
-  static const int antiSpoofingIntervalMs = 1000; // Check every 1 second instead of every frame
+  static const int antiSpoofingIntervalMs = 1000;
 
   // Performance optimization
   int frameSkipCounter = 0;
-  static const int frameSkipInterval = 3; // Process every 4th frame
+  static const int frameSkipInterval = 3;
 
   // Recognition confidence threshold
   static const double recognitionThreshold = 0.6;
@@ -73,7 +73,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   }
 
   void initializeComponents() async {
-    // Initialize face detector
     faceDetector = FaceDetector(
       options: FaceDetectorOptions(
         enableClassification: false,
@@ -83,13 +82,9 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       ),
     );
 
-    // Initialize face recognizer
     recognizer = Recognizer();
-
-    // Initialize anti-spoofing detector
     antiSpoofingDetector = AntiSpoofingDetector();
 
-    // Initialize camera
     await initializeCamera();
   }
 
@@ -108,7 +103,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
 
       setState(() {
         isInitialized = true;
-        isRecognizing = true; // Auto-start recognition
+        isRecognizing = true;
       });
 
       controller.startImageStream((image) => {
@@ -122,7 +117,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   }
 
   doFaceRecognitionOnFrame() async {
-    // Performance optimization - skip frames
     frameSkipCounter++;
     if (frameSkipCounter % frameSkipInterval != 0) {
       setState(() {
@@ -157,7 +151,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   performFaceRecognition(List<Face> faces) async {
     recognitions.clear();
 
-    // Convert camera image to img.Image
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
         : Util.convertNV21(frame!);
@@ -169,11 +162,25 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     for (Face face in faces) {
       Rect faceRect = face.boundingBox;
 
-      // Crop face with bounds checking
-      int left = faceRect.left.toInt().clamp(0, image.width - 1);
-      int top = faceRect.top.toInt().clamp(0, image.height - 1);
-      int width = faceRect.width.toInt().clamp(1, image.width - left);
-      int height = faceRect.height.toInt().clamp(1, image.height - top);
+      // ✅ After rotation, recalculate bounding box coordinates
+      double rotatedLeft, rotatedTop, rotatedWidth, rotatedHeight;
+
+      if (camDirec == CameraLensDirection.front) {
+        rotatedLeft = faceRect.top;
+        rotatedTop = image.height - (faceRect.left + faceRect.width);
+        rotatedWidth = faceRect.height;
+        rotatedHeight = faceRect.width;
+      } else {
+        rotatedLeft = image.width - (faceRect.top + faceRect.height);
+        rotatedTop = faceRect.left;
+        rotatedWidth = faceRect.height;
+        rotatedHeight = faceRect.width;
+      }
+
+      int left = rotatedLeft.toInt().clamp(0, image.width - 1);
+      int top = rotatedTop.toInt().clamp(0, image.height - 1);
+      int width = rotatedWidth.toInt().clamp(1, image.width - left);
+      int height = rotatedHeight.toInt().clamp(1, image.height - top);
 
       img.Image croppedFace = img.copyCrop(image,
           x: left,
@@ -188,18 +195,14 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         lastAntiSpoofingCheck = now;
       }
 
-      // Only proceed with recognition if face is real
       if (isRealFace) {
         Recognition recognition = recognizer.recognize(croppedFace, faceRect);
 
-        // Check if recognition confidence is above threshold
-        // Note: distance is actually cosine similarity (higher = better match)
         if (recognition.distance > recognitionThreshold) {
           recognitions.add(recognition);
 
-          // Auto-submit attendance if this is a good match and cooldown has passed
           if (shouldShowDialog(recognition)) {
-            await _autoSubmitAttendance(recognition, croppedFace);
+            await showRecognitionDialog(recognition, croppedFace);
           }
         }
       }
@@ -216,7 +219,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       });
     } catch (e) {
       print('Anti-spoofing detection error: $e');
-      // Default to real face if detection fails
       setState(() {
         isRealFace = true;
         spoofingConfidence = 0.5;
@@ -225,7 +227,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   }
 
   bool shouldShowDialog(Recognition recognition) {
-    // Check cooldown period
     if (lastDialogTime != null) {
       Duration timeSinceLastDialog = DateTime.now().difference(lastDialogTime!);
       if (timeSinceLastDialog.inSeconds < dialogCooldownSeconds) {
@@ -233,7 +234,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       }
     }
 
-    // Check if this is a different person or significantly better match
     if (lastRecognition == null ||
         lastRecognition!.name != recognition.name ||
         recognition.distance > lastRecognition!.distance + 0.1) {
@@ -247,7 +247,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     lastDialogTime = DateTime.now();
     lastRecognition = recognition;
 
-    // Haptic feedback
     HapticFeedback.mediumImpact();
 
     // Get stored face image if available
@@ -255,233 +254,277 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
 
     if (!mounted) return;
 
+    // ✅ For production: Skip dialog and auto-submit
+    await _autoSubmitAttendance(recognition, faceImage);
+    return;
+
+    // ✅ For debugging: Uncomment below to show preview dialog
+    /*
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(30),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withAlpha(40)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Success icon
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green.withAlpha(80),
-                        border: Border.all(color: Colors.green, width: 2),
-                      ),
-                      child: Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.white,
-                        size: 48,
-                      ),
-                    ),
-
-                    SizedBox(height: 20),
-
-                    // Recognition title
-                    Text(
-                      "Face Recognized!",
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // User name
-                    Text(
-                      "Welcome back,",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 8),
-
-                    Text(
-                      recognition.name,
-                      style: TextStyle(
-                        fontSize: 28,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Attendance type
-                    Text(
-                      _getAttendanceTypeText(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 24),
-
-                    // Face images row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Current face
-                        Column(
-                          children: [
-                            Text(
-                              "Current",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
+          insetPadding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  constraints: BoxConstraints(
+                    maxWidth: 500,
+                    maxHeight: MediaQuery.of(context).size.height * 0.85,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(30),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withAlpha(40)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // ✅ Close button at top right
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {
+                                isRecognizing = true;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 24,
                             ),
-                            SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(60),
-                              child: Image.memory(
-                                Uint8List.fromList(img.encodeBmp(faceImage)),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ],
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 8),
+
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green.withAlpha(80),
+                          border: Border.all(color: Colors.green, width: 2),
                         ),
-
-                        // Arrow
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: Colors.white70,
-                          size: 24,
+                        child: Icon(
+                          Icons.check_circle_outline,
+                          color: Colors.white,
+                          size: 40,
                         ),
-
-                        // Stored face
-                        Column(
-                          children: [
-                            Text(
-                              "Stored",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(60),
-                              child: storedImage != null
-                                  ? Image.memory(
-                                storedImage,
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              )
-                                  : Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.withAlpha(100),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.person,
-                                  color: Colors.white70,
-                                  size: 40,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 24),
-
-                    // Confidence score
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(20),
-                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
-                        "Confidence: ${(recognition.distance * 100).toStringAsFixed(1)}%",
+
+                      SizedBox(height: 16),
+
+                      Text(
+                        "Face Recognized!",
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 12),
+
+                      Text(
+                        "Welcome back,",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white70,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
 
-                    SizedBox(height: 24),
+                      SizedBox(height: 6),
 
-                    // Action buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Cancel button
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade600,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                      Text(
+                        recognition.name,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      SizedBox(height: 12),
+
+                      Text(
+                        _getAttendanceTypeText(),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 20),
+
+                      // Face images row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Current",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Image.memory(
+                                    Uint8List.fromList(img.encodePng(faceImage)),
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Text(
-                            "Cancel",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white70,
+                              size: 20,
                             ),
+                          ),
+
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Stored",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: storedImage != null
+                                      ? Image.memory(
+                                    storedImage,
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                  )
+                                      : Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(100),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.white70,
+                                      size: 35,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 20),
+
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(20),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Confidence: ${(recognition.distance * 100).toStringAsFixed(1)}%",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
                           ),
                         ),
+                      ),
 
-                        // Confirm button
-                        ElevatedButton(
-                          onPressed: () => _submitAttendance(recognition),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade600,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                      SizedBox(height: 20),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  isRecognizing = true;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade600,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
-                          child: Text(
-                            "Confirm",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+
+                          SizedBox(width: 12),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _submitAttendance(recognition),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade600,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                              child: Text(
+                                "Confirm",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -489,6 +532,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         );
       },
     );
+    */
   }
 
   String _getAttendanceTypeText() {
@@ -524,17 +568,14 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   Future<void> _autoSubmitAttendance(Recognition recognition, img.Image faceImage) async {
     lastDialogTime = DateTime.now();
     lastRecognition = recognition;
-    
-    // Stop recognition during submission
+
     setState(() {
       isRecognizing = false;
     });
 
-    // Haptic feedback
     HapticFeedback.mediumImpact();
 
     try {
-      // Show brief recognition success message
       if (mounted) {
         showDialog(
           context: context,
@@ -587,31 +628,27 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         );
       }
 
-      // Get user data
       final preferences = Preferences();
       final userData = await preferences.getUserData();
-      
+
       if (userData == null) {
         throw Exception('User data not found');
       }
 
-      // Submit attendance
       final attendanceRepo = AttendanceRepository();
-      
-      // Get location data from widget or use defaults
+
       double? latitude;
       double? longitude;
       String? wifiSSID;
       String? wifiBSSID;
       String? address;
-      
+
       if (widget.locationData != null) {
         latitude = widget.locationData!['latitude'];
         longitude = widget.locationData!['longitude'];
         wifiSSID = widget.locationData!['wifiSSID'];
         wifiBSSID = widget.locationData!['wifiBSSID'];
-        
-        // Build address from location data
+
         String street = widget.locationData!['street'] ?? '';
         String city = widget.locationData!['city'] ?? '';
         String state = widget.locationData!['state'] ?? '';
@@ -619,19 +656,18 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         address = '$street, $city, $state, $country'.replaceAll(RegExp(r'^,\s*|,\s*$'), '').trim();
         if (address.isEmpty) address = 'Location not available';
       } else {
-        // Fallback values if no location data provided
         latitude = 0.0;
         longitude = 0.0;
         wifiSSID = 'Unknown';
         wifiBSSID = 'Unknown';
         address = 'Location not available';
       }
-      
+
       final result = await attendanceRepo.saveEmployeeAttendanceWithLocation(
         userData.id!,
         widget.attendanceType,
         'Face verification attendance',
-        '', // No image file path needed for face recognition
+        '',
         latitude: latitude,
         longitude: longitude,
         wifiSSID: wifiSSID,
@@ -640,13 +676,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       );
 
       if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
+        Navigator.of(context).pop();
       }
 
       if (result != null) {
-        // Check if there's an error in the response
         if (result.error) {
-          // Show error dialog
           if (mounted) {
             showDialog(
               context: context,
@@ -687,169 +721,158 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
               ),
             );
           }
-          
-          // Auto-close after 3 seconds and go back to previous screen
+
           Future.delayed(Duration(seconds: 3), () {
             if (mounted) {
-              Navigator.of(context).pop(); // Close error dialog
+              Navigator.of(context).pop();
               Navigator.of(context).pop({
                 'success': false,
                 'error': true,
                 'message': result.message,
-              }); // Go back to previous screen with error info
+              });
+            }
+          });
+        } else if (result.validationMessage.isNotEmpty) {
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => Dialog(
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withAlpha(200),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.warning_amber, color: Colors.white, size: 48),
+                      SizedBox(height: 16),
+                      Text(
+                        'Notice',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        result.validationMessage,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          Future.delayed(Duration(seconds: 3), () {
+            if (mounted) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop({
+                'success': false,
+                'warning': true,
+                'message': result.validationMessage,
+              });
             }
           });
         } else {
-          // Check for validation messages (warnings)
-          if (result.validationMessage.isNotEmpty) {
-            // Show warning dialog
-            if (mounted) {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withAlpha(200),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.warning_amber, color: Colors.white, size: 48),
-                        SizedBox(height: 16),
-                        Text(
-                          'Notice',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => Dialog(
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withAlpha(200),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white, size: 48),
+                      SizedBox(height: 16),
+                      Text(
+                        'Success!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          result.validationMessage,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        result.message.isNotEmpty ? result.message : '${_getAttendanceTypeText()} recorded successfully!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
                         ),
-                      ],
-                    ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
-              );
-            }
-            
-            // Auto-close after 3 seconds and go back to previous screen
-            Future.delayed(Duration(seconds: 3), () {
-              if (mounted) {
-                Navigator.of(context).pop(); // Close warning dialog
-                Navigator.of(context).pop({
-                  'success': false,
-                  'warning': true,
-                  'message': result.validationMessage,
-                }); // Go back to previous screen with warning info
-              }
-            });
-          } else {
-            // Success - show success message
-            if (mounted) {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withAlpha(200),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.white, size: 48),
-                        SizedBox(height: 16),
-                        Text(
-                          'Success!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          result.message.isNotEmpty ? result.message : '${_getAttendanceTypeText()} recorded successfully!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            // Auto-close after 2 seconds and return to main screen with data
-            Future.delayed(Duration(seconds: 2), () {
-              if (mounted) {
-                Navigator.of(context).pop(); // Close success dialog
-                
-                // Prepare return data with actual server timestamps
-                String timestamp = DateTime.now().toIso8601String();
-                if (result.data != null) {
-                  // Use the actual timestamp from server response based on attendance type
-                  switch (widget.attendanceType) {
-                    case 'clock_in':
-                      if (result.data!.clockIn != null) {
-                        timestamp = result.data!.clockIn!;
-                      }
-                      break;
-                    case 'clock_out':
-                      if (result.data!.clockOut != null) {
-                        timestamp = result.data!.clockOut!;
-                      }
-                      break;
-                    case 'break_start':
-                      if (result.data!.breakIn != null) {
-                        timestamp = result.data!.breakIn!;
-                      }
-                      break;
-                    case 'break_end':
-                      if (result.data!.breakOut != null) {
-                        timestamp = result.data!.breakOut!;
-                      }
-                      break;
-                  }
-                }
-                
-                Navigator.of(context).pop({
-                  'success': true,
-                  'attendanceType': widget.attendanceType,
-                  'time': timestamp,
-                  'userName': recognition.name,
-                  'message': result.message,
-                }); // Return to calling screen with data
-              }
-            });
+              ),
+            );
           }
+
+          Future.delayed(Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.of(context).pop();
+
+              String timestamp = DateTime.now().toIso8601String();
+              if (result.data != null) {
+                switch (widget.attendanceType) {
+                  case 'clock_in':
+                    if (result.data!.clockIn != null) {
+                      timestamp = result.data!.clockIn!;
+                    }
+                    break;
+                  case 'clock_out':
+                    if (result.data!.clockOut != null) {
+                      timestamp = result.data!.clockOut!;
+                    }
+                    break;
+                  case 'break_start':
+                    if (result.data!.breakIn != null) {
+                      timestamp = result.data!.breakIn!;
+                    }
+                    break;
+                  case 'break_end':
+                    if (result.data!.breakOut != null) {
+                      timestamp = result.data!.breakOut!;
+                    }
+                    break;
+                }
+              }
+
+              Navigator.of(context).pop({
+                'success': true,
+                'attendanceType': widget.attendanceType,
+                'time': timestamp,
+                'userName': recognition.name,
+                'message': result.message,
+              });
+            }
+          });
         }
       } else {
         throw Exception('Failed to submit attendance');
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog if open
-        
-        // Show error dialog
+        Navigator.of(context).pop();
+
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -858,12 +881,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close error dialog
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop({
                     'success': false,
                     'error': true,
                     'message': 'Failed to submit attendance: ${e.toString()}',
-                  }); // Go back to previous screen with error info
+                  });
                 },
                 child: Text('OK'),
               ),
@@ -875,15 +898,13 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   }
 
   Future<void> _submitAttendance(Recognition recognition) async {
-    Navigator.of(context).pop(); // Close dialog
-    
-    // Stop recognition during submission
+    Navigator.of(context).pop();
+
     setState(() {
       isRecognizing = false;
     });
 
     try {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -892,31 +913,27 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         ),
       );
 
-      // Get user data
       final preferences = Preferences();
       final userData = await preferences.getUserData();
-      
+
       if (userData == null) {
         throw Exception('User data not found');
       }
 
-      // Submit attendance
       final attendanceRepo = AttendanceRepository();
-      
-      // Get location data from widget or use defaults
+
       double? latitude;
       double? longitude;
       String? wifiSSID;
       String? wifiBSSID;
       String? address;
-      
+
       if (widget.locationData != null) {
         latitude = widget.locationData!['latitude'];
         longitude = widget.locationData!['longitude'];
         wifiSSID = widget.locationData!['wifiSSID'];
         wifiBSSID = widget.locationData!['wifiBSSID'];
-        
-        // Build address from location data
+
         String street = widget.locationData!['street'] ?? '';
         String city = widget.locationData!['city'] ?? '';
         String state = widget.locationData!['state'] ?? '';
@@ -924,19 +941,18 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         address = '$street, $city, $state, $country'.replaceAll(RegExp(r'^,\s*|,\s*$'), '').trim();
         if (address.isEmpty) address = 'Location not available';
       } else {
-        // Fallback values if no location data provided
         latitude = 0.0;
         longitude = 0.0;
         wifiSSID = 'Unknown';
         wifiBSSID = 'Unknown';
         address = 'Location not available';
       }
-      
+
       final result = await attendanceRepo.saveEmployeeAttendanceWithLocation(
         userData.id!,
         widget.attendanceType,
         'Face verification attendance',
-        '', // No image file path needed for face recognition
+        '',
         latitude: latitude,
         longitude: longitude,
         wifiSSID: wifiSSID,
@@ -944,12 +960,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         address: address,
       );
 
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
 
       if (result != null) {
-        // Check if there's an error in the response
         if (result.error) {
-          // Show error dialog
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -958,12 +972,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close error dialog
+                    Navigator.of(context).pop();
                     Navigator.of(context).pop({
                       'success': false,
                       'error': true,
                       'message': result.message,
-                    }); // Go back to previous screen with error info
+                    });
                   },
                   child: Text('OK'),
                 ),
@@ -971,7 +985,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
             ),
           );
         } else if (result.validationMessage.isNotEmpty) {
-          // Show validation message dialog
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -980,12 +993,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop();
                     Navigator.of(context).pop({
                       'success': false,
                       'warning': true,
                       'message': result.validationMessage,
-                    }); // Go back to previous screen with warning info
+                    });
                   },
                   child: Text('OK'),
                 ),
@@ -993,7 +1006,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
             ),
           );
         } else {
-          // Success - show success dialog and return result
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -1002,12 +1014,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close success dialog
-                    
-                    // Prepare return data with actual server timestamps
+                    Navigator.of(context).pop();
+
                     String timestamp = DateTime.now().toIso8601String();
                     if (result.data != null) {
-                      // Use the actual timestamp from server response based on attendance type
                       switch (widget.attendanceType) {
                         case 'clock_in':
                           if (result.data!.clockIn != null) {
@@ -1031,14 +1041,14 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                           break;
                       }
                     }
-                    
+
                     Navigator.of(context).pop({
                       'success': true,
                       'attendanceType': widget.attendanceType,
                       'time': timestamp,
                       'userName': recognition.name,
                       'message': result.message,
-                    }); // Return to calling screen with data
+                    });
                   },
                   child: Text('OK'),
                 ),
@@ -1050,9 +1060,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         throw Exception('Failed to submit attendance');
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog if open
-      
-      // Show error dialog
+      Navigator.of(context).pop();
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -1061,12 +1070,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close error dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pop({
                   'success': false,
                   'error': true,
                   'message': 'Failed to submit attendance: ${e.toString()}',
-                }); // Go back to previous screen with error info
+                });
               },
               child: Text('OK'),
             ),
@@ -1158,64 +1167,101 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        // Allow back navigation and stop recognition
+        setState(() {
+          isRecognizing = false;
+        });
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              // Stop recognition before going back
+              setState(() {
+                isRecognizing = false;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          title: Text(
+            _getAppBarTitle(),
+            style: TextStyle(color: Colors.white),
+          ),
+          elevation: 0,
         ),
-        title: Text(
-          _getAppBarTitle(),
-          style: TextStyle(color: Colors.white),
-        ),
-        elevation: 0,
-      ),
-      body: !isInitialized
-          ? Center(child: CircularProgressIndicator(color: Colors.green))
-          : Column(
-        children: [
-          // Camera preview
-          Expanded(
-            child: Stack(
-              children: [
-                // Camera preview
-                Positioned.fill(
-                  child: controller.value.isInitialized
-                      ? CameraPreview(controller)
-                      : Container(color: Colors.grey[800]),
-                ),
-
-                // Face detection overlay
-                if (recognitions.isNotEmpty)
+        body: !isInitialized
+            ? Center(child: CircularProgressIndicator(color: Colors.green))
+            : Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
                   Positioned.fill(
-                    child: CustomPaint(
-                      painter: FaceRecognitionPainter(
-                        Size(
-                          controller.value.previewSize!.height,
-                          controller.value.previewSize!.width,
-                        ),
-                        recognitions,
-                        camDirec,
-                      ),
-                    ),
+                    child: controller.value.isInitialized
+                        ? CameraPreview(controller)
+                        : Container(color: Colors.grey[800]),
                   ),
 
-                // Anti-spoofing warning
-                if (isRecognizing && !isRealFace)
+                  if (recognitions.isNotEmpty)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: FaceRecognitionPainter(
+                          Size(
+                            controller.value.previewSize!.height,
+                            controller.value.previewSize!.width,
+                          ),
+                          recognitions,
+                          camDirec,
+                        ),
+                      ),
+                    ),
+
+                  if (isRecognizing && !isRealFace)
+                    Positioned(
+                      top: 60,
+                      left: 20,
+                      right: 20,
+                      child: Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withAlpha(200),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          "⚠️ Spoofing detected! Use your real face",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+
                   Positioned(
-                    top: 60,
+                    top: 100,
                     left: 20,
                     right: 20,
                     child: Container(
                       padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red.withAlpha(200),
+                        color: isRecognizing
+                            ? Colors.green.withAlpha(200)
+                            : Colors.grey.withAlpha(200),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        "⚠️ Spoofing detected! Use your real face",
+                        isRecognizing
+                            ? (recognitions.isEmpty
+                            ? "Looking for faces..."
+                            : "Recognizing ${recognitions.length} face(s)")
+                            : "Recognition paused",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1224,39 +1270,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       ),
                     ),
                   ),
-
-                // Status indicator
-                Positioned(
-                  top: 100,
-                  left: 20,
-                  right: 20,
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isRecognizing
-                          ? Colors.green.withAlpha(200)
-                          : Colors.grey.withAlpha(200),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      isRecognizing
-                          ? (recognitions.isEmpty
-                          ? "Looking for faces..."
-                          : "Recognizing ${recognitions.length} face(s)")
-                          : "Recognition paused",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1296,10 +1314,8 @@ class FaceRecognitionPainter extends CustomPainter {
       final rect = Rect.fromLTRB(left, top, right, bottom);
       final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
 
-      // Draw face box
       canvas.drawRRect(rRect, boxPaint);
 
-      // Draw label background
       const double labelHeight = 30;
       final labelRect = Rect.fromLTRB(
         left,
@@ -1310,7 +1326,6 @@ class FaceRecognitionPainter extends CustomPainter {
       final labelRRect = RRect.fromRectAndRadius(labelRect, const Radius.circular(4));
       canvas.drawRRect(labelRRect, labelBgPaint);
 
-      // Draw label text
       final textPainter = TextPainter(
         text: TextSpan(
           text: '${recognition.name} (${(recognition.distance * 100).toStringAsFixed(0)}%)',

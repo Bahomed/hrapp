@@ -47,6 +47,7 @@ const Map<String, String> enTranslations = {
   'attendance_calendar': 'Attendance Calendar',
   'attendance_for': 'Attendance for',
   'no_attendance_records': 'No attendance records for this date',
+  'no_attendance_data_available': 'No attendance data available',
   'clock_in': 'Clock In',
   'clock_out': 'Clock Out',
   'break_start': 'Break Start',
@@ -616,6 +617,7 @@ const Map<String, String> enTranslations = {
   'something_went_wrong': 'Something went wrong',
   'something_went_wrong_try_again': 'Something went wrong. Please try again.',
   'error_loading_attendance_data': 'Error loading attendance data',
+  'loading_attendance_data': 'loading attendance data ...',
   'no_user_data_found': 'No user data found',
   'error_loading_profile': 'Error loading profile',
   'no_user_data_available': 'No user data available',
@@ -961,4 +963,19 @@ const Map<String, String> enTranslations = {
   'gosi_non_saudi_employee': 'GOSI Non-Saudi Employee',
   'paid': 'Paid',
   'notes': 'Notes',
+  'view_history':'View History',
+  'deduction_history':'Deduction History',
+  // Add to your translation files:
+  'verify_captured_faces': 'Verify Captured Faces',
+  'review_faces_before_saving': 'Review all captured angles before saving',
+  'confirm_and_save': 'Confirm & Save',
+  'no_upcoming_holidays':'No Upcoming Holidays',
+  'past':'Past',
+  'upcoming':'Upcoming',
+  'no_past_holidays':'No Past Holidays',
+
+  // Privacy & Terms
+  'by_continuing_you_agree': 'By continuing, you agree to our',
+  'and': 'and',
+  'terms_and_conditions': 'Terms & Conditions',
 };

@@ -581,7 +581,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Loading attendance data...',
+              tr('loading_attendance_data'),
               style: TextStyle(
                 fontSize: 14,
                 color: ThemeService.instance.getTextSecondaryColor(),
@@ -608,7 +608,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No attendance data available',
+              tr('no_attendance_data_available'),
               style: TextStyle(
                 fontSize: 14,
                 color: ThemeService.instance.getTextSecondaryColor().withOpacity(0.8),

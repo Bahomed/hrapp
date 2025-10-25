@@ -61,6 +61,8 @@ class Preferences {
 
   Future<String> getUserPreferredLang() async => (await getUserData())?.preferredLang ?? '';
 
+  Future<bool> isManager() async => (await getUserData())?.manager ?? false;
+
   // ==================== COMPANY DATA ====================
 
   Future<void> saveCompanyName(String value) async => datacount.write(companyName, value);

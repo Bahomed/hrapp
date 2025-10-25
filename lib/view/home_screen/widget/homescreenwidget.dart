@@ -134,100 +134,103 @@ class HomeScreenWidget extends StatelessWidget {
     );
   }
   Widget _buildActionGrid() {
-    return Builder(
-      builder: (context) {
-        final actions = [
-      {
-        'icon': Icons.assignment_outlined,
-        'label': tr('requests'),
-        'key': 'requests'
-      },
-      {
-        'icon': Icons.account_balance_wallet_outlined,
-        'label': tr('payroll'),
-        'key': 'payroll'
-      },
-      {
-        'icon': Icons.description_outlined,
-        'label': tr('documents'),
-        'key': 'documents'
-      },
-      {
-        'icon': Icons.access_time_outlined,
-        'label': tr('attendance'),
-        'key': 'attendance'
-      },
-      {
-        'icon': Icons.payments_outlined,
-        'label': tr('compensation'),
-        'key': 'compensation'
-      },
-      {
-        'icon': Icons.check_circle_outline,
-        'label': tr('approval'),
-        'key': 'approval'
-      },
-      {
-        'icon': Icons.pending_actions_outlined,
-        'label': tr('un_executed'),
-        'key': 'unexecuted_requests'
-      },
-      {
-        'icon': Icons.person_outline_rounded,
-        'label': tr('profile'),
-        'key': 'profile'
-      },
-      {
-        'icon': Icons.people_outline,
-        'label': tr('subordinates_data'),
-        'key': 'subordinates_data'
-      },
-    ];
+    final model = Get.find<HomeScreenController>();
 
-    // List of navigation functions - Fixed to match the number of actions
-    final List<VoidCallback> navigationFunctions = [
-          () => Get.to(const RequestHomeScreen()),
-          () => Get.to(const PayrollScreen()),
-          () => Get.to(const DocumentScreen()),
-          () => Get.find<HomeScreenController>().goToAttendanceDetailScreen(),
-          () => Get.to(const CompensationScreen()),
-          () => Get.to(const ApprovalScreen()),
-          () => Get.to(const UnexecutedRequestsScreen()),
-          () => Get.find<HomeScreenController>().goToProfileScreen(),
-          () => Get.find<HomeScreenController>().goToSubordinatesDataScreen(),
-    ];
+    return Obx(() {
+      final actions = <Map<String, dynamic>>[
+        {
+          'icon': Icons.assignment_outlined,
+          'label': tr('requests'),
+          'key': 'requests',
+          'onTap': () => Get.to(const RequestHomeScreen()),
+        },
+        {
+          'icon': Icons.account_balance_wallet_outlined,
+          'label': tr('payroll'),
+          'key': 'payroll',
+          'onTap': () => Get.to(const PayrollScreen()),
+        },
+        {
+          'icon': Icons.description_outlined,
+          'label': tr('documents'),
+          'key': 'documents',
+          'onTap': () => Get.to(const DocumentScreen()),
+        },
+        {
+          'icon': Icons.access_time_outlined,
+          'label': tr('attendance'),
+          'key': 'attendance',
+          'onTap': () => model.goToAttendanceDetailScreen(),
+        },
+        {
+          'icon': Icons.payments_outlined,
+          'label': tr('compensation'),
+          'key': 'compensation',
+          'onTap': () => Get.to(const CompensationScreen()),
+        },
+        {
+          'icon': Icons.person_outline_rounded,
+          'label': tr('profile'),
+          'key': 'profile',
+          'onTap': () => model.goToProfileScreen(),
+        },
+      ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: ResponsiveUtils.getResponsiveValue<int>(
-          context, 
-          mobile: 3, 
-          tablet: 4, 
-          desktop: 5
-        ),
-        mainAxisSpacing: 15,
-        crossAxisSpacing: 15,
-        childAspectRatio: 1.0,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final action = actions[index];
-        Widget actionButton = AppTheme.buildActionButton(
-          icon: action['icon'] as IconData,
-          label: action['label'] as String,
-          color: AppTheme.getActionColor(action['key'] as String),
-          onTap: navigationFunctions[index],
-          context: context,
-        );
+      // Add manager-only items if user is a manager
+      if (model.isManager.value) {
+        actions.add({
+          'icon': Icons.people_outline,
+          'label': tr('subordinates_data'),
+          'key': 'subordinates_data',
+          'onTap': () => model.goToSubordinatesDataScreen(),
+        });
+        actions.add({
+          'icon': Icons.check_circle_outline,
+          'label': tr('approval'),
+          'key': 'approval',
+          'onTap': () => Get.to(const ApprovalScreen()),
+        });
+        actions.add({
+          'icon': Icons.pending_actions_outlined,
+          'label': tr('un_executed'),
+          'key': 'unexecuted_requests',
+          'onTap': () => Get.to(const UnexecutedRequestsScreen()),
+        });
+      }
 
+      return Builder(
+        builder: (context) {
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: ResponsiveUtils.getResponsiveValue<int>(
+                context,
+                mobile: 3,
+                tablet: 4,
+                desktop: 5
+              ),
+              mainAxisSpacing: 15,
+              crossAxisSpacing: 15,
+              childAspectRatio: 1.0,
+            ),
+            itemCount: actions.length,
+            itemBuilder: (context, index) {
+              final action = actions[index];
+              Widget actionButton = AppTheme.buildActionButton(
+                icon: action['icon'] as IconData,
+                label: action['label'] as String,
+                color: AppTheme.getActionColor(action['key'] as String),
+                onTap: action['onTap'] as VoidCallback,
+                context: context,
+              );
 
-        return actionButton;
-      },
-    );
-      },
-    );
+              return actionButton;
+            },
+          );
+        },
+      );
+    });
   }
 
 }

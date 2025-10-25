@@ -4,8 +4,10 @@ import 'package:com.injazatsoftware.injazathr/utils/appconstants.dart';
 import 'package:com.injazatsoftware.injazathr/utils/input_widgets.dart';
 import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
+import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
 import 'package:com.injazatsoftware.injazathr/view/workspace/workspace_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WorkspaceScreen extends StatelessWidget {
   WorkspaceScreen({super.key});
@@ -25,31 +27,32 @@ class WorkspaceScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 60),
-              
-              // Simple Logo with business icon
-              Stack(
-                children: [
-                  Image.asset(
-                    themeService.isDarkMode ? logoWhite : logoBlack,
-                    height: 80,
-                  ),
 
-                ],
+              // Logo that adapts to theme
+              Image.asset(
+                themeService.isDarkMode ? logoWhite : logoBlack,
+                height: 80,
               ),
-              
-              const SizedBox(height: 40),
-              
+
+              Text(
+                tr('app_name'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: themeService.getTextSecondaryColor(),
+                ),
+              ),
+const SizedBox(height: 8),
               // Welcome Text
               Text(
-                tr('setup_workspace', fallback: 'Setup Workspace 🏢'),
+                '${tr('setup_workspace', fallback: 'Setup Workspace')}',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   color: themeService.getTextPrimaryColor(),
                 ),
               ),
-              
-              const SizedBox(height: 8),
+const SizedBox(height: 8),
               
               Text(
                 tr('connect_to_company', fallback: 'Connect to your company'),
@@ -60,8 +63,10 @@ class WorkspaceScreen extends StatelessWidget {
                 ),
               ),
               
-              const SizedBox(height: 50),
               
+              
+              const SizedBox(height: 50),
+
               // Workspace Form
               Form(
                 key: controller.formKey,
@@ -77,19 +82,18 @@ class WorkspaceScreen extends StatelessWidget {
                         color: themeService.getTextPrimaryColor(),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     Text(
                       tr('enter_workspace_description', fallback: 'Enter your company workspace ID to continue'),
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w400,
                         color: themeService.getTextSecondaryColor(),
                       ),
                     ),
-                    
-                    const SizedBox(height: 32),
+
+                    SizedBox(height: ResponsiveUtils.responsiveHeight(context, 4)),
                     
                     // Workspace ID Field
                     InputWidgets.buildInputField(
@@ -110,9 +114,9 @@ class WorkspaceScreen extends StatelessWidget {
                         return null;
                       },
                     ),
-                    
-                    const SizedBox(height: 32),
-                    
+
+                    SizedBox(height: ResponsiveUtils.responsiveHeight(context, 4)),
+
                     // Save Button
                     SizedBox(
                       width: double.infinity,
@@ -121,24 +125,26 @@ class WorkspaceScreen extends StatelessWidget {
                           controller.saveWorkspace(workspaceController.text.trim());
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: themeService.getSecondaryColor(),
-                          foregroundColor: Colors.white,
+                          backgroundColor: themeService.getActionColor('requests'),
+                          foregroundColor: themeService.getSilver(),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 0,
+                          elevation: 2,
+                          shadowColor: themeService.getActionColor('requests').withValues(alpha: 0.3),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.business, size: 20),
+                            Icon(Icons.business, size: 20, color: themeService.getSilver()),
                             const SizedBox(width: 12),
                             Text(
                               tr('connect_workspace'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
+                                color: themeService.getSilver(),
                               ),
                             ),
                           ],
@@ -174,18 +180,89 @@ class WorkspaceScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 40),
-              
+
+              SizedBox(height: ResponsiveUtils.responsiveHeight(context, 3)),
+
               // Language Selection Section
               _buildLanguageSection(),
-              
+
+              SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2)),
+
+              // Privacy Policy & Terms
+              _buildPrivacyTermsSection(),
+
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildPrivacyTermsSection() {
+    final themeService = Get.find<ThemeService>();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            tr('by_continuing_you_agree'),
+            style: TextStyle(
+              fontSize: 12,
+              color: themeService.getTextSecondaryColor(),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: () => _launchURL('https://injazathr.com/en/privacy-policy/'),
+            child: Text(
+              tr('privacy_policy'),
+              style: TextStyle(
+                fontSize: 12,
+                color: themeService.getActionColor('requests'),
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            tr('and'),
+            style: TextStyle(
+              fontSize: 12,
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: () => _launchURL('https://injazathr.com/en/term'),
+            child: Text(
+              tr('terms_and_conditions'),
+              style: TextStyle(
+                fontSize: 12,
+                color: themeService.getActionColor('requests'),
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
+      Get.snackbar(
+        tr('error'),
+        'Could not open link',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
 
@@ -293,19 +370,16 @@ class WorkspaceScreen extends StatelessWidget {
   Widget _buildLanguageSection() {
     final themeService = Get.find<ThemeService>();
     final languageService = Get.find<LanguageService>();
-    
+
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: themeService.getCardColor(),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: themeService.getTextSecondaryColor().withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

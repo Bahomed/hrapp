@@ -6,6 +6,7 @@ import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
 import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/theme_service.dart';
 
@@ -231,13 +232,83 @@ class LoginScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2)),
+
+              // Privacy Policy & Terms
+              _buildPrivacyTermsSection(context, themeService),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildPrivacyTermsSection(BuildContext context, ThemeService themeService) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            tr('by_continuing_you_agree'),
+            style: TextStyle(
+              fontSize: 12,
+              color: themeService.getTextSecondaryColor(),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: () => _launchURL('https://injazathr.com/en/privacy-policy/'),
+            child: Text(
+              tr('privacy_policy'),
+              style: TextStyle(
+                fontSize: 12,
+                color: themeService.getActionColor('requests'),
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            tr('and'),
+            style: TextStyle(
+              fontSize: 12,
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: () => _launchURL('https://injazathr.com/en/term/'),
+            child: Text(
+              tr('terms_and_conditions'),
+              style: TextStyle(
+                fontSize: 12,
+                color: themeService.getActionColor('requests'),
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
+      Get.snackbar(
+        tr('error'),
+        'Could not open link',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
 }

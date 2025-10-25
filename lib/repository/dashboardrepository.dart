@@ -81,15 +81,21 @@ class DashboardRepository {
     }
   }
 
-  Future<UnexecutedRequestsResponse> getUnexecutedRequests() async {
+  Future<UnexecutedRequestsResponse> getUnexecutedRequests({String? locale}) async {
     try {
       final token = await preferences.getToken();
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$getUnexecutedRequestsUrl';
-      
+
+      Map<String, dynamic> queryParams = {};
+
+      if (locale != null) {
+        queryParams['locale'] = locale;
+      }
+
       var response = await dioClient
-          .get(apiUrl, {'Authorization': 'Bearer $token'}, {});
-      
+          .get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
+
       return UnexecutedRequestsResponse.fromJson(response.data);
     }
     on DioException catch (e) {

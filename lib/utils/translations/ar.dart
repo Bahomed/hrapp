@@ -47,6 +47,7 @@ const Map<String, String> arTranslations = {
   'attendance_calendar': 'تقويم الحضور',
   'attendance_for': 'الحضور لتاريخ',
   'no_attendance_records': 'لا توجد سجلات حضور لهذا التاريخ',
+  'no_attendance_data_available': 'لا تتوفر بيانات الحضور',
   'clock_in': 'تسجيل الدخول',
   'clock_out': 'تسجيل الخروج',
   'break_start': 'بداية الاستراحة',
@@ -966,4 +967,22 @@ const Map<String, String> arTranslations = {
   'gosi_saudi_employee': 'تأمينات الموظف السعودي',
   'gosi_non_saudi_employee': 'تأمينات الموظف غير السعودي',
   'paid': 'مدفوع',
+  'loading_attendance_data': 'loading attendance data ...',
+  'balance': 'الرصيد',
+  'view_history':'عرض السجل',
+  'deduction_history':'سجل الاستقطاعات',
+  'notes': 'ملاحظات',
+  // Add to your translation files:
+  'verify_captured_faces': 'التحقق من الوجوه الملتقطة',
+  'review_faces_before_saving': 'مراجعة جميع الزوايا الملتقطة قبل الحفظ',
+  'confirm_and_save': 'تأكيد وحفظ',
+  'no_upcoming_holidays':'لا توجد عطلات قادمة',
+  'past':'السابقة',
+  'upcoming':'القادمة',
+  'no_past_holidays':'لا توجد عطلات سابقة',
+
+  // Privacy & Terms
+  'by_continuing_you_agree': 'بالمتابعة، أنت توافق على',
+  'and': 'و',
+  'terms_and_conditions': 'الشروط والأحكام',
 };
