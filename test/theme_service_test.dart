@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
 
 void main() {
   group('ThemeService Tests', () {

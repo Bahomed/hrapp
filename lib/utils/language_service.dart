@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translations/en.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translations/ar.dart';
-import 'package:com.injazatsoftware.injazathr/repository/userrepositiory.dart';
-import 'package:com.injazatsoftware.injazathr/view/home_screen/homescreen_controller.dart';
+import 'package:co.injazathr.injazathr/utils/translations/en.dart';
+import 'package:co.injazathr.injazathr/utils/translations/ar.dart';
+import 'package:co.injazathr.injazathr/repository/userrepositiory.dart';
+import 'package:co.injazathr.injazathr/view/home_screen/homescreen_controller.dart';
 
 class LanguageService extends GetxController {
   static LanguageService get instance => Get.find<LanguageService>();

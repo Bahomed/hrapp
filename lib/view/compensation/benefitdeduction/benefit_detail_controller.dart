@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/repository/benefit_deduction_repository.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/benefits_response.dart';
+import 'package:co.injazathr.injazathr/repository/benefit_deduction_repository.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/benefits_response.dart';
 
 class BenefitDetailController extends GetxController {
   final BenefitDeductionRepository _repository = BenefitDeductionRepository();

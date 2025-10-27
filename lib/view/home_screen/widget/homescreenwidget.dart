@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/compensation/compensation_screen.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
-import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
-import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
+import 'package:co.injazathr.injazathr/view/compensation/compensation_screen.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/app_theme.dart';
+import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
+import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 
 import '../../attendance/clocking_screen.dart';
 import '../../document/document_screen.dart';
 import '../homescreen_controller.dart';
-import 'package:com.injazatsoftware.injazathr/view/request_leave/request_home_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/approval/approval_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/unexecuted_requests/unexecuted_requests_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.dart';
+import 'package:co.injazathr.injazathr/view/approval/approval_screen.dart';
+import 'package:co.injazathr.injazathr/view/unexecuted_requests/unexecuted_requests_screen.dart';
 
 class HomeScreenWidget extends StatelessWidget {
   const HomeScreenWidget({super.key});

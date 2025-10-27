@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:get_storage/get_storage.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/login_response.dart' as login_response;
+import 'package:co.injazathr.injazathr/data/remote/response/login_response.dart' as login_response;
 
 class Preferences {
   final datacount = GetStorage();

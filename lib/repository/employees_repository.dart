@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/employees_response.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:co.injazathr.injazathr/data/remote/network_url/network_url.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/employees_response.dart';
 import 'package:dio/dio.dart';
 
 import '../utils/exceptionhandler.dart';

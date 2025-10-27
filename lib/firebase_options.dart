@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '615617259720',
     projectId: 'injazathr-defdb',
     storageBucket: 'injazathr-defdb.firebasestorage.app',
-    iosBundleId: 'com.injazatsoftware.injazathr',
+    iosBundleId: 'co.injazathr.injazathr',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -75,6 +75,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '615617259720',
     projectId: 'injazathr-defdb',
     storageBucket: 'injazathr-defdb.firebasestorage.app',
-    iosBundleId: 'com.injazatsoftware.injazathr',
+    iosBundleId: 'co.injazathr.injazathr',
   );
 }

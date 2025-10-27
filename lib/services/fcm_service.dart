@@ -2,8 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:com.injazatsoftware.injazathr/repository/loginrepository.dart';
-import 'package:com.injazatsoftware.injazathr/services/notification_service.dart';
+import 'package:co.injazathr.injazathr/repository/loginrepository.dart';
+import 'package:co.injazathr.injazathr/services/notification_service.dart';
 
 // Top-level function for background message handling
 @pragma('vm:entry-point')

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/app_notification_model.dart';
-import 'package:com.injazatsoftware.injazathr/repository/notification_repository.dart';
-import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_screen.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
+import 'package:co.injazathr.injazathr/repository/notification_repository.dart';
+import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../approval/approval_screen.dart';

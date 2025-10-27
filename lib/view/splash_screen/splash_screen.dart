@@ -1,6 +1,6 @@
-import 'package:com.injazatsoftware.injazathr/utils/backgrounddecoration.dart';
-import 'package:com.injazatsoftware.injazathr/view/splash_screen/splash_controller.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/utils/backgrounddecoration.dart';
+import 'package:co.injazathr.injazathr/view/splash_screen/splash_controller.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

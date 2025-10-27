@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 class RequestLeaveScreen extends StatefulWidget {
   const RequestLeaveScreen({super.key});
 

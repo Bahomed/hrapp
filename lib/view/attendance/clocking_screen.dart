@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'clocking_controller.dart';
 import '../../repository/attendancerepository.dart';
 import '../../data/remote/response/attendance_status_response.dart';

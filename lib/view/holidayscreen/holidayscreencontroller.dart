@@ -1,5 +1,5 @@
-import 'package:com.injazatsoftware.injazathr/data/remote/response/holiday_response.dart';
-import 'package:com.injazatsoftware.injazathr/repository/holidayrepository.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/holiday_response.dart';
+import 'package:co.injazathr.injazathr/repository/holidayrepository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 

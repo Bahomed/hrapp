@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../utils/responsive_utils.dart';
 import 'profile_controller.dart';
 import '../../services/theme_service.dart';

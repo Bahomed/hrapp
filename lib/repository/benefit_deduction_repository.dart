@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/benefits_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/deductions_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/deduction_history_response.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/benefits_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/deductions_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/deduction_history_response.dart';
 import '../utils/exceptionhandler.dart';
 import '../utils/translation_helper.dart';
 

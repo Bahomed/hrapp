@@ -1,4 +1,4 @@
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 
 final Preferences preferences = Preferences();
 
@@ -8,7 +8,7 @@ Future<String> get workspaceBaseUrl async => await preferences.getWorkspaceUrl()
 const liveurl = 'https://digitalhrface.cyclonenepal.com';
 const demourl = 'http://10.10.3.18/digital-hr-admin-files/public';
 
-const baseurl = 'http://injazatsoftware.net/api';
+const baseurl = 'https://injazathr.co/api';
 
 const loginurl = '$baseurl=/api/v2/login';
 const logouturl = '$baseurl=/api/1.0v/logout';

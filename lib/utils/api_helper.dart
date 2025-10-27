@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
+import 'package:co.injazathr.injazathr/utils/language_service.dart';
 
 class ApiHelper {
   static ApiHelper? _instance;

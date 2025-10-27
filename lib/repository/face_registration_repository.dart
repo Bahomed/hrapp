@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/face_id_response.dart';
-import 'package:com.injazatsoftware.injazathr/utils/exceptionhandler.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/face_id_response.dart';
+import 'package:co.injazathr.injazathr/utils/exceptionhandler.dart';
 
 class FaceRegistrationRepository {
   final Preferences preferences = Preferences();

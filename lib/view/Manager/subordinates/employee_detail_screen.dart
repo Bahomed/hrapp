@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/employees_response.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/employees_response.dart';
 import '../../../services/theme_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../payroll/payroll_screen.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
 class ThemeToggleWidget extends StatelessWidget {
   final bool showLabel;

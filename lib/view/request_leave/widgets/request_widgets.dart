@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/leave_request_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/permission_request_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/loan_request_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/letter_request_response.dart';
-import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/leave_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/permission_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 import '../../../widgets/saudi_riyal_display.dart';
 

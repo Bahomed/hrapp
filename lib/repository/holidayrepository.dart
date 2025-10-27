@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/holiday_response.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/utils/api_helper.dart';
+import 'package:co.injazathr.injazathr/data/remote/network_url/network_url.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/holiday_response.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
 
 import '../data/local/preferences.dart';

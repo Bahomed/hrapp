@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/payroll_records_response.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/payroll_summary_response.dart';
-import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
-import 'package:com.injazatsoftware.injazathr/utils/screen_themes.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_controller.dart';
-import 'package:com.injazatsoftware.injazathr/widgets/saudi_riyal_display.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/payroll_records_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/payroll_summary_response.dart';
+import 'package:co.injazathr.injazathr/utils/app_theme.dart';
+import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/view/payroll/payroll_controller.dart';
+import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
 import '../../../services/theme_service.dart';
 
 class PayrollStatusChip extends StatelessWidget {

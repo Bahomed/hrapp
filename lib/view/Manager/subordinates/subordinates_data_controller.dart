@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/employees_response.dart';
-import 'package:com.injazatsoftware.injazathr/repository/employees_repository.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/employees_response.dart';
+import 'package:co.injazathr.injazathr/repository/employees_repository.dart';
 
 class SubordinatesDataController extends GetxController {
   final EmployeesRepository repository = EmployeesRepository();

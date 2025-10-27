@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../data/local/preferences.dart';
 import '../../data/remote/response/login_response.dart';
 import '../../repository/logoutrepository.dart';

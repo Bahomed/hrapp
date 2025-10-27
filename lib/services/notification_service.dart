@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/app_notification_model.dart';
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
-import 'package:com.injazatsoftware.injazathr/view/payroll/payroll_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/request_leave/request_home_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/notifications_screen/notification_screen.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/utils/app_theme.dart';
+import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.dart';
+import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
 
 import '../view/approval/approval_screen.dart';
 

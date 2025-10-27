@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4</string>
+	<string>AIzaSyCzHmDJOx1f-VLe_fkRnIzjcIH7V7pIlOw</string>
 	<key>GCM_SENDER_ID</key>
-	<string>615617259720</string>
+	<string>948730820759</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.injazatsoftware.injazathr</string>
+	<string>co.injazathr.injazathr</string>
 	<key>PROJECT_ID</key>
-	<string>injazathr-defdb</string>
+	<string>injazathr-13f0f</string>
 	<key>STORAGE_BUCKET</key>
-	<string>injazathr-defdb.firebasestorage.app</string>
+	<string>injazathr-13f0f.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:615617259720:ios:27a5e7244b4c19ae5d5dfd</string>
+	<string>1:948730820759:ios:4770ee8d6eb02a3eaf91d2</string>
 </dict>
 </plist>

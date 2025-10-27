@@ -1,6 +1,6 @@
 {
-    "name": "com.injazatsoftware.injazathr",
-    "short_name": "com.injazatsoftware.injazathr",
+    "name": "co.injazathr.injazathr",
+    "short_name": "co.injazathr.injazathr",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

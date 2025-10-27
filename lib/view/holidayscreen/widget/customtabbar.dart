@@ -1,7 +1,7 @@
-import 'package:com.injazatsoftware.injazathr/view/holidayscreen/holidayscreencontroller.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/view/holidayscreen/holidayscreencontroller.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

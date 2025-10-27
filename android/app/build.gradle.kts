@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.injazatsoftware.injazathr"
+    namespace = "co.injazathr.injazathr"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.injazatsoftware.injazathr"
+        applicationId = "co.injazathr.injazathr"
         minSdk = 23
         targetSdk = 36
         versionCode = flutter.versionCode

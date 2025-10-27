@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "615617259720",
-    "project_id": "injazathr-defdb",
-    "storage_bucket": "injazathr-defdb.firebasestorage.app"
+    "project_number": "948730820759",
+    "project_id": "injazathr-13f0f",
+    "storage_bucket": "injazathr-13f0f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:615617259720:android:28c6d6ffdfc903335d5dfd",
+        "mobilesdk_app_id": "1:948730820759:android:2e1d1052c40027c2af91d2",
         "android_client_info": {
-          "package_name": "com.injazatsoftware.injazathr"
+          "package_name": "co.injazathr.injazathr"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD6STdFWe28o20265Z-5c6HYQbfc35K1Wk"
+          "current_key": "AIzaSyD0OVzs_27D7NI9Ej8ffjqCAnMqEkYsqH4"
         }
       ],
       "services": {
@@ -27,3 +27,4 @@
   ],
   "configuration_version": "1"
 }
+

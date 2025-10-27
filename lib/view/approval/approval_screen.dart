@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/approval_request_response.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
-import 'package:com.injazatsoftware.injazathr/view/approval/approval_controller.dart';
-import 'package:com.injazatsoftware.injazathr/widgets/saudi_riyal_display.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/view/approval/approval_controller.dart';
+import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
 
 class ApprovalScreen extends StatelessWidget {
   const ApprovalScreen({super.key});

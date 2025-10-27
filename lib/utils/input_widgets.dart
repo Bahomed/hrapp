@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
 
 class InputWidgets {
   

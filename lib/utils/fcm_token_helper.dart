@@ -6,7 +6,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:googleapis_auth/auth_io.dart';
-import 'package:com.injazatsoftware.injazathr/services/fcm_service.dart';
+import 'package:co.injazathr.injazathr/services/fcm_service.dart';
 
 class FCMTokenHelper {
   static Future<void> printFCMToken() async {

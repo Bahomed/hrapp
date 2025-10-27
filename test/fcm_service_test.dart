@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:com.injazatsoftware.injazathr/services/fcm_service.dart';
+import 'package:co.injazathr.injazathr/services/fcm_service.dart';
 
 void main() {
   group('FCM Service Tests', () {

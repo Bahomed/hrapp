@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/app_notification_model.dart';
-import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
+import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import '../../utils/translation_helper.dart';
 import 'notification_controller.dart';
 

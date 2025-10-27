@@ -4,11 +4,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math' as math;
 
-import 'package:com.injazatsoftware.injazathr/repository/attendancerepository.dart';
-import 'package:com.injazatsoftware.injazathr/utils/alertbox.dart';
-import 'package:com.injazatsoftware.injazathr/utils/list_extensions.dart';
-import 'package:com.injazatsoftware.injazathr/utils/location_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/repository/attendancerepository.dart';
+import 'package:co.injazathr.injazathr/utils/alertbox.dart';
+import 'package:co.injazathr.injazathr/utils/list_extensions.dart';
+import 'package:co.injazathr.injazathr/utils/location_service.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';

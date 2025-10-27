@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/view/scan/AutoRecognitionScreen.dart';
-import 'package:com.injazatsoftware.injazathr/view/scan/AutoRegisterScreen.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/view/scan/AutoRecognitionScreen.dart';
+import 'package:co.injazathr.injazathr/view/scan/AutoRegisterScreen.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
 class ClockingController extends GetxController {
   final Preferences preferences = Preferences();

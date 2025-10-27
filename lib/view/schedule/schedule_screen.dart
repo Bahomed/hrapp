@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'schedule_controller.dart';
 import '../../data/remote/response/schedule_models.dart';
 import '../../services/theme_service.dart';

@@ -1,10 +1,10 @@
-import 'package:com.injazatsoftware.injazathr/utils/alertbox.dart';
-import 'package:com.injazatsoftware.injazathr/view/attendance/attendance_detail_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/attendance/attendance_calendar_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/holidayscreen/holiday_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/home_screen/widget/homescreenwidget.dart';
-import 'package:com.injazatsoftware.injazathr/view/notifications_screen/notification_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/settings/settings_screen.dart';
+import 'package:co.injazathr.injazathr/utils/alertbox.dart';
+import 'package:co.injazathr.injazathr/view/attendance/attendance_detail_screen.dart';
+import 'package:co.injazathr.injazathr/view/attendance/attendance_calendar_screen.dart';
+import 'package:co.injazathr.injazathr/view/holidayscreen/holiday_screen.dart';
+import 'package:co.injazathr.injazathr/view/home_screen/widget/homescreenwidget.dart';
+import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
+import 'package:co.injazathr.injazathr/view/settings/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

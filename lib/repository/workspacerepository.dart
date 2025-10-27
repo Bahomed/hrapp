@@ -1,9 +1,9 @@
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/dio_client/dio_client.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/network_url/network_url.dart';
-import 'package:com.injazatsoftware.injazathr/data/remote/response/workspace_response.dart';
-import 'package:com.injazatsoftware.injazathr/utils/exceptionhandler.dart';
-import 'package:com.injazatsoftware.injazathr/utils/api_helper.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
+import 'package:co.injazathr.injazathr/data/remote/network_url/network_url.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/workspace_response.dart';
+import 'package:co.injazathr.injazathr/utils/exceptionhandler.dart';
+import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
 
 class WorkspaceRepository {
@@ -26,7 +26,7 @@ class WorkspaceRepository {
       queryParams = ApiHelper.instance.addLocaleToQuery(queryParams);
 
       var response = await dioClient.get(
-        'http://injazatsoftware.net/api/companies', // URL
+        'https://injazathr.co/api/companies', // URL
         {}, // Headers (empty or custom headers)
         queryParams, // Query parameters with locale
       );

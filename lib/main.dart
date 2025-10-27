@@ -1,9 +1,9 @@
-import 'package:com.injazatsoftware.injazathr/view/splash_screen/splash_screen.dart';
-import 'package:com.injazatsoftware.injazathr/utils/language_service.dart';
-import 'package:com.injazatsoftware.injazathr/utils/app_theme.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/services/fcm_service.dart';
-import 'package:com.injazatsoftware.injazathr/services/notification_service.dart';
+import 'package:co.injazathr.injazathr/view/splash_screen/splash_screen.dart';
+import 'package:co.injazathr.injazathr/utils/language_service.dart';
+import 'package:co.injazathr.injazathr/utils/app_theme.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/services/fcm_service.dart';
+import 'package:co.injazathr.injazathr/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';

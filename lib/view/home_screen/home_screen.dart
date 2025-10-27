@@ -1,10 +1,10 @@
-import 'package:com.injazatsoftware.injazathr/utils/appconstants.dart';
-import 'package:com.injazatsoftware.injazathr/utils/image.dart';
-import 'package:com.injazatsoftware.injazathr/utils/theme_toggle_widget.dart';
-import 'package:com.injazatsoftware.injazathr/utils/translation_helper.dart';
-import 'package:com.injazatsoftware.injazathr/utils/responsive_utils.dart';
-import 'package:com.injazatsoftware.injazathr/services/theme_service.dart';
-import 'package:com.injazatsoftware.injazathr/view/home_screen/homescreen_controller.dart';
+import 'package:co.injazathr.injazathr/utils/appconstants.dart';
+import 'package:co.injazathr.injazathr/utils/image.dart';
+import 'package:co.injazathr.injazathr/utils/theme_toggle_widget.dart';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/view/home_screen/homescreen_controller.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

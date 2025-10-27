@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:com.injazatsoftware.injazathr/data/local/preferences.dart';
-import 'package:com.injazatsoftware.injazathr/view/workspace/workspace_screen.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/view/workspace/workspace_screen.dart';
 import 'package:get/get.dart';
-import 'package:com.injazatsoftware.injazathr/view/home_screen/home_screen.dart';
-import 'package:com.injazatsoftware.injazathr/view/login_screen/login_screen.dart';
+import 'package:co.injazathr.injazathr/view/home_screen/home_screen.dart';
+import 'package:co.injazathr.injazathr/view/login_screen/login_screen.dart';
 
 import '../../utils/fcm_token_helper.dart';
 
