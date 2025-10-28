@@ -32,7 +32,6 @@ class ClockingController extends GetxController {
         await _checkEmbeddingStatus();
       }
     } catch (e) {
-      print('Error initializing user: $e');
     } finally {
       isLoading.value = false;
     }
@@ -42,9 +41,7 @@ class ClockingController extends GetxController {
     try {
       hasEmbedding.value = await preferences.userFaceExists();
 
-      print(await preferences.getFaceUserName());
     } catch (e) {
-      print('Error checking embedding status: $e');
       hasEmbedding.value = false;
     }
   }

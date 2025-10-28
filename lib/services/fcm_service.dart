@@ -8,12 +8,6 @@ import 'package:co.injazathr.injazathr/services/notification_service.dart';
 // Top-level function for background message handling
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (kDebugMode) {
-    print('Handling a background message: ${message.messageId}');
-    print('Message data: ${message.data}');
-    print('Message notification: ${message.notification?.title}');
-  }
-
   // Only add to notification service for when app opens
   // Server already shows the notification automatically
   await FCMService._addToNotificationService(message);
@@ -41,36 +35,18 @@ class FCMService {
       sound: true,
     );
 
-    if (kDebugMode) {
-      print('=== NOTIFICATION PERMISSION STATUS ===');
-      print('Authorization Status: ${settings.authorizationStatus}');
-      print('Alert Setting: ${settings.alert}');
-      print('Badge Setting: ${settings.badge}');
-      print('Sound Setting: ${settings.sound}');
-      print('=====================================');
-    }
+    // Debug logging removed
 
     // Check if permission was denied
     if (settings.authorizationStatus == AuthorizationStatus.denied) {
-      if (kDebugMode) {
-        print('❌ NOTIFICATION PERMISSION DENIED - Notifications will not work!');
-        print('Please enable notifications in iOS Settings > [App Name] > Notifications');
-      }
+      // Debug logging removed
     } else if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      if (kDebugMode) {
-        print('✅ NOTIFICATION PERMISSION GRANTED - Notifications should work');
-      }
+      // Debug logging removed
     }
 
     // Handle foreground messages - delegate to NotificationService
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (kDebugMode) {
-        print('🔥 FOREGROUND MESSAGE RECEIVED!');
-        print('Title: ${message.notification?.title}');
-        print('Body: ${message.notification?.body}');
-        print('Data: ${message.data}');
-        print('Message ID: ${message.messageId}');
-      }
+      // Debug logging removed
 
       // Let NotificationService handle foreground messages
       NotificationService.handleForegroundMessage(message);
@@ -81,9 +57,7 @@ class FCMService {
 
     // Handle token refresh
     _firebaseMessaging.onTokenRefresh.listen((String token) {
-      if (kDebugMode) {
-        print('FCM Token refreshed: $token');
-      }
+      // Debug logging removed
       // Update the token on the server
       _loginRepository.updateFCMToken();
     });
@@ -91,42 +65,30 @@ class FCMService {
 
   static Future<String?> getFCMToken() async {
     try {
-      if (kDebugMode) {
-        print('Getting FCM token...');
-      }
+      // Debug logging removed
 
       // For iOS, ensure APNS token is available first
       if (Platform.isIOS) {
         String? apnsToken = await _firebaseMessaging.getAPNSToken();
         if (apnsToken == null) {
-          if (kDebugMode) {
-            print('APNS token not available yet, waiting...');
-          }
+          // Debug logging removed
           // Wait a bit and try again
           await Future.delayed(const Duration(seconds: 3));
           apnsToken = await _firebaseMessaging.getAPNSToken();
           if (apnsToken == null) {
-            if (kDebugMode) {
-              print('APNS token still not available');
-            }
+            // Debug logging removed
             // Try to get FCM token anyway
           }
         }
         if (kDebugMode && apnsToken != null) {
-          print('APNS Token: ${apnsToken.substring(0, 20)}...');
         }
       }
 
       String? token = await _firebaseMessaging.getToken();
-      if (kDebugMode) {
-        print('FCM Token obtained: $token');
-      }
+      // Debug logging removed
       return token;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting FCM token: $e');
-        print('Stack trace: ${StackTrace.current}');
-      }
+      // Debug logging removed
       return null;
     }
   }
@@ -134,26 +96,18 @@ class FCMService {
   static Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
-      if (kDebugMode) {
-        print('Subscribed to topic: $topic');
-      }
+      // Debug logging removed
     } catch (e) {
-      if (kDebugMode) {
-        print('Error subscribing to topic: $e');
-      }
+      // Debug logging removed
     }
   }
 
   static Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(topic);
-      if (kDebugMode) {
-        print('Unsubscribed from topic: $topic');
-      }
+      // Debug logging removed
     } catch (e) {
-      if (kDebugMode) {
-        print('Error unsubscribing from topic: $e');
-      }
+      // Debug logging removed
     }
   }
 
@@ -228,9 +182,7 @@ class FCMService {
     try {
       await NotificationService.addBackgroundNotification(message);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error adding background notification to service: $e');
-      }
+      // Debug logging removed
     }
   }
 }

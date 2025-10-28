@@ -292,10 +292,8 @@ class ProfileController extends GetxController {
       try {
         final response = await _logoutRepository.logOutApi();
         if (response != null && response.status == 1) {
-          print('Logout API successful: ${response.message}');
         }
       } catch (apiError) {
-        print('Logout API error (continuing with local cleanup): $apiError');
       }
       
       // Clear ALL local data and reset all controllers
@@ -310,7 +308,6 @@ class ProfileController extends GetxController {
       try {
         await _clearAllAppData();
       } catch (clearError) {
-        print('Error clearing app data: $clearError');
       }
       _showErrorSnackbar(tr('logout_completed_with_errors') + ': $e');
       Get.offAll(() => LoginScreen());
@@ -331,7 +328,6 @@ class ProfileController extends GetxController {
       await _clearCachedData();
       
     } catch (e) {
-      print('Error clearing app data: $e');
     }
   }
 
@@ -400,7 +396,6 @@ class ProfileController extends GetxController {
       }
       
     } catch (e) {
-      print('Error resetting controllers: $e');
     }
   }
 
@@ -421,7 +416,6 @@ class ProfileController extends GetxController {
       permanentAddressController.clear();
       
     } catch (e) {
-      print('Error clearing cached data: $e');
     }
   }
 

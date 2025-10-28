@@ -59,7 +59,6 @@ class LocationService {
           address = '${place.street ?? ''} ${place.subThoroughfare ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}, ${place.country ?? ''}'.trim();
         }
       } catch (e) {
-        print('Error getting address: $e');
         address = 'Address not available';
       }
 
@@ -88,18 +87,15 @@ class LocationService {
                 
                 // iOS may still return null due to entitlements requiring Apple approval
                 if (wifiSSID == null || wifiBSSID == null) {
-                  print('WiFi info requires Apple entitlement approval - using IP-based location verification');
                   // Use IP address as alternative verification method
                   wifiSSID = 'WiFi Entitlement Pending';
                   wifiBSSID = 'Using IP Verification';
                 }
               } catch (e) {
-                print('Error getting WiFi info on iOS: $e');
                 wifiSSID = 'WiFi Access Error';
                 wifiBSSID = 'WiFi Access Error';
               }
             } else {
-              print('Location permission required for WiFi info on iOS');
               wifiSSID = 'Location Permission Required';
               wifiBSSID = 'Location Permission Required';
             }
@@ -109,7 +105,6 @@ class LocationService {
               wifiSSID = await info.getWifiName();
               wifiBSSID = await info.getWifiBSSID();
             } catch (e) {
-              print('Error getting WiFi info on Android: $e');
               wifiSSID = 'WiFi Access Error';
               wifiBSSID = 'WiFi Access Error';
             }
@@ -121,7 +116,6 @@ class LocationService {
           }
         }
       } catch (e) {
-        print('Error getting WiFi info: $e');
       }
 
       return LocationData(
@@ -135,7 +129,6 @@ class LocationService {
       );
 
     } catch (e) {
-      print('Error getting location data: $e');
       rethrow;
     }
   }
@@ -166,7 +159,6 @@ class LocationService {
       return permission == LocationPermission.whileInUse || 
              permission == LocationPermission.always;
     } catch (e) {
-      print('Error requesting location permission: $e');
       return false;
     }
   }

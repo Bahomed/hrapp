@@ -31,7 +31,6 @@ class AttendanceRepository {
     try {
     return true;
     } catch (e) {
-      print('Error verifying Face ID: $e');
       return false;
     }
   }
@@ -179,9 +178,6 @@ class AttendanceRepository {
       
       final apiUrl = '$workspaceUrl/api/attendance/status';
       
-      print('Calling attendance status API: $apiUrl');
-      print('Query params: $queryParams');
-      print('Token: ${token.isNotEmpty ? "Present" : "Missing"}');
       
       final response = await dioclient.get(
         apiUrl,
@@ -189,16 +185,11 @@ class AttendanceRepository {
         queryParams,
       );
       
-      print('Attendance status API response: ${response.statusCode}');
-      print('Response data: ${response.data}');
       
       return response.data;
     } on DioException catch (e) {
-      print('Dio error in attendance status API: ${e.message}');
-      print('Error response: ${e.response?.data}');
       throw exceptionHandler(e);
     } catch (e) {
-      print('General error in attendance status API: $e');
       rethrow;
     }
   }
@@ -211,8 +202,6 @@ class AttendanceRepository {
     try {
       final apiUrl = '$workspaceUrl/api/attendance/calendar/$month/$year';
       
-      print('Calling attendance API: $apiUrl');
-      print('Token: ${token.isNotEmpty ? "Present" : "Missing"}');
       
       final response = await dioclient.get(
         apiUrl,
@@ -220,16 +209,11 @@ class AttendanceRepository {
         {},
       );
       
-      print('Attendance API response: ${response.statusCode}');
-      print('Response data: ${response.data}');
       
       return AttendanceCalendarResponse.fromJson(response.data);
     } on DioException catch (e) {
-      print('Dio error in attendance API: ${e.message}');
-      print('Error response: ${e.response?.data}');
       throw exceptionHandler(e);
     } catch (e) {
-      print('General error in attendance API: $e');
       rethrow;
     }
   }
@@ -270,9 +254,6 @@ class AttendanceRepository {
     try {
       final apiUrl = '$workspaceUrl/api/attendance/calendar/$month/$year';
       
-      print('Calling employee attendance API: $apiUrl');
-      print('Employee ID: $employeeId');
-      print('Token: ${token.isNotEmpty ? "Present" : "Missing"}');
       
       final response = await dioclient.get(
         apiUrl,
@@ -280,16 +261,11 @@ class AttendanceRepository {
         {'locale': getCurrentLanguage(), 'emp_id': employeeId},
       );
       
-      print('Employee attendance API response: ${response.statusCode}');
-      print('Response data: ${response.data}');
       
       return AttendanceCalendarResponse.fromJson(response.data);
     } on DioException catch (e) {
-      print('Dio error in employee attendance API: ${e.message}');
-      print('Error response: ${e.response?.data}');
       throw exceptionHandler(e);
     } catch (e) {
-      print('General error in employee attendance API: $e');
       rethrow;
     }
   }

@@ -115,7 +115,6 @@ class EmployeeRequestsScreen extends StatelessWidget {
                           final isSelectedNow = controller.selectedTypeFilter.value == filter['key'];
                           return GestureDetector(
                             onTap: () {
-                              print('Tapping filter: ${filter['key']}');
                               controller.setTypeFilter(filter['key']);
                             },
                             child: Container(
@@ -177,7 +176,6 @@ class EmployeeRequestsScreen extends StatelessWidget {
                           final isSelectedNow = controller.selectedStatusFilter.value == filter['key'];
                           return GestureDetector(
                             onTap: () {
-                              print('Tapping status filter: ${filter['key']}');
                               controller.setStatusFilter(filter['key']);
                             },
                             child: Container(

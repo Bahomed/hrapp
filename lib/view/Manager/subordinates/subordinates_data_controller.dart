@@ -53,7 +53,6 @@ class SubordinatesDataController extends GetxController {
       
       // Debug: Print first employee image data
       if (employees.isNotEmpty) {
-        print('First employee image: ${employees.first.image}');
       }
       
     } catch (e) {

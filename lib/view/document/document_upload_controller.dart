@@ -54,13 +54,11 @@ class DocumentUploadController extends GetxController {
         final categories = response.data.map((category) => category.documentName).toList();
         availableCategories.assignAll(categories);
         
-        print('Categories loaded: ${availableCategories.length}');
       } else {
         _showErrorSnackbar(tr('error'), tr('failed_to_load_categories'));
       }
     } catch (e) {
       _showErrorSnackbar(tr('error'), tr('error_loading_categories'));
-      print('Error loading categories: $e');
     } finally {
       isCategoriesLoading.value = false;
     }
@@ -94,7 +92,6 @@ class DocumentUploadController extends GetxController {
       }
     } catch (e) {
       _showErrorSnackbar(tr('error'), tr('error_selecting_file'));
-      print('Error picking file: $e');
     } finally {
       // Reset flag after file picking is done
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -199,7 +196,6 @@ class DocumentUploadController extends GetxController {
        }
     } catch (e) {
       _showErrorSnackbar(tr('upload_failed'), tr('error_uploading_document'));
-      print('Error uploading document: $e');
     } finally {
       isUploading.value = false;
     }

@@ -66,7 +66,6 @@ class PayrollController extends GetxController {
   // Initialize with specific employee ID for viewing subordinate payroll
   Future<void> initializeWithEmployeeId(int empId) async {
     employeeId.value = empId;
-    print('PayrollController: Initializing with employee ID: $empId');
     
     isLoading.value = true;
     try {
@@ -293,7 +292,6 @@ class PayrollController extends GetxController {
 
   // View payroll details
   void viewPayrollDetails(PayrollRecordResponseData record) {
-    print('viewPayrollDetails called for record ID: ${record.id}');
     Get.bottomSheet(
       Container(
         height: Get.height * 0.9,
@@ -793,12 +791,9 @@ class PayrollController extends GetxController {
 
   // Navigate to specific payroll detail by ID
   void navigateToPayrollDetail(String payrollId) {
-    print('PayrollController.navigateToPayrollDetail: Searching for payroll ID: $payrollId');
-    print('PayrollController: Current payrollRecords count: ${payrollRecords.length}');
     
     // Debug print all available record IDs
     for (var record in payrollRecords) {
-      print('PayrollController: Available record ID: ${record.id}');
     }
     
     // Find the payroll record with the matching ID
@@ -807,11 +802,9 @@ class PayrollController extends GetxController {
     );
     
     if (record != null) {
-      print('PayrollController: Found matching record! Calling viewPayrollDetails for ID: ${record.id}');
       // Show the payroll details
       viewPayrollDetails(record);
     } else {
-      print('PayrollController: Record NOT found in current records. payrollId: $payrollId');
       // If not found in current records, show a message
       Get.snackbar(
         tr('info'),

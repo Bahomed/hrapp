@@ -78,14 +78,8 @@ class HomeScreenController extends SuperController {
         isManager.value = userData.manager ?? false;
 
         // Debug print to verify data loading
-        print('User data loaded:');
-        print('Name: ${userName.value}');
-        print('Email: ${userEmail.value}');
-        print('Image: ${userImage.value}');
-        print('Is Manager: ${isManager.value}');
       }
     } catch (e) {
-      print('Error loading user data: $e');
     }
   }
 
@@ -101,18 +95,14 @@ class HomeScreenController extends SuperController {
       final locale = Get.locale?.languageCode ?? 'en';
       final datetime = DateTime.now().toIso8601String();
 
-      print('Loading greeting with locale: $locale, datetime: $datetime');
 
       final greeting = await repository.getGreeting(
         locale: locale,
         datetime: datetime,
       );
 
-      print('Greeting received: "$greeting"');
       greetingText.value = greeting;
-      print('Greeting set to observable: "${greetingText.value}"');
     } catch (e) {
-      print('Error loading greeting: $e');
     }
   }
 

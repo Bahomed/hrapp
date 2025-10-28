@@ -31,9 +31,7 @@ class UnexecutedRequestsController extends GetxController {
       // Process files if they exist in the response
       _processRequestFiles(response);
 
-      print('Unexecuted requests loaded: ${unexecutedRequestsTotal.value} total requests');
     } catch (e) {
-      print('Error loading unexecuted requests: $e');
       unexecutedRequestsTotal.value = 0;
       unexecutedRequests.value = [];
       

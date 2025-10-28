@@ -67,7 +67,6 @@ class DashboardRepository {
           .get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
       
       final greeting = response.data['greeting'] ?? 'Good morning';
-      print('Repository returning greeting: "$greeting"');
       return greeting;
     }
     on DioException catch (e) {

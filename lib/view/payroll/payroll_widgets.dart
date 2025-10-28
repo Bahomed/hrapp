@@ -103,7 +103,6 @@ class PayrollCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            print('PayrollCard tapped! Record ID: ${record.id}');
             controller.viewPayrollDetails(record);
           },
           borderRadius: BorderRadius.circular(16),

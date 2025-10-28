@@ -57,7 +57,6 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
   // Initialize with specific employee ID for viewing subordinate documents
   Future<void> initializeWithEmployeeId(int empId) async {
     employeeId.value = empId;
-    print('DocumentController: Initializing with employee ID: $empId');
     
     isLoading.value = true;
     try {
@@ -201,12 +200,9 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
       final response = await _documentRepository.getAvailableCategories();
       if (response.success) {
         availableCategories.value = response.data;
-        print('Categories loaded successfully: ${availableCategories.length} categories');
       } else {
-        print('Failed to load categories: ${response.message}');
       }
     } catch (e) {
-      print('Error loading available categories: $e');
     } finally {
       isCategoriesLoading.value = false;
     }
@@ -337,7 +333,6 @@ class DocumentController extends GetxController with GetTickerProviderStateMixin
         onReceiveProgress: (received, total) {
           if (total != -1) {
             final progress = (received / total * 100).toStringAsFixed(0);
-            print('Download progress: $progress%');
           }
         },
       );

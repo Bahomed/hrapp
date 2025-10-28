@@ -116,7 +116,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
         _attendanceStatusError = '${tr('failed_to_load_attendance_data')}: ${e.toString()}';
         _isLoadingAttendanceStatus = false;
       });
-      print('Error loading attendance status: $e');
     }
   }
 
@@ -165,17 +164,14 @@ class _ClockingScreenState extends State<ClockingScreen> {
               
               // iOS may still return null due to entitlements or developer account restrictions
               if (wifiName == null || wifiBSSID == null) {
-                print('WiFi info null - may require paid Apple Developer account for WiFi entitlements');
                 wifiName = wifiName ?? 'Entitlement Required';
                 wifiBSSID = wifiBSSID ?? 'Entitlement Required';
               }
             } catch (e) {
-              print('Error getting WiFi info on iOS: $e');
               wifiName = 'WiFi Access Error';
               wifiBSSID = 'WiFi Access Error';
             }
           } else {
-            print('Location permission required for WiFi info on iOS');
             wifiName = 'Location Permission Required';
             wifiBSSID = 'Location Permission Required';
           }
@@ -185,7 +181,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
             wifiName = await info.getWifiName();       // SSID
             wifiBSSID = await info.getWifiBSSID();     // BSSID
           } catch (e) {
-            print('Error getting WiFi info on Android: $e');
             wifiName = 'WiFi Access Error';
             wifiBSSID = 'WiFi Access Error';
           }
@@ -194,10 +189,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
         final wifiIP = await info.getWifiIP();           // IP Address
         final wifiGatewayIP = await info.getWifiGatewayIP();
 
-        print('WiFi Name (SSID): $wifiName');
-        print('BSSID: $wifiBSSID');
-        print('IP Address: $wifiIP');
-        print('Gateway IP: $wifiGatewayIP');
 
         setState(() {
           _wifiSSID = wifiName ?? tr('connected_to_wifi');
@@ -210,7 +201,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
         });
       }
     } catch (e) {
-      print('Connectivity check error: $e');
       setState(() {
         _isConnectedToWifi = false;
         _wifiSSID = null;
@@ -242,15 +232,8 @@ class _ClockingScreenState extends State<ClockingScreen> {
           _isGeocodingLoading = false;
         });
 
-        print('Address Details:');
-        print('Street: $_street');
-        print('City: $_city');
-        print('State: $_state');
-        print('Country: $_country');
-        print('Postal Code: $_postalCode');
       }
     } catch (e) {
-      print('Geocoding error: $e');
       setState(() {
         _street = tr('address_not_available');
         _city = tr('city_not_available');
@@ -460,15 +443,10 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
     try {
       // Show debug information
-      print('Current location: $_currentLat, $_currentLng');
-      print('WiFi SSID: $_wifiSSID');
-      print('WiFi BSSID: $_wifiBSSID');
-      print('Address: $_street, $_city, $_state');
 
       // Allow clocking from anywhere - always return true
       return true;
     } catch (e) {
-      print('Error validating work location: $e');
       return true; // Still allow clocking even if there's an error
     }
   }

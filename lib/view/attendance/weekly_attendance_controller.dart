@@ -22,7 +22,6 @@ class WeeklyAttendanceController extends GetxController {
   // Initialize with specific employee ID for viewing subordinate attendance
   Future<void> initializeWithEmployeeId(int empId) async {
     employeeId.value = empId;
-    print('WeeklyAttendanceController: Initializing with employee ID: $empId');
     loadCurrentWeekData();
   }
 

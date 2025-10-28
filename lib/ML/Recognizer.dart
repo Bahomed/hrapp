@@ -50,15 +50,11 @@ class Recognizer {
 
           Recognition recognition = Recognition(name, Rect.zero, embd, 0);
           registered.putIfAbsent(name, () => recognition);
-          print('Loaded registered face: $name');
         } catch (e) {
-          print('Error parsing embedding for user $name: $e');
         }
       } else {
-        print('Face embedding is empty for user: $name');
       }
     } else {
-      print('No registered face found in shared preferences');
     }
   }
   // void loadRegisteredFaces() async {
@@ -126,7 +122,6 @@ class Recognizer {
     // Also add to in-memory registered map
     Recognition recognition = Recognition(name, Rect.zero, embedding, 0);
     registered.putIfAbsent(name, () => recognition);
-    print('Registered face in memory and updated preferences: $name');
   }
 
   Future<Uint8List?> getStoredFaceImage(String name) async {
@@ -137,7 +132,6 @@ class Recognizer {
       }
       return null;
     } catch (e) {
-      print('Error getting stored face image: $e');
       return null;
     }
   }
@@ -147,7 +141,6 @@ class Recognizer {
     try {
       interpreter = await Interpreter.fromAsset(modelName);
     } catch (e) {
-      print('Unable to create interpreter, Caught Exception: ${e.toString()}');
     }
   }
 
@@ -174,7 +167,6 @@ class Recognizer {
 
     //TODO crop face from image resize it and convert it to float array
     var input = imageToArray(image);
-    print(input.shape.toString());
 
     //TODO output array
     List output = List.filled(1*OUTPUT, 0).reshape([1,OUTPUT]);
@@ -183,14 +175,12 @@ class Recognizer {
     final runs = DateTime.now().millisecondsSinceEpoch;
     interpreter.run(input, output);
     final run = DateTime.now().millisecondsSinceEpoch - runs;
-    print('Time to run inference: $run ms$output');
 
     //TODO convert dynamic list to double list
     List<double> outputArray = output.first.cast<double>();
 
     //TODO looks for the nearest embeeding in the database and returns the pair
     Pair pair = findNearest(outputArray);
-    print("distance= ${pair.distance}");
 
     return Recognition(pair.name,location,outputArray,pair.distance);
   }

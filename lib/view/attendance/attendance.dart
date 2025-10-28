@@ -69,10 +69,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
         final wifiIP = await info.getWifiIP();           // IP Address
         final wifiGatewayIP = await info.getWifiGatewayIP();
 
-        print('WiFi Name (SSID): $wifiName');
-        print('BSSID: $wifiBSSID');
-        print('IP Address: $wifiIP');
-        print('Gateway IP: $wifiGatewayIP');
 
         setState(() {
           _wifiSSID = wifiName ?? "Connected to WiFi";
@@ -85,7 +81,6 @@ class _ClockingScreenState extends State<ClockingScreen> {
         });
       }
     } catch (e) {
-      print('Connectivity check error: $e');
       setState(() {
         _isConnectedToWifi = false;
         _wifiSSID = null;
@@ -289,14 +284,10 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
     try {
       // Show debug information
-      print('Current location: $_currentLat, $_currentLng');
-      print('WiFi SSID: $_wifiSSID');
-      print('WiFi BSSID: $_wifiBSSID');
 
       // Allow clocking from anywhere - always return true
       return true;
     } catch (e) {
-      print('Error validating work location: $e');
       return true; // Still allow clocking even if there's an error
     }
   }

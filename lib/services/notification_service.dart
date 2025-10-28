@@ -46,9 +46,7 @@ class NotificationService {
 
 
   static Future<void> _handleBackgroundMessageTap(RemoteMessage message) async {
-    if (kDebugMode) {
-      print('Background message tapped: ${message.messageId}');
-    }
+    // Debug logging removed
 
     final appNotification = _createAppNotificationFromFCM(message);
     await _navigateToNotificationScreen(appNotification);
@@ -79,19 +77,15 @@ class NotificationService {
   static Future<void> _navigateToNotificationScreen(AppNotification notification) async {
     // Mark as read when opened
     await markAsRead(notification.id);
-    print('NotificationService: type: ${notification.type}');
 
     // Navigate based on notification type
     switch (notification.type) {
       case NotificationType.payroll:
         // Check if payroll_id is provided for direct detail navigation
         final payrollId = notification.data?['payroll_id'];
-        print('NotificationService: Navigating to payroll with ID: $payrollId');
         if (payrollId != null) {
-          print('NotificationService: Opening PayrollScreen with payrollId: $payrollId');
           Get.to(() => PayrollScreen(payrollId: payrollId));
         } else {
-          print('NotificationService: Opening PayrollScreen without specific ID');
           Get.to(() => const PayrollScreen());
         }
         break;
@@ -131,9 +125,7 @@ class NotificationService {
       _notifications.clear();
       _notifications.addAll(savedNotifications.map((json) => AppNotification.fromJson(json)));
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading saved notifications: $e');
-      }
+      // Debug logging removed
     }
   }
 
@@ -226,9 +218,7 @@ class NotificationService {
   }
 
   static void _onLocalNotificationTap(NotificationResponse response) {
-    if (kDebugMode) {
-      print('Local notification tapped with payload: ${response.payload}');
-    }
+    // Debug logging removed
     
     // Handle local notification tap by navigating based on payload
     if (response.payload != null) {
@@ -238,7 +228,6 @@ class NotificationService {
         final String typeString = payloadData['type'] ?? 'general';
         final Map<String, dynamic>? data = payloadData['data'];
         
-        print('Local notification payload data: $payloadData');
         
         final notificationType = NotificationType.values.firstWhere(
           (type) => type.name == typeString,
@@ -257,7 +246,6 @@ class NotificationService {
         _navigateToNotificationScreen(dummyNotification);
       } catch (e) {
         // Fallback to old method if JSON parsing fails
-        print('Failed to parse notification payload as JSON: $e');
         final notificationType = NotificationType.values.firstWhere(
           (type) => type.name == response.payload,
           orElse: () => NotificationType.general,
@@ -282,12 +270,7 @@ class NotificationService {
     final String body = message.notification?.body ?? message.data['body'] ?? '';
     final String imageUrl = message.data['image'] ?? '';
 
-    if (kDebugMode) {
-      print('📱 Creating local notification:');
-      print('Title: $title');
-      print('Body: $body');
-      print('Data: ${message.data}');
-    }
+    // Debug logging removed
 
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
@@ -332,13 +315,9 @@ class NotificationService {
         payload: jsonEncode(payloadJson),
       );
       
-      if (kDebugMode) {
-        print('✅ Local notification sent successfully with payload: ${jsonEncode(payloadJson)}');
-      }
+      // Debug logging removed
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Failed to show local notification: $e');
-      }
+      // Debug logging removed
     }
   }
 }

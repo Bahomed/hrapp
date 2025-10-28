@@ -139,12 +139,9 @@ class NotificationController extends GetxController {
   void _navigateToPayrollScreen(AppNotification notification) {
     // Navigate to payroll screen with payroll_id from data - same as FCM
     final payrollId = notification.data?['payroll_id'];
-    print('NotificationController: Navigating to payroll with ID: $payrollId');
     if (payrollId != null) {
-      print('NotificationController: Opening PayrollScreen with payrollId: $payrollId');
       Get.to(() => PayrollScreen(payrollId: payrollId));
     } else {
-      print('NotificationController: Opening PayrollScreen without specific ID');
       Get.to(() => const PayrollScreen());
     }
   }
@@ -159,14 +156,12 @@ class NotificationController extends GetxController {
     //   // Get.to(() => RequestDetailsScreen(requestId: requestId));
     // } else {
     //   // Navigate to general requests screen
-      print('NotificationController: Opening general requests screen');
      Get.to(() => const RequestHomeScreen());
     //}
   }
 
   void _navigateToApprovalScreen(AppNotification notification) {
     // Navigate to approval screen - same pattern as other screens
-    print('NotificationController: Opening ApprovalScreen');
      Get.to(() => const ApprovalScreen());
   }
 
@@ -174,7 +169,6 @@ class NotificationController extends GetxController {
     // Navigate to message/chat screen with message details
     final messageId = notification.data?['message_id'];
     final senderId = notification.data?['sender_id'];
-    print('NotificationController: Opening messages with messageId: $messageId, senderId: $senderId');
     // Get.to(() => MessagesScreen(messageId: messageId, senderId: senderId));
   }
 

@@ -38,11 +38,7 @@ class AntiSpoofingDetector {
       var inputTensors = interpreter!.getInputTensors();
       var outputTensors = interpreter!.getOutputTensors();
       
-      print('Anti-spoofing model loaded successfully');
-      print('Input tensor: ${inputTensors[0].shape}, type: ${inputTensors[0].type}');
-      print('Output tensor: ${outputTensors[0].shape}, type: ${outputTensors[0].type}');
     } catch (e) {
-      print('Unable to load anti-spoofing model: ${e.toString()}');
       _isModelLoaded = false;
     }
   }
@@ -83,7 +79,6 @@ class AntiSpoofingDetector {
     
     // If model still failed to load, return default result
     if (!_isModelLoaded || interpreter == null) {
-      print('Anti-spoofing model not available, returning default result');
       return AntiSpoofingResult(
         isReal: true,
         confidence: 0.5,
@@ -141,7 +136,6 @@ class AntiSpoofingDetector {
       double realProb = isReal ? confidence : 1 - confidence;
       double fakeProb = 1 - realProb;
       
-      print('Anti-spoofing result: Raw=${averageScore.toStringAsFixed(3)}, Variance=${variance.toStringAsFixed(3)}, IsReal=$isReal');
       
       return AntiSpoofingResult(
         isReal: isReal,
@@ -151,7 +145,6 @@ class AntiSpoofingDetector {
         inferenceTime: inferenceTime,
       );
     } catch (e) {
-      print('Error in anti-spoofing detection: ${e.toString()}');
       // Return default "real" result if model fails
       return AntiSpoofingResult(
         isReal: true,

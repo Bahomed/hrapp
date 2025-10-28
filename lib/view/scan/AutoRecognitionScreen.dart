@@ -218,7 +218,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         spoofingConfidence = result.confidence;
       });
     } catch (e) {
-      print('Anti-spoofing detection error: $e');
       setState(() {
         isRealFace = true;
         spoofingConfidence = 0.5;

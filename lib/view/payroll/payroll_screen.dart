@@ -19,7 +19,6 @@ class PayrollScreen extends StatelessWidget {
     
     // Initialize controller with employee ID if provided
     if (employeeId != null) {
-      print('PayrollScreen: Received employeeId: $employeeId');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.initializeWithEmployeeId(employeeId!);
       });
@@ -27,9 +26,7 @@ class PayrollScreen extends StatelessWidget {
     
     // If payrollId is provided, handle specific payroll details
     if (payrollId != null) {
-      print('PayrollScreen: Received payrollId: $payrollId');
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        print('PayrollScreen: About to call navigateToPayrollDetail with ID: $payrollId');
         
         // Wait a bit for data to load, then try to navigate
         await Future.delayed(const Duration(milliseconds: 1500));

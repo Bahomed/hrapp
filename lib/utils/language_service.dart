@@ -66,7 +66,6 @@ class LanguageService extends GetxController {
             await homeController.refreshUserData();
           } catch (e) {
             // HomeScreenController not found, continue normally
-            print('HomeScreenController not found: $e');
           }
           
           // Update text direction for Arabic
@@ -79,7 +78,6 @@ class LanguageService extends GetxController {
         }
       } catch (e) {
         // If API call fails, still update locally as fallback
-        print('Language API update failed: $e');
         
         currentLanguage.value = languageCode;
         currentLocale.value = supportedLanguages[languageCode]!;
@@ -96,7 +94,6 @@ class LanguageService extends GetxController {
           await homeController.refreshUserData();
         } catch (e) {
           // HomeScreenController not found, continue normally
-          print('HomeScreenController not found: $e');
         }
         
         // Update text direction for Arabic

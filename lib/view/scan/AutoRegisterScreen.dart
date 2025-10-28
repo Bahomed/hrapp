@@ -387,21 +387,18 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       // Simple validation: just check if the cropped image has reasonable dimensions
       // and looks like it could contain a face
       if (croppedFace.width < 50 || croppedFace.height < 50) {
-        print('Cropped face too small: ${croppedFace.width}x${croppedFace.height}');
         return false;
       }
 
       // Check aspect ratio is reasonable for a face (not too wide or tall)
       double aspectRatio = croppedFace.width / croppedFace.height;
       if (aspectRatio < 0.5 || aspectRatio > 2.0) {
-        print('Invalid aspect ratio: $aspectRatio');
         return false;
       }
 
       // Validation passed
       return true;
     } catch (e) {
-      print('Error validating cropped face: $e');
       return false;
     }
   }
@@ -441,7 +438,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
           });
         }
       } catch (e) {
-        print('Anti-spoofing detection error: $e');
         setState(() {
           isRealFace = true;
           spoofingConfidence = 0.5;

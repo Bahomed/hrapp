@@ -174,27 +174,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   Future<void> loadLeaveRequests() async {
     try {
       isLoading.value = true;
-      print('[RequestController] Loading leave requests for current year');
 
       final response = await _requestRepository.getLeaveRequests(
         status: null, // Load all data, filter client-side
         year: DateTime.now().year,
       );
 
-      print('[RequestController] Leave requests response - Success: ${response.success}');
-      print('[RequestController] Leave requests response - Message: ${response.message}');
-      print('[RequestController] Leave requests response - Data count: ${response.data?.length ?? 0}');
 
       if (response.success) {
         _allLeaveRequests.value = response.data; // Store all data
         _filterLeaveRequests(); // Apply current filter
-        print('[RequestController] Leave requests loaded successfully: ${_allLeaveRequests.length} total, ${leaveRequests.length} filtered');
       } else {
-        print('[RequestController] Failed to load leave requests: ${response.message}');
         _showErrorSnackbar('${tr('failed_to_load_leave_requests')}: ${response.message}');
       }
     } catch (e) {
-      print('[RequestController] Error loading leave requests: $e');
       _showErrorSnackbar('${tr('error_loading_leave_requests')}: $e');
     } finally {
       isLoading.value = false;
