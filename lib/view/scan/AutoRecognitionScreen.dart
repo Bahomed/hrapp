@@ -262,6 +262,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
+
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,

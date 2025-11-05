@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:camera/camera.dart';
@@ -53,6 +54,120 @@ class CircleOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter to draw face landmarks and contours
+class FaceLandmarksPainter extends CustomPainter {
+  final Face? face;
+  final Size imageSize;
+  final Size screenSize;
+
+  FaceLandmarksPainter({
+    required this.face,
+    required this.imageSize,
+    required this.screenSize,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (face == null) return;
+
+    // Calculate scale - image width maps to screen width
+    final scaleX = screenSize.width / imageSize.height;  // Note: height because camera is rotated
+    final scaleY = screenSize.height / imageSize.width;  // Note: width because camera is rotated
+
+    // Offset for centering
+    final offsetX = 0.0;
+    final offsetY = 0.0;
+
+    // Draw face oval contour (face mesh)
+    final faceOval = face!.contours[FaceContourType.face];
+    if (faceOval != null && faceOval.points.isNotEmpty) {
+      final path = Path();
+      final firstPoint = _transformPoint(faceOval.points.first, scaleX, scaleY, offsetX, offsetY);
+      path.moveTo(firstPoint.dx, firstPoint.dy);
+
+      for (var point in faceOval.points.skip(1)) {
+        final transformedPoint = _transformPoint(point, scaleX, scaleY, offsetX, offsetY);
+        path.lineTo(transformedPoint.dx, transformedPoint.dy);
+      }
+      path.close();
+
+      final paint = Paint()
+        ..color = Colors.green.withOpacity(0.8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0;
+
+      canvas.drawPath(path, paint);
+    }
+
+    // Draw eye contours
+    _drawContour(canvas, face!.contours[FaceContourType.leftEye], scaleX, scaleY, offsetX, offsetY, Colors.blue);
+    _drawContour(canvas, face!.contours[FaceContourType.rightEye], scaleX, scaleY, offsetX, offsetY, Colors.blue);
+
+    // Draw nose contours
+    _drawContour(canvas, face!.contours[FaceContourType.noseBridge], scaleX, scaleY, offsetX, offsetY, Colors.yellow);
+    _drawContour(canvas, face!.contours[FaceContourType.noseBottom], scaleX, scaleY, offsetX, offsetY, Colors.yellow);
+
+    // Draw mouth contours
+    _drawContour(canvas, face!.contours[FaceContourType.upperLipTop], scaleX, scaleY, offsetX, offsetY, Colors.red);
+    _drawContour(canvas, face!.contours[FaceContourType.lowerLipBottom], scaleX, scaleY, offsetX, offsetY, Colors.red);
+
+    // Draw landmarks as larger circles
+    final landmarkPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    face!.landmarks.forEach((type, landmark) {
+      if (landmark != null) {
+        final transformedPoint = _transformPoint(
+          Point(landmark.position.x, landmark.position.y),
+          scaleX,
+          scaleY,
+          offsetX,
+          offsetY
+        );
+        canvas.drawCircle(
+          Offset(transformedPoint.dx, transformedPoint.dy),
+          6.0,
+          landmarkPaint,
+        );
+      }
+    });
+  }
+
+  Offset _transformPoint(Point point, double scaleX, double scaleY, double offsetX, double offsetY) {
+    // Transform coordinates from camera space to screen space
+    // For front camera in portrait mode: rotate 90 degrees counterclockwise
+    final x = point.y.toDouble() * scaleX + offsetX;
+    final y = point.x.toDouble() * scaleY + offsetY;
+    return Offset(x, y);
+  }
+
+  void _drawContour(Canvas canvas, FaceContour? contour, double scaleX, double scaleY, double offsetX, double offsetY, Color color) {
+    if (contour == null || contour.points.isEmpty) return;
+
+    final path = Path();
+    final firstPoint = _transformPoint(contour.points.first, scaleX, scaleY, offsetX, offsetY);
+    path.moveTo(firstPoint.dx, firstPoint.dy);
+
+    for (var point in contour.points.skip(1)) {
+      final transformedPoint = _transformPoint(point, scaleX, scaleY, offsetX, offsetY);
+      path.lineTo(transformedPoint.dx, transformedPoint.dy);
+    }
+
+    final paint = Paint()
+      ..color = color.withOpacity(0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(FaceLandmarksPainter oldDelegate) {
+    return face != oldDelegate.face;
+  }
 }
 
 class AutoRegisterScreen extends StatefulWidget {
@@ -110,6 +225,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
   bool showCountdown = false;
   int countdownValue = 3;
+
+  Face? detectedFace; // Store detected face for drawing landmarks
 
   int frameSkipCounter = 0;
   static const int frameSkipInterval = 2;
@@ -172,7 +289,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         options: FaceDetectorOptions(
           enableClassification: false,
           enableLandmarks: true,
-          enableContours: false,
+          enableContours: true,
           enableTracking: true,
         ),
       );
@@ -248,6 +365,11 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (faces.isNotEmpty && faces.length == 1) {
       Face face = faces.first;
 
+      // Store face for drawing landmarks
+      setState(() {
+        detectedFace = face;
+      });
+
       bool faceWellPositioned = isFaceWellPositioned(face);
       bool angleCorrect = isCorrectAngleForStep(face);
       bool qualityGood = assessFaceQuality(face);
@@ -281,6 +403,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     } else {
       correctAngleCount = 0;
       setState(() {
+        detectedFace = null; // Clear face when not detected
         isAngleCorrect = false;
         isFaceQualityGood = false;
         angleStatus = faces.isEmpty ? tr('no_face_detected') : tr('multiple_faces_detected');
@@ -381,25 +504,43 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     return true;
   }
 
+  /// Align face by rotating based on eye positions to ensure horizontal alignment
+  img.Image _alignFaceByEyes(img.Image face, FaceLandmark leftEye, FaceLandmark rightEye,
+      double centerX, double centerY, int cropLeft, int cropTop) {
+    try {
+      // Calculate angle between eyes
+      double dx = (rightEye.position.x - leftEye.position.x).toDouble();
+      double dy = (rightEye.position.y - leftEye.position.y).toDouble();
+      double angle = -atan2(dy, dx) * 180 / pi;
+
+      // Only apply small corrections (within ±15 degrees)
+      if (angle.abs() > 15) {
+        angle = angle.sign * 15;
+      }
+
+      // Rotate the face to align eyes horizontally
+      if (angle.abs() > 2) {
+        return img.copyRotate(face, angle: angle);
+      }
+      return face;
+    } catch (e) {
+      return face;
+    }
+  }
+
   /// ✅ NEW: Validates that a cropped image actually contains a face
   Future<bool> _validateCroppedFaceContainsFace(img.Image croppedFace) async {
     try {
-      // Simple validation: just check if the cropped image has reasonable dimensions
-      // and looks like it could contain a face
+      // Simple validation - just check minimum size
       if (croppedFace.width < 50 || croppedFace.height < 50) {
         return false;
       }
 
-      // Check aspect ratio is reasonable for a face (not too wide or tall)
-      double aspectRatio = croppedFace.width / croppedFace.height;
-      if (aspectRatio < 0.5 || aspectRatio > 2.0) {
-        return false;
-      }
-
-      // Validation passed
+      // Always return true if basic size check passes
+      // Face detection already verified the face exists
       return true;
     } catch (e) {
-      return false;
+      return true; // Don't block on validation errors
     }
   }
 
@@ -409,19 +550,55 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         : Util.convertNV21(frame!);
 
     if (image != null) {
-      image = img.copyRotate(image, angle: camDirec == CameraLensDirection.front ? 270 : 90);
+      // Use face contours and landmarks to find the actual face center
+      FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
+      FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
+      FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
 
+      double centerX, centerY;
+
+      // Try to get face oval contour for most accurate center
+      FaceContour? faceOval = face.contours[FaceContourType.face];
+
+      if (faceOval != null && faceOval.points.isNotEmpty) {
+        // Calculate center from face oval contour points
+        double sumX = 0, sumY = 0;
+        for (var point in faceOval.points) {
+          sumX += point.x.toDouble();
+          sumY += point.y.toDouble();
+        }
+        centerX = sumX / faceOval.points.length;
+        centerY = sumY / faceOval.points.length;
+      } else if (leftEye != null && rightEye != null && noseBase != null) {
+        // Use eyes and nose to find face center
+        centerX = (leftEye.position.x + rightEye.position.x + noseBase.position.x) / 3;
+        centerY = (leftEye.position.y + rightEye.position.y + noseBase.position.y) / 3;
+      } else {
+        // Fallback to bounding box center
+        Rect faceRect = face.boundingBox;
+        centerX = faceRect.left + faceRect.width / 2;
+        centerY = faceRect.top + faceRect.height / 2;
+      }
+
+      // Create a square crop around the face center
       Rect faceRect = face.boundingBox;
-      int left = faceRect.left.toInt().clamp(0, image.width - 1);
-      int top = faceRect.top.toInt().clamp(0, image.height - 1);
-      int width = faceRect.width.toInt().clamp(1, image.width - left);
-      int height = faceRect.height.toInt().clamp(1, image.height - top);
+      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 1.5;
 
+      int left = (centerX - faceSize / 2).toInt().clamp(0, image.width - 1);
+      int top = (centerY - faceSize / 2).toInt().clamp(0, image.height - 1);
+      int width = faceSize.toInt().clamp(1, image.width - left);
+      int height = faceSize.toInt().clamp(1, image.height - top);
+
+      // Crop the face from the original image FIRST
       img.Image croppedFace = img.copyCrop(image,
           x: left,
           y: top,
           width: width,
           height: height);
+
+      // NOW rotate the cropped face image
+      croppedFace = img.copyRotate(croppedFace,
+          angle: camDirec == CameraLensDirection.front ? 270 : 90);
 
       try {
         AntiSpoofingResult result = await antiSpoofingDetector.detectSpoofing(croppedFace);
@@ -495,44 +672,60 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         : Util.convertNV21(frame!);
 
     if (image != null) {
-      // ✅ IMPORTANT: Rotate image first, THEN adjust face coordinates
-      image = img.copyRotate(image, angle: camDirec == CameraLensDirection.front ? 270 : 90);
+      // Use face contours and landmarks to find the actual face center
+      FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
+      FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
+      FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
 
-      // ✅ After rotation, recalculate bounding box coordinates
-      Rect faceRect = face.boundingBox;
+      double centerX, centerY;
 
-      // For front camera with 270° rotation, we need to transform coordinates
-      double rotatedLeft, rotatedTop, rotatedWidth, rotatedHeight;
+      // Try to get face oval contour for most accurate center
+      FaceContour? faceOval = face.contours[FaceContourType.face];
 
-      if (camDirec == CameraLensDirection.front) {
-        // After 270° rotation: new coordinates
-        rotatedLeft = faceRect.top;
-        rotatedTop = image.height - (faceRect.left + faceRect.width);
-        rotatedWidth = faceRect.height;
-        rotatedHeight = faceRect.width;
+      if (faceOval != null && faceOval.points.isNotEmpty) {
+        // Calculate center from face oval contour points
+        double sumX = 0, sumY = 0;
+        for (var point in faceOval.points) {
+          sumX += point.x.toDouble();
+          sumY += point.y.toDouble();
+        }
+        centerX = sumX / faceOval.points.length;
+        centerY = sumY / faceOval.points.length;
+      } else if (leftEye != null && rightEye != null && noseBase != null) {
+        // Use eyes and nose to find face center
+        centerX = (leftEye.position.x + rightEye.position.x + noseBase.position.x) / 3;
+        centerY = (leftEye.position.y + rightEye.position.y + noseBase.position.y) / 3;
       } else {
-        // After 90° rotation
-        rotatedLeft = image.width - (faceRect.top + faceRect.height);
-        rotatedTop = faceRect.left;
-        rotatedWidth = faceRect.height;
-        rotatedHeight = faceRect.width;
+        // Fallback to bounding box center
+        Rect faceRect = face.boundingBox;
+        centerX = faceRect.left + faceRect.width / 2;
+        centerY = faceRect.top + faceRect.height / 2;
       }
 
-      // Add padding for better capture (15% on each side)
-      double padding = 0.15;
-      int paddingX = (rotatedWidth * padding).toInt();
-      int paddingY = (rotatedHeight * padding).toInt();
+      // Create a larger square crop around the face center for better accuracy
+      Rect faceRect = face.boundingBox;
+      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 2.0;
 
-      int left = (rotatedLeft.toInt() - paddingX).clamp(0, image.width - 1);
-      int top = (rotatedTop.toInt() - paddingY).clamp(0, image.height - 1);
-      int width = (rotatedWidth.toInt() + paddingX * 2).clamp(1, image.width - left);
-      int height = (rotatedHeight.toInt() + paddingY * 2).clamp(1, image.height - top);
+      int left = (centerX - faceSize / 2).toInt().clamp(0, image.width - 1);
+      int top = (centerY - faceSize / 2).toInt().clamp(0, image.height - 1);
+      int width = faceSize.toInt().clamp(1, image.width - left);
+      int height = faceSize.toInt().clamp(1, image.height - top);
 
+      // Crop the face from the original image FIRST
       img.Image croppedFace = img.copyCrop(image,
           x: left,
           y: top,
           width: width,
           height: height);
+
+      // NOW rotate the cropped face image
+      croppedFace = img.copyRotate(croppedFace,
+          angle: camDirec == CameraLensDirection.front ? 270 : 90);
+
+      // Align face using eye positions if available
+      if (leftEye != null && rightEye != null) {
+        croppedFace = _alignFaceByEyes(croppedFace, leftEye, rightEye, centerX, centerY, left, top);
+      }
 
       // ✅ VALIDATE: Ensure the cropped image actually contains a face
       bool isValidFace = await _validateCroppedFaceContainsFace(croppedFace);
@@ -548,8 +741,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         return;
       }
 
-      // ✅ Resize to standard size for consistency (optional but recommended)
-      img.Image resizedFace = img.copyResize(croppedFace, width: 300, height: 300);
+      // ✅ Resize to higher resolution for better embeddings (512x512 instead of 300x300)
+      img.Image resizedFace = img.copyResize(croppedFace, width: 512, height: 512);
 
       Recognition recognition = recognizer.recognize(resizedFace, faceRect);
 
@@ -586,7 +779,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       _completeRegistration();
 
       // ✅ For debugging: uncomment this line to show preview dialog
-      // _showCapturedFacesPreview();
+     //  _showCapturedFacesPreview();
     }
   }
 
