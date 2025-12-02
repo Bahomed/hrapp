@@ -931,12 +931,16 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         Recognition primaryRecognition = faceEmbeddings.first;
         img.Image primaryFace = capturedFaces.first;
 
+        // ✅ Extract all embeddings from captured faces
+        List<List<double>> allEmbeddings = faceEmbeddings.map((rec) => rec.embeddings).toList();
+
         final preferences = Preferences();
         final userId = await preferences.getUserId();
 
         if (userId != null) {
           final faceRepository = FaceRegistrationRepository();
 
+          // Register with API using primary embedding
           final result = await faceRepository.registerFaceApi(
             userId: userId.toString(),
             name: name,
@@ -944,9 +948,10 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             faceImage: Uint8List.fromList(img.encodeBmp(primaryFace)),
           );
 
-          recognizer.registerFaceInDB(
+          // ✅ Register multiple embeddings for better accuracy
+          recognizer.registerMultipleFaces(
             name,
-            primaryRecognition.embeddings,
+            allEmbeddings,  // Pass all 5 embeddings
             Uint8List.fromList(img.encodeBmp(primaryFace)),
           );
 

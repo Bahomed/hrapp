@@ -65,8 +65,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   int frameSkipCounter = 0;
   static const int frameSkipInterval = 3;
 
-  // Recognition confidence threshold (~85% confidence => similarity ~0.70)
-  static const double recognitionThreshold = 0.7;
+  // ✅ Recognition confidence threshold adjusted for improved preprocessing
+  // With L2 normalization and better preprocessing, we can use a higher threshold
+  // ~88% confidence => similarity ~0.75 (increased from 0.70)
+  static const double recognitionThreshold = 0.75;
 
   // Cooldown to prevent repeated dialogs
   DateTime? lastDialogTime;
