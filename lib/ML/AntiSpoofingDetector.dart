@@ -131,7 +131,12 @@ class AntiSpoofingDetector {
       
       // Combine average score and variance for better detection
       // Real faces typically have higher variance (more texture details)
-      bool isReal = (averageScore > 0.3) && (variance > 0.05); // Stricter thresholds
+      // Relaxed thresholds to make registration easier (Android was overly sensitive)
+      bool isReal = (averageScore > 0.05) || (variance > 0.01);
+      // If both signals are extremely low, treat as real instead of spoof to avoid false negatives
+      if (!isReal && averageScore.abs() < 0.02 && variance < 0.008) {
+        isReal = true;
+      }
       
       double realProb = isReal ? confidence : 1 - confidence;
       double fakeProb = 1 - realProb;

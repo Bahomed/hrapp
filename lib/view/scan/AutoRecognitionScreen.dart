@@ -16,6 +16,12 @@ import '../../utils/Util.dart';
 import '../../repository/attendancerepository.dart';
 import '../../data/local/preferences.dart';
 
+/// Convert cosine similarity (-1..1) into a 0..100 confidence percentage.
+double similarityToConfidencePercent(double similarity) {
+  final normalized = ((similarity + 1) / 2).clamp(0.0, 1.0);
+  return normalized * 100;
+}
+
 class AutoRecognitionScreen extends StatefulWidget {
   final String attendanceType; // 'clock_in', 'clock_out', 'break_start', 'break_end'
   final Map<String, dynamic>? locationData;
@@ -59,8 +65,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   int frameSkipCounter = 0;
   static const int frameSkipInterval = 3;
 
-  // Recognition confidence threshold
-  static const double recognitionThreshold = 0.6;
+  // Recognition confidence threshold (~85% confidence => similarity ~0.70)
+  static const double recognitionThreshold = 0.7;
 
   // Cooldown to prevent repeated dialogs
   DateTime? lastDialogTime;
@@ -254,11 +260,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     if (!mounted) return;
 
     // ✅ For production: Skip dialog and auto-submit
-    await _autoSubmitAttendance(recognition, faceImage);
-    return;
+    // await _autoSubmitAttendance(recognition, faceImage);
+    // return;
 
     // ✅ For debugging: Uncomment below to show preview dialog
-    /*
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -461,7 +467,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          "Confidence: ${(recognition.distance * 100).toStringAsFixed(1)}%",
+                          "Confidence: ${similarityToConfidencePercent(recognition.distance).toStringAsFixed(1)}%",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
@@ -532,7 +538,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         );
       },
     );
-    */
+   // */
   }
 
   String _getAttendanceTypeText() {
@@ -1086,6 +1092,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   }
 
   InputImage? getInputImage() {
+    if (frame == null) return null;
+
     final camera = camDirec == CameraLensDirection.front ? cameras[1] : cameras[0];
     final sensorOrientation = camera.sensorOrientation;
 
@@ -1112,22 +1120,78 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     if (rotation == null) return null;
 
     final format = InputImageFormatValue.fromRawValue(frame!.format.raw);
-    if (format == null ||
-        (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+    if (format == null) return null;
 
-    if (frame!.planes.length != 1) return null;
-    final plane = frame!.planes.first;
+    // Normalize Android input to NV21 bytes (handles YUV_420_888 3-plane)
+    Uint8List? bytes;
+    InputImageFormat targetFormat = format;
+
+    if (Platform.isIOS) {
+      if (format != InputImageFormat.bgra8888 || frame!.planes.isEmpty) return null;
+      bytes = frame!.planes.first.bytes;
+      targetFormat = InputImageFormat.bgra8888;
+    } else {
+      // Android
+      if (frame!.planes.length == 1 && format == InputImageFormat.nv21) {
+        bytes = frame!.planes.first.bytes;
+        targetFormat = InputImageFormat.nv21;
+      } else {
+        bytes = _convertYUV420ToNV21(frame!);
+        targetFormat = InputImageFormat.nv21;
+      }
+    }
+
+    if (bytes == null) return null;
+
+    final int bytesPerRow = Platform.isIOS
+        ? frame!.planes.first.bytesPerRow // preserve stride on iOS BGRA
+        : frame!.width; // NV21: width is the row stride
 
     return InputImage.fromBytes(
-      bytes: plane.bytes,
+      bytes: bytes,
       metadata: InputImageMetadata(
         size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
         rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
+        format: targetFormat,
+        bytesPerRow: bytesPerRow,
       ),
     );
+  }
+
+  /// Convert YUV_420_888 (3-plane) to NV21 byte layout for ML Kit
+  Uint8List _convertYUV420ToNV21(CameraImage image) {
+    final int width = image.width;
+    final int height = image.height;
+    final int ySize = width * height;
+    final int uvRowStride = image.planes[1].bytesPerRow;
+    final int uvPixelStride = image.planes[1].bytesPerPixel ?? 1;
+
+    final Uint8List out = Uint8List(ySize + (width * height ~/ 2));
+    int offset = 0;
+
+    // Copy Y plane
+    for (int row = 0; row < height; row++) {
+      final int rowStart = row * image.planes[0].bytesPerRow;
+      out.setRange(offset, offset + width,
+          image.planes[0].bytes.sublist(rowStart, rowStart + width));
+      offset += width;
+    }
+
+    // Interleave VU data
+    final bytesU = image.planes[1].bytes;
+    final bytesV = image.planes[2].bytes;
+    final int chromaHeight = height ~/ 2;
+    final int chromaWidth = width ~/ 2;
+
+    for (int row = 0; row < chromaHeight; row++) {
+      for (int col = 0; col < chromaWidth; col++) {
+        final int uvIndex = row * uvRowStride + col * uvPixelStride;
+        out[offset++] = bytesV[uvIndex];
+        out[offset++] = bytesU[uvIndex];
+      }
+    }
+
+    return out;
   }
 
   void _toggleCameraDirection() async {
@@ -1328,7 +1392,7 @@ class FaceRecognitionPainter extends CustomPainter {
 
       final textPainter = TextPainter(
         text: TextSpan(
-          text: '${recognition.name} (${(recognition.distance * 100).toStringAsFixed(0)}%)',
+          text: '${recognition.name} (${similarityToConfidencePercent(recognition.distance).toStringAsFixed(0)}%)',
           style: TextStyle(
             color: Colors.white,
             fontSize: 12,

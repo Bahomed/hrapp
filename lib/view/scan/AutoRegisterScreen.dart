@@ -215,7 +215,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   bool isAngleCorrect = false;
   String angleStatus = "";
   int correctAngleCount = 0;
-  static const int requiredStableFrames = 8;
+  static const int requiredStableFrames = 5;  // Reduced from 8 to 5
 
   bool isFaceQualityGood = false;
   double faceConfidence = 0.0;
@@ -321,7 +321,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         description!,
         ResolutionPreset.medium,
         imageFormatGroup: Platform.isAndroid
-            ? ImageFormatGroup.nv21
+            ? ImageFormatGroup.nv21  // ML Kit officially supports NV21 for Android
             : ImageFormatGroup.bgra8888,
         enableAudio: false
     );
@@ -329,12 +329,22 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     await controller.initialize().then((_) {
       if (!mounted) return;
 
+      print('📷 Camera initialized - Platform: ${Platform.isAndroid ? "Android" : "iOS"}');
+      print('📷 Camera direction: $camDirec');
+      print('📷 Sensor orientation: ${description!.sensorOrientation}');
+
       setState(() {
         isInitialized = true;
       });
 
       controller.startImageStream((image) => {
         if (!isBusy && isCapturing) {
+          // Debug: Print image format info on first frame
+          if (frameSkipCounter == 0) {
+            print('📷 Image format: ${image.format.group}'),
+            print('📷 Image size: ${image.width}x${image.height}'),
+            print('📷 Planes: ${image.planes.length}'),
+          },
           isBusy = true,
           frame = image,
           doFaceDetectionOnFrame()
@@ -436,8 +446,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       headEulerAngleY = -headEulerAngleY;
     }
 
-    const double tolerance = 15.0;
-    const double rollTolerance = 25.0;
+    const double tolerance = 20.0;  // Relaxed from 15.0
+    const double rollTolerance = 30.0;  // Relaxed from 25.0
 
     switch (currentStep) {
       case 0:
@@ -478,8 +488,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     double faceHeight = face.boundingBox.height;
     double faceSize = faceWidth * faceHeight;
 
-    double minFaceSize = 2500;
-    double maxFaceSize = frameWidth * frameHeight * 0.8;
+    double minFaceSize = 2000;  // Reduced from 2500 to allow smaller faces
+    double maxFaceSize = frameWidth * frameHeight * 0.85;  // Increased from 0.8 to allow larger faces
 
     if (faceSize < minFaceSize) {
       setState(() {
@@ -547,7 +557,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   Future<void> checkAntiSpoofing(Face face) async {
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
-        : Util.convertNV21(frame!);
+        : (frame!.planes.length == 3
+            ? Util.convertYUV420ToImageStatic(frame!)
+            : Util.convertNV21(frame!));
 
     if (image != null) {
       // Use face contours and landmarks to find the actual face center
@@ -669,7 +681,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   Future<void> _performFaceCapture(Face face) async {
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
-        : Util.convertNV21(frame!);
+        : (frame!.planes.length == 3
+            ? Util.convertYUV420ToImageStatic(frame!)
+            : Util.convertNV21(frame!));
 
     if (image != null) {
       // Use face contours and landmarks to find the actual face center
@@ -776,10 +790,10 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       });
     } else {
       // ✅ For production: go directly to registration
-      _completeRegistration();
+      //_completeRegistration();
 
       // ✅ For debugging: uncomment this line to show preview dialog
-     //  _showCapturedFacesPreview();
+       _showCapturedFacesPreview();
     }
   }
 
@@ -1060,7 +1074,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
   }
 
   InputImage? getInputImage() {
-    if (description == null) return null;
+    if (description == null || frame == null) return null;
 
     final camera = description!;
     final sensorOrientation = camera.sensorOrientation;
@@ -1088,22 +1102,83 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (rotation == null) return null;
 
     final format = InputImageFormatValue.fromRawValue(frame!.format.raw);
-    if (format == null ||
-        (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+    if (format == null) return null;
 
-    if (frame!.planes.length != 1) return null;
-    final plane = frame!.planes.first;
+    // Validate format based on platform - ML Kit supports NV21/YUV420 on Android and BGRA8888 on iOS
+    if (Platform.isIOS && format != InputImageFormat.bgra8888) return null;
+    if (Platform.isAndroid &&
+        format != InputImageFormat.nv21 &&
+        format != InputImageFormat.yuv_420_888) {
+      return null;
+    }
+    if (frame!.planes.isEmpty) return null;
+
+    // Normalize Android input to NV21 bytes (ML Kit happy path)
+    Uint8List? bytes;
+    InputImageFormat targetFormat = format;
+
+    if (Platform.isAndroid) {
+      if (frame!.planes.length == 1 && format == InputImageFormat.nv21) {
+        bytes = frame!.planes.first.bytes;
+        targetFormat = InputImageFormat.nv21;
+      } else {
+        // Convert YUV_420_888 (3-plane) to NV21
+        bytes = _convertYUV420ToNV21(frame!);
+        targetFormat = InputImageFormat.nv21;
+      }
+    } else {
+      bytes = frame!.planes.first.bytes;
+    }
+
+    final int bytesPerRow = Platform.isIOS
+        ? frame!.planes.first.bytesPerRow // preserve iOS stride for BGRA
+        : frame!.width; // NV21: use width to avoid padding differences
 
     return InputImage.fromBytes(
-      bytes: plane.bytes,
+      bytes: bytes,
       metadata: InputImageMetadata(
         size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
         rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
+        format: targetFormat,
+        bytesPerRow: bytesPerRow,
       ),
     );
+  }
+
+  /// Convert YUV_420_888 to NV21 so ML Kit can process it on Android
+  Uint8List _convertYUV420ToNV21(CameraImage image) {
+    final int width = image.width;
+    final int height = image.height;
+    final int ySize = width * height;
+    final int uvRowStride = image.planes[1].bytesPerRow;
+    final int uvPixelStride = image.planes[1].bytesPerPixel ?? 1;
+
+    final Uint8List out = Uint8List(ySize + (width * height ~/ 2));
+    int offset = 0;
+
+    // Copy Y plane
+    for (int row = 0; row < height; row++) {
+      final int rowStart = row * image.planes[0].bytesPerRow;
+      out.setRange(offset, offset + width,
+          image.planes[0].bytes.sublist(rowStart, rowStart + width));
+      offset += width;
+    }
+
+    // Interleave VU data
+    final bytesU = image.planes[1].bytes;
+    final bytesV = image.planes[2].bytes;
+    final int chromaHeight = height ~/ 2;
+    final int chromaWidth = width ~/ 2;
+
+    for (int row = 0; row < chromaHeight; row++) {
+      for (int col = 0; col < chromaWidth; col++) {
+        final int uvIndex = row * uvRowStride + col * uvPixelStride;
+        out[offset++] = bytesV[uvIndex];
+        out[offset++] = bytesU[uvIndex];
+      }
+    }
+
+    return out;
   }
 
   void _startCapture() {
