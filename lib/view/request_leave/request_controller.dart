@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/base_response.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/leave_request_response.dart';
@@ -754,14 +757,67 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       final response = await _requestRepository.downloadLetter(request.id);
 
       if (response.success && response.data != null) {
-        Get.snackbar(
-          tr('success'),
-          '${tr('letter_downloaded')}: ${response.data!.filename}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: ThemeService.instance.getSuccessColor(),
-          colorText: Colors.white,
+        final downloadUrl = response.data!.downloadUrl;
+        final filename = response.data!.filename;
+
+        if (downloadUrl.isEmpty) {
+          _showErrorSnackbar('${tr('failed_to_download_letter')}: Download URL not available');
+          return;
+        }
+
+        // Get the file extension from the filename or URL
+        String fileExtension = '';
+
+        if (filename.contains('.')) {
+          fileExtension = filename.substring(filename.lastIndexOf('.'));
+        } else {
+          // Try to get extension from URL
+          final uri = Uri.parse(downloadUrl);
+          final path = uri.path;
+          if (path.contains('.')) {
+            fileExtension = path.substring(path.lastIndexOf('.'));
+          } else {
+            fileExtension = '.pdf'; // Default to PDF
+          }
+        }
+
+        // Clean filename and add extension
+        String cleanFilename = filename.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+        if (!cleanFilename.endsWith(fileExtension)) {
+          cleanFilename += fileExtension;
+        }
+
+        // Get the app's document directory
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/$cleanFilename';
+
+        // Download the file
+        final dio = Dio();
+        await dio.download(
+          downloadUrl,
+          filePath,
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              // Progress tracking can be added here if needed
+              // final progress = (received / total * 100).toStringAsFixed(0);
+            }
+          },
         );
-        // TODO: Handle file download with response.data.downloadUrl
+
+        // Open the downloaded file
+        final result = await OpenFile.open(filePath);
+
+        if (result.type == ResultType.done) {
+          Get.snackbar(
+            tr('success'),
+            '${tr('letter_downloaded')}: $cleanFilename',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: ThemeService.instance.getSuccessColor(),
+            colorText: Colors.white,
+          );
+        } else {
+          _showErrorSnackbar('${tr('failed_to_open_letter')}: ${result.message}');
+        }
       } else {
         _showErrorSnackbar('${tr('failed_to_download_letter')}: ${response.message}');
       }

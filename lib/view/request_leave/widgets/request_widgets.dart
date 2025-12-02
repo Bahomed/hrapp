@@ -766,11 +766,11 @@ class LetterRequestCard extends StatelessWidget {
                       onTap: () => controller.deleteLetterRequest(request),
                     ),
                   ] else ...[
-                    RequestActionButton(
-                      icon: Icons.visibility_outlined,
-                      color: ThemeService.instance.getTextSecondaryColor(),
-                      onTap: () => controller.viewLetterDetails(request),
-                    ),
+                    // RequestActionButton(
+                    //   icon: Icons.visibility_outlined,
+                    //   color: ThemeService.instance.getTextSecondaryColor(),
+                    //   onTap: () => controller.viewLetterDetails(request),
+                    // ),
                     if (request.status.toLowerCase() == 'approved')
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
