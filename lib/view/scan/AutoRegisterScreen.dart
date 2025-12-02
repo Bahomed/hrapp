@@ -170,6 +170,13 @@ class FaceLandmarksPainter extends CustomPainter {
   }
 }
 
+// Simple holder for rotated image + mapped rect
+class _RotatedFrame {
+  final img.Image image;
+  final Rect rect;
+  _RotatedFrame(this.image, this.rect);
+}
+
 class AutoRegisterScreen extends StatefulWidget {
   const AutoRegisterScreen({super.key});
 
@@ -554,6 +561,33 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     }
   }
 
+  /// Rotate the camera frame to upright orientation and map the face rect into that space
+  _RotatedFrame _rotateImageAndMapRect(img.Image image, Rect faceRect) {
+    final int originalWidth = image.width;
+    final int originalHeight = image.height;
+    final bool isFront = camDirec == CameraLensDirection.front;
+    final int angle = isFront ? 270 : 90; // portrait upright
+
+    final img.Image rotatedImage = img.copyRotate(image, angle: angle);
+
+    // Map bounding box to rotated coordinates (matches logic in AutoRecognitionScreen)
+    double rotatedLeft;
+    double rotatedTop;
+    double rotatedWidth = faceRect.height;
+    double rotatedHeight = faceRect.width;
+
+    if (isFront) {
+      rotatedLeft = faceRect.top;
+      rotatedTop = originalWidth - (faceRect.left + faceRect.width);
+    } else {
+      rotatedLeft = originalHeight - (faceRect.top + faceRect.height);
+      rotatedTop = faceRect.left;
+    }
+
+    final Rect mappedRect = Rect.fromLTWH(rotatedLeft, rotatedTop, rotatedWidth, rotatedHeight);
+    return _RotatedFrame(rotatedImage, mappedRect);
+  }
+
   Future<void> checkAntiSpoofing(Face face) async {
     img.Image? image = Platform.isIOS
         ? Util.convertBGRA8888ToImage(frame!)
@@ -562,55 +596,28 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             : Util.convertNV21(frame!));
 
     if (image != null) {
-      // Use face contours and landmarks to find the actual face center
-      FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
-      FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
-      FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
+      // Rotate the full frame to upright orientation and map the face rect accordingly
+      final rotated = _rotateImageAndMapRect(image, face.boundingBox);
+      final uprightImage = rotated.image;
+      final faceRect = rotated.rect;
 
-      double centerX, centerY;
+      // Tighter square crop around face center to avoid background
+      double centerX = faceRect.left + faceRect.width / 2;
+      double centerY = faceRect.top + faceRect.height / 2;
+      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 1.1;
 
-      // Try to get face oval contour for most accurate center
-      FaceContour? faceOval = face.contours[FaceContourType.face];
+      int left = (centerX - faceSize / 2).toInt().clamp(0, uprightImage.width - 1);
+      int top = (centerY - faceSize / 2).toInt().clamp(0, uprightImage.height - 1);
+      int width = faceSize.toInt().clamp(1, uprightImage.width - left);
+      int height = faceSize.toInt().clamp(1, uprightImage.height - top);
 
-      if (faceOval != null && faceOval.points.isNotEmpty) {
-        // Calculate center from face oval contour points
-        double sumX = 0, sumY = 0;
-        for (var point in faceOval.points) {
-          sumX += point.x.toDouble();
-          sumY += point.y.toDouble();
-        }
-        centerX = sumX / faceOval.points.length;
-        centerY = sumY / faceOval.points.length;
-      } else if (leftEye != null && rightEye != null && noseBase != null) {
-        // Use eyes and nose to find face center
-        centerX = (leftEye.position.x + rightEye.position.x + noseBase.position.x) / 3;
-        centerY = (leftEye.position.y + rightEye.position.y + noseBase.position.y) / 3;
-      } else {
-        // Fallback to bounding box center
-        Rect faceRect = face.boundingBox;
-        centerX = faceRect.left + faceRect.width / 2;
-        centerY = faceRect.top + faceRect.height / 2;
-      }
-
-      // Create a square crop around the face center
-      Rect faceRect = face.boundingBox;
-      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 1.5;
-
-      int left = (centerX - faceSize / 2).toInt().clamp(0, image.width - 1);
-      int top = (centerY - faceSize / 2).toInt().clamp(0, image.height - 1);
-      int width = faceSize.toInt().clamp(1, image.width - left);
-      int height = faceSize.toInt().clamp(1, image.height - top);
-
-      // Crop the face from the original image FIRST
-      img.Image croppedFace = img.copyCrop(image,
-          x: left,
-          y: top,
-          width: width,
-          height: height);
-
-      // NOW rotate the cropped face image
-      croppedFace = img.copyRotate(croppedFace,
-          angle: camDirec == CameraLensDirection.front ? 270 : 90);
+      img.Image croppedFace = img.copyCrop(
+        uprightImage,
+        x: left,
+        y: top,
+        width: width,
+        height: height,
+      );
 
       try {
         AntiSpoofingResult result = await antiSpoofingDetector.detectSpoofing(croppedFace);
@@ -686,57 +693,32 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
             : Util.convertNV21(frame!));
 
     if (image != null) {
-      // Use face contours and landmarks to find the actual face center
+      // Rotate the full frame to upright orientation and map the face rect accordingly
+      final rotated = _rotateImageAndMapRect(image, face.boundingBox);
+      final uprightImage = rotated.image;
+      final faceRect = rotated.rect;
+
+      // Create a tighter square crop around the mapped face rect center for better accuracy
+      double centerX = faceRect.left + faceRect.width / 2;
+      double centerY = faceRect.top + faceRect.height / 2;
+      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 1.15;
+
+      int left = (centerX - faceSize / 2).toInt().clamp(0, uprightImage.width - 1);
+      int top = (centerY - faceSize / 2).toInt().clamp(0, uprightImage.height - 1);
+      int width = faceSize.toInt().clamp(1, uprightImage.width - left);
+      int height = faceSize.toInt().clamp(1, uprightImage.height - top);
+
+      img.Image croppedFace = img.copyCrop(
+        uprightImage,
+        x: left,
+        y: top,
+        width: width,
+        height: height,
+      );
+
+      // Align face using eye positions if available (no change in crop coords needed after rotation)
       FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
       FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
-      FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
-
-      double centerX, centerY;
-
-      // Try to get face oval contour for most accurate center
-      FaceContour? faceOval = face.contours[FaceContourType.face];
-
-      if (faceOval != null && faceOval.points.isNotEmpty) {
-        // Calculate center from face oval contour points
-        double sumX = 0, sumY = 0;
-        for (var point in faceOval.points) {
-          sumX += point.x.toDouble();
-          sumY += point.y.toDouble();
-        }
-        centerX = sumX / faceOval.points.length;
-        centerY = sumY / faceOval.points.length;
-      } else if (leftEye != null && rightEye != null && noseBase != null) {
-        // Use eyes and nose to find face center
-        centerX = (leftEye.position.x + rightEye.position.x + noseBase.position.x) / 3;
-        centerY = (leftEye.position.y + rightEye.position.y + noseBase.position.y) / 3;
-      } else {
-        // Fallback to bounding box center
-        Rect faceRect = face.boundingBox;
-        centerX = faceRect.left + faceRect.width / 2;
-        centerY = faceRect.top + faceRect.height / 2;
-      }
-
-      // Create a larger square crop around the face center for better accuracy
-      Rect faceRect = face.boundingBox;
-      double faceSize = (faceRect.width > faceRect.height ? faceRect.width : faceRect.height) * 2.0;
-
-      int left = (centerX - faceSize / 2).toInt().clamp(0, image.width - 1);
-      int top = (centerY - faceSize / 2).toInt().clamp(0, image.height - 1);
-      int width = faceSize.toInt().clamp(1, image.width - left);
-      int height = faceSize.toInt().clamp(1, image.height - top);
-
-      // Crop the face from the original image FIRST
-      img.Image croppedFace = img.copyCrop(image,
-          x: left,
-          y: top,
-          width: width,
-          height: height);
-
-      // NOW rotate the cropped face image
-      croppedFace = img.copyRotate(croppedFace,
-          angle: camDirec == CameraLensDirection.front ? 270 : 90);
-
-      // Align face using eye positions if available
       if (leftEye != null && rightEye != null) {
         croppedFace = _alignFaceByEyes(croppedFace, leftEye, rightEye, centerX, centerY, left, top);
       }
