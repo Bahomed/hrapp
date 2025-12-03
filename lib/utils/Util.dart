@@ -4,6 +4,14 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
 
+// Helper class for RGB values
+class _Rgb {
+  final int r;
+  final int g;
+  final int b;
+  _Rgb(this.r, this.g, this.b);
+}
+
 class Util{
   static var IOS_BYTES_OFFSET = 28;
   static img.Image convertBGRA8888ToImage(CameraImage cameraImage) {
@@ -33,23 +41,14 @@ class Util{
       for (int j = 0, yp = 0; j < height; j++) {
         int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
         for (int i = 0; i < width; i++, yp++) {
-          int y = (0xff & yuv420sp[yp]) - 16;
-          if (y < 0) y = 0;
+          final int y = (0xff & yuv420sp[yp]) - 16;
           if ((i & 1) == 0) {
             v = (0xff & yuv420sp[uvp++]) - 128;
             u = (0xff & yuv420sp[uvp++]) - 128;
           }
-          int y1192 = 1192 * y;
-          int r = (y1192 + 1634 * v);
-          int g = (y1192 - 833 * v - 400 * u);
-          int b = (y1192 + 2066 * u);
 
-          r = ((r < 0) ? 0 : ((r > 262143) ? 262143 : r));
-          g = ((g < 0) ? 0 : ((g > 262143) ? 262143 : g));
-          b = ((b < 0) ? 0 : ((b > 262143) ? 262143 : b));
-
-          outImg.setPixelRgb(i, j, ((r << 6) & 0xff0000) >> 16,
-              ((g >> 2) & 0xff00) >> 8, (b >> 10) & 0xff);
+          final _Rgb rgb = _yuvToRgb(y, u, v);
+          outImg.setPixelRgb(i, j, rgb.r, rgb.g, rgb.b);
         }
       }
       return outImg;
@@ -80,7 +79,8 @@ class Util{
         final u = cameraImage.planes[1].bytes[uvIndex];
         final v = cameraImage.planes[2].bytes[uvIndex];
 
-        image.data!.setPixelR(w, h, yuv2rgbStatic(y, u, v));
+        final _Rgb rgb = _yuvToRgb(y, u - 128, v - 128);
+        image.setPixelRgb(w, h, rgb.r, rgb.g, rgb.b);
       }
     }
     return image;
@@ -125,7 +125,8 @@ class Util{
         final u = cameraImage.planes[1].bytes[uvIndex];
         final v = cameraImage.planes[2].bytes[uvIndex];
 
-        image.data!.setPixelR(w, h, yuv2rgb(y, u, v)); //= yuv2rgb(y, u, v);
+        final _Rgb rgb = _yuvToRgb(y, u - 128, v - 128);
+        image.setPixelRgb(w, h, rgb.r, rgb.g, rgb.b);
       }
     }
     return image;
@@ -148,4 +149,26 @@ class Util{
     (r & 0xff);
   }
 
+  static _Rgb _yuvToRgb(int y, int u, int v) {
+    // Normalize YUV like standard NV21 conversion
+    int yVal = y + 16;
+    int uVal = u;
+    int vVal = v;
+
+    if (yVal < 0) yVal = 0;
+
+    int c = yVal - 16;
+    int d = uVal;
+    int e = vVal;
+
+    int r = (298 * c + 409 * e + 128) >> 8;
+    int g = (298 * c - 100 * d - 208 * e + 128) >> 8;
+    int b = (298 * c + 516 * d + 128) >> 8;
+
+    r = r.clamp(0, 255);
+    g = g.clamp(0, 255);
+    b = b.clamp(0, 255);
+
+    return _Rgb(r, g, b);
+  }
 }

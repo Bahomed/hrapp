@@ -159,61 +159,83 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   performFaceRecognition(List<Face> faces) async {
     recognitions.clear();
 
-    img.Image? image = Platform.isIOS
-        ? Util.convertBGRA8888ToImage(frame!)
-        : Util.convertNV21(frame!);
-
-    if (image == null) return;
-
-    image = img.copyRotate(image, angle: camDirec == CameraLensDirection.front ? 270 : 90);
-
-    for (Face face in faces) {
-      Rect faceRect = face.boundingBox;
-
-      // ✅ After rotation, recalculate bounding box coordinates
-      double rotatedLeft, rotatedTop, rotatedWidth, rotatedHeight;
-
-      if (camDirec == CameraLensDirection.front) {
-        rotatedLeft = faceRect.top;
-        rotatedTop = image.height - (faceRect.left + faceRect.width);
-        rotatedWidth = faceRect.height;
-        rotatedHeight = faceRect.width;
-      } else {
-        rotatedLeft = image.width - (faceRect.top + faceRect.height);
-        rotatedTop = faceRect.left;
-        rotatedWidth = faceRect.height;
-        rotatedHeight = faceRect.width;
+    // ✅ Take a picture for consistent quality with registration
+    try {
+      final XFile? picture = await controller.takePicture();
+      if (picture == null) {
+        setState(() {
+          isBusy = false;
+        });
+        return;
       }
 
-      int left = rotatedLeft.toInt().clamp(0, image.width - 1);
-      int top = rotatedTop.toInt().clamp(0, image.height - 1);
-      int width = rotatedWidth.toInt().clamp(1, image.width - left);
-      int height = rotatedHeight.toInt().clamp(1, image.height - top);
+      final Uint8List imageBytes = await picture.readAsBytes();
+      img.Image? image = img.decodeImage(imageBytes);
 
-      img.Image croppedFace = img.copyCrop(image,
-          x: left,
-          y: top,
-          width: width,
-          height: height);
-
-      // Perform anti-spoofing check (throttled to reduce lag)
-      DateTime now = DateTime.now();
-      if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
-        await checkAntiSpoofing(croppedFace);
-        lastAntiSpoofingCheck = now;
+      if (image == null) {
+        setState(() {
+          isBusy = false;
+        });
+        return;
       }
 
-      if (isRealFace) {
-        Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+      for (Face face in faces) {
+        Rect faceRect = face.boundingBox;
 
-        if (recognition.distance > recognitionThreshold) {
-          recognitions.add(recognition);
+        // ✅ Use original bounding box without rotation adjustment
+        // ✅ Add 5% padding to avoid cutting off facial features
+        final double paddingX = faceRect.width * 0.05;
+        final double paddingY = faceRect.height * 0.05;
 
-          if (shouldShowDialog(recognition)) {
-            await showRecognitionDialog(recognition, croppedFace);
+        int left = (faceRect.left - paddingX).toInt().clamp(0, image.width - 1);
+        int top = (faceRect.top - paddingY).toInt().clamp(0, image.height - 1);
+        int right = (faceRect.right + paddingX).toInt().clamp(0, image.width);
+        int bottom = (faceRect.bottom + paddingY).toInt().clamp(0, image.height);
+
+        int width = (right - left).clamp(1, image.width - left);
+        int height = (bottom - top).clamp(1, image.height - top);
+
+        img.Image croppedFace = img.copyCrop(image,
+            x: left,
+            y: top,
+            width: width,
+            height: height);
+
+        // Perform anti-spoofing check (throttled to reduce lag)
+        DateTime now = DateTime.now();
+        if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
+          await checkAntiSpoofing(croppedFace);
+          lastAntiSpoofingCheck = now;
+        }
+
+        if (isRealFace) {
+          Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+
+          print('🎯 Recognition result: ${recognition.name} with similarity: ${recognition.distance}');
+
+          if (recognition.distance > recognitionThreshold) {
+            recognitions.add(recognition);
+
+            if (shouldShowDialog(recognition)) {
+              // Stop image stream before showing dialog
+              await controller.stopImageStream();
+              await showRecognitionDialog(recognition, croppedFace);
+              // Restart image stream after dialog is closed if still recognizing
+              if (isRecognizing && mounted) {
+                controller.startImageStream((image) => {
+                  if (!isBusy && isRecognizing) {
+                    isBusy = true,
+                    frame = image,
+                    doFaceRecognitionOnFrame()
+                  }
+                });
+              }
+            }
           }
         }
       }
+    } catch (e) {
+      print('❌ Error during face recognition: $e');
     }
   }
 

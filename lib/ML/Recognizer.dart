@@ -37,9 +37,12 @@ class Recognizer {
 
   void loadRegisteredFaces() async {
     final userData = await prefsHelper.getFaceUser();
+    print('🔍 Loading registered faces...');
     if (userData != null) {
       String name = userData['name'];
       String embeddingStr = userData['embedding'];
+      print('✅ Found user data for: $name');
+      print('📊 Embedding length: ${embeddingStr.length} characters');
       if (embeddingStr.isNotEmpty) {
         List<double> embd;
 
@@ -54,18 +57,28 @@ class Recognizer {
             embd = embeddingStr.split(',').map((e) => double.parse(e.trim())).toList();
           }
 
-          // ✅ Normalize embedding for better comparison
-          embd = _normalizeEmbedding(embd);
+          print('📦 Loaded embedding with ${embd.length} dimensions');
+
+          // ✅ IMPORTANT: The stored embedding is ALREADY normalized during registration
+          // DO NOT normalize again or it will be double-normalized!
+          // embd = _normalizeEmbedding(embd);
 
           Recognition recognition = Recognition(name, Rect.zero, embd, 0);
           registered.putIfAbsent(name, () => recognition);
 
           // ✅ Store in multiple embeddings map as well
           multipleEmbeddings.putIfAbsent(name, () => [embd]);
+
+          print('✅ Successfully loaded registered face for: $name');
+          print('📊 Total registered faces: ${registered.length}');
         } catch (e) {
-          print('Error loading face embedding: $e');
+          print('❌ Error loading face embedding: $e');
         }
+      } else {
+        print('⚠️ Embedding string is empty for user: $name');
       }
+    } else {
+      print('⚠️ No user data found in preferences');
     }
   }
   // void loadRegisteredFaces() async {
@@ -222,8 +235,8 @@ class Recognizer {
   }
 
   List<dynamic> imageToArray(img.Image inputImage) {
-    // ✅ Apply preprocessing for better feature extraction
-    inputImage = _preprocessImage(inputImage);
+    // ✅ DISABLED preprocessing - it was causing inconsistent embeddings
+    // inputImage = _preprocessImage(inputImage);
 
     img.Image resizedImage = img.copyResize(inputImage, width: WIDTH, height: HEIGHT);
     List<double> flattenedList = resizedImage.data!.expand((channel) => [channel.r, channel.g, channel.b]).map((value) => value.toDouble()).toList();
@@ -285,6 +298,9 @@ class Recognizer {
   Pair findNearestImproved(List<double> emb) {
     Pair pair = Pair("Unknown", -1);
 
+    print('🔎 Searching for match in ${registered.length} registered faces');
+    print('🔎 MultipleEmbeddings contains: ${multipleEmbeddings.keys.toList()}');
+
     for (MapEntry<String, Recognition> item in registered.entries) {
       final String name = item.key;
 
@@ -292,6 +308,7 @@ class Recognizer {
       double maxSimilarity = -1;
 
       if (multipleEmbeddings.containsKey(name) && multipleEmbeddings[name]!.isNotEmpty) {
+        print('📊 Comparing with ${multipleEmbeddings[name]!.length} embeddings for $name');
         for (List<double> knownEmb in multipleEmbeddings[name]!) {
           double similarity = _cosineSimilarity(emb, knownEmb);
           if (similarity > maxSimilarity) {
@@ -300,9 +317,12 @@ class Recognizer {
         }
       } else {
         // Fallback to single embedding
+        print('📊 Using single embedding for $name');
         List<double> knownEmb = item.value.embeddings;
         maxSimilarity = _cosineSimilarity(emb, knownEmb);
       }
+
+      print('📈 Similarity for $name: $maxSimilarity (threshold: 0.75)');
 
       // Cosine similarity is between -1 and 1, where 1 means most similar
       if (pair.distance == -1 || maxSimilarity > pair.distance) {
@@ -311,6 +331,7 @@ class Recognizer {
       }
     }
 
+    print('🎯 Best match: ${pair.name} with similarity: ${pair.distance}');
     return pair;
   }
 
