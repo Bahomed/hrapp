@@ -15,7 +15,9 @@ import '../../main.dart';
 import '../../repository/attendancerepository.dart';
 import '../../data/local/preferences.dart';
 import '../../services/theme_service.dart';
+import '../../utils/Util.dart';
 import '../../utils/translation_helper.dart';
+
 /// Convert cosine similarity (-1..1) into a 0..100 confidence percentage.
 double similarityToConfidencePercent(double similarity) {
   final normalized = ((similarity + 1) / 2).clamp(0.0, 1.0);
@@ -133,7 +135,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       return;
     }
 
-    InputImage? inputImage = getInputImage();
+    // ✅ Create InputImage with proper error handling using frame and description
+    final inputImage = _createInputImageRobust(frame!, description);
     if (inputImage == null) {
       setState(() {
         isBusy = false;
@@ -144,7 +147,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     List<Face> faces = await faceDetector.processImage(inputImage);
 
     if (faces.isNotEmpty) {
-      await performFaceRecognition(faces);
+      // ✅ Call appropriate method based on platform
+      if (Platform.isIOS) {
+        await iosPerformFaceRecognition(faces);
+      } else {
+        await androidPerformFaceRecognition(faces);
+      }
     } else {
       setState(() {
         recognitions.clear();
@@ -156,7 +164,79 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     });
   }
 
-  performFaceRecognition(List<Face> faces) async {
+  iosPerformFaceRecognition(List<Face> faces) async {
+    recognitions.clear();
+
+    // Convert camera image to img.Image
+    img.Image? image = Util.convertBGRA8888ToImage(frame!);
+
+    if (image == null) return;
+
+   
+    for (Face face in faces) {
+      Rect faceRect = face.boundingBox;
+
+      // ✅ Use same 5% padding as registration
+      final double paddingX = faceRect.width * 0.05;
+      final double paddingY = faceRect.height * 0.05;
+
+      int left = (faceRect.left - paddingX).toInt().clamp(0, image.width - 1);
+      int top = (faceRect.top - paddingY).toInt().clamp(0, image.height - 1);
+      int right = (faceRect.right + paddingX).toInt().clamp(0, image.width);
+      int bottom = (faceRect.bottom + paddingY).toInt().clamp(0, image.height);
+
+      int width = (right - left).clamp(1, image.width - left);
+      int height = (bottom - top).clamp(1, image.height - top);
+
+      img.Image croppedFace = img.copyCrop(image,
+          x: left,
+          y: top,
+          width: width,
+          height: height);
+
+      // 🐛 DEBUG: Log crop details for iOS
+      print('📱 iOS DEBUG: Stream frame: ${image.width}x${image.height}');
+      print('📦 iOS DEBUG: Face rect: ${faceRect.left.toInt()}, ${faceRect.top.toInt()}, ${faceRect.width.toInt()}, ${faceRect.height.toInt()}');
+      print('📐 iOS DEBUG: Padding: $paddingX x $paddingY');
+      print('✂️ iOS DEBUG: Crop coords: left=$left, top=$top, right=$right, bottom=$bottom');
+      print('🖼️ iOS DEBUG: Cropped face: ${croppedFace.width}x${croppedFace.height}');
+
+      // Perform anti-spoofing check (throttled to reduce lag)
+      DateTime now = DateTime.now();
+      if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
+        await checkAntiSpoofing(croppedFace);
+        lastAntiSpoofingCheck = now;
+      }
+
+      if (isRealFace) {
+        Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+
+        print('🎯 iOS Recognition result: ${recognition.name} with similarity: ${recognition.distance}');
+
+        if (recognition.distance > recognitionThreshold) {
+          recognitions.add(recognition);
+
+          if (shouldShowDialog(recognition)) {
+            // ✅ Show debug dialog like Android (same as line 298)
+            await controller.stopImageStream();
+            await showRecognitionDialog(recognition, croppedFace);
+            // Restart image stream after dialog is closed if still recognizing
+            if (isRecognizing && mounted) {
+              controller.startImageStream((image) => {
+                if (!isBusy && isRecognizing) {
+                  isBusy = true,
+                  frame = image,
+                  doFaceRecognitionOnFrame()
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  androidPerformFaceRecognition(List<Face> faces) async {
     recognitions.clear();
 
     // ✅ Check cooldown first to avoid unnecessary picture taking
@@ -296,11 +376,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     // return;
 
     // ✅ For debugging: Uncomment below to show preview dialog
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
-
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -570,7 +649,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         );
       },
     );
-   // */
+    // */
   }
 
   String _getAttendanceTypeText() {
@@ -1123,73 +1202,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     }
   }
 
-  InputImage? getInputImage() {
-    if (frame == null) return null;
-
-    final camera = camDirec == CameraLensDirection.front ? cameras[1] : cameras[0];
-    final sensorOrientation = camera.sensorOrientation;
-
-    InputImageRotation? rotation;
-    if (Platform.isIOS) {
-      rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
-    } else if (Platform.isAndroid) {
-      const orientations = {
-        DeviceOrientation.portraitUp: 0,
-        DeviceOrientation.landscapeLeft: 90,
-        DeviceOrientation.portraitDown: 180,
-        DeviceOrientation.landscapeRight: 270,
-      };
-      var rotationCompensation = orientations[controller!.value.deviceOrientation];
-
-      if (rotationCompensation == null) return null;
-      if (camera.lensDirection == CameraLensDirection.front) {
-        rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
-      } else {
-        rotationCompensation = (sensorOrientation - rotationCompensation + 360) % 360;
-      }
-      rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
-    }
-    if (rotation == null) return null;
-
-    final format = InputImageFormatValue.fromRawValue(frame!.format.raw);
-    if (format == null) return null;
-
-    // Normalize Android input to NV21 bytes (handles YUV_420_888 3-plane)
-    Uint8List? bytes;
-    InputImageFormat targetFormat = format;
-
-    if (Platform.isIOS) {
-      if (format != InputImageFormat.bgra8888 || frame!.planes.isEmpty) return null;
-      bytes = frame!.planes.first.bytes;
-      targetFormat = InputImageFormat.bgra8888;
-    } else {
-      // Android
-      if (frame!.planes.length == 1 && format == InputImageFormat.nv21) {
-        bytes = frame!.planes.first.bytes;
-        targetFormat = InputImageFormat.nv21;
-      } else {
-        bytes = _convertYUV420ToNV21(frame!);
-        targetFormat = InputImageFormat.nv21;
-      }
-    }
-
-    if (bytes == null) return null;
-
-    final int bytesPerRow = Platform.isIOS
-        ? frame!.planes.first.bytesPerRow // preserve stride on iOS BGRA
-        : frame!.width; // NV21: width is the row stride
-
-    return InputImage.fromBytes(
-      bytes: bytes,
-      metadata: InputImageMetadata(
-        size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
-        rotation: rotation,
-        format: targetFormat,
-        bytesPerRow: bytesPerRow,
-      ),
-    );
-  }
-
   /// Convert YUV_420_888 (3-plane) to NV21 byte layout for ML Kit
   Uint8List _convertYUV420ToNV21(CameraImage image) {
     final int width = image.width;
@@ -1373,6 +1385,210 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         ),
       ),
     );
+  }
+
+  /// Create InputImage with maximum robustness
+  InputImage? _createInputImageRobust(CameraImage image, CameraDescription camera) {
+    // Try multiple approaches in order of preference
+
+    // Approach 0: Convert YUV420 to NV21 for Android if needed
+    if(Platform.isAndroid && _getSafeInputImageFormat(image.format) == InputImageFormat.yuv420) {
+      try {
+        return _createInputImageWithYUV420ToNV21Conversion(image, camera);
+      } catch (e) {
+        debugPrint('(Conversion yuv420 to nv21) InputImage creation failed: $e');
+      }
+    }
+
+    // Approach 1: Force nv21 (Android) / bgra8888 (iOS) format (most common)
+    try {
+      return _createInputImageForced(image, camera);
+    } catch (e) {
+      debugPrint('Forced nv21 (Android) / bgra8888 (iOS) InputImage creation failed: $e');
+    }
+
+    // Approach 2: Minimal metadata approach
+    try {
+      return _createInputImageMinimal(image, camera);
+    } catch (e) {
+      debugPrint('Minimal InputImage creation failed: $e');
+    }
+
+    return null;
+  }
+
+  /// InputImage creation converting yuv420 to nv21 format
+  InputImage? _createInputImageWithYUV420ToNV21Conversion(CameraImage image, CameraDescription camera) {
+    try {
+      if (image.format.group != ImageFormatGroup.yuv420) {
+        throw ArgumentError('CameraImage must be in YUV420 format');
+      }
+
+      if (image.planes.length < 3) {
+        throw ArgumentError('YUV420 image should have at least 3 planes');
+      }
+
+      final width = image.width;
+      final height = image.height;
+
+      // Calculate plane sizes - YUV420 has 4:2:0 subsampling
+      final ySize = width * height;
+      final uvSize = (width * height) ~/ 4; // 1/4 of Y size
+
+      // Final buffer for NV21: Y + interleaved VU
+      final nv21Buffer = Uint8List(ySize + uvSize * 2);
+
+      // Access YUV planes
+      final yPlane = image.planes[0];
+      final uPlane = image.planes[1];
+      final vPlane = image.planes[2];
+
+      // 1. Copy Y plane (luminance)
+      int dstIndex = 0;
+      int srcIndex = 0;
+
+      // Copy Y considering possible padding
+      for (int y = 0; y < height; y++) {
+        final bytesToCopy = width < yPlane.bytesPerRow ? width : yPlane.bytesPerRow;
+        final endIndex = srcIndex + bytesToCopy;
+
+        if (endIndex <= yPlane.bytes.length && dstIndex + bytesToCopy <= nv21Buffer.length) {
+          nv21Buffer.setRange(dstIndex, dstIndex + bytesToCopy, yPlane.bytes, srcIndex);
+        }
+
+        dstIndex += width;
+        srcIndex += yPlane.bytesPerRow;
+      }
+
+      // 2. Interleave U and V planes into VU format (NV21)
+      final uvWidth = width ~/ 2;
+      final uvHeight = height ~/ 2;
+
+      // Reset indices for UV section
+      dstIndex = ySize;
+
+      for (int y = 0; y < uvHeight; y++) {
+        for (int x = 0; x < uvWidth; x++) {
+          final uvIndex = y * uPlane.bytesPerRow ~/ 2 + x;
+
+          // Copy V first, then U (NV21 format: Y + interleaved VU)
+          if (uvIndex < vPlane.bytes.length && dstIndex < nv21Buffer.length - 1) {
+            nv21Buffer[dstIndex++] = vPlane.bytes[uvIndex]; // V
+          } else {
+            nv21Buffer[dstIndex++] = 128; // Default value if out of range
+          }
+
+          if (uvIndex < uPlane.bytes.length && dstIndex < nv21Buffer.length) {
+            nv21Buffer[dstIndex++] = uPlane.bytes[uvIndex]; // U
+          } else {
+            nv21Buffer[dstIndex++] = 128; // Default value if out of range
+          }
+        }
+      }
+
+      return InputImage.fromBytes(
+        bytes: nv21Buffer,
+        metadata: InputImageMetadata(
+          size: Size(width.toDouble(), height.toDouble()),
+          rotation: _getInputImageRotation(camera),
+          format: InputImageFormat.nv21,
+          bytesPerRow: yPlane.bytesPerRow,
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to convert YUV420 to NV21: $e');
+    }
+  }
+
+  /// Forced nv21 format for Android and bgra8888 for iOS InputImage creation
+  InputImage? _createInputImageForced(CameraImage image, CameraDescription camera) {
+    final WriteBuffer allBytes = WriteBuffer();
+
+    for (final Plane plane in image.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+
+    final bytes = allBytes.done().buffer.asUint8List();
+
+    final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
+
+    final inputImageFormat = InputImageFormatValue.fromRawValue(image.format.raw);
+
+    debugPrint("_createInputImageForced called. Format [${inputImageFormat?.name}], It will be forced to ${Platform.isAndroid ? InputImageFormat.nv21.name : InputImageFormat.bgra8888.name}");
+
+    return InputImage.fromBytes(
+      bytes: bytes,
+      metadata: InputImageMetadata(
+        size: imageSize,
+        rotation: _getInputImageRotation(camera),
+        format: Platform.isAndroid ? InputImageFormat.nv21 : InputImageFormat.bgra8888,
+        bytesPerRow: image.planes.first.bytesPerRow,
+      ),
+    );
+  }
+
+  /// Minimal InputImage creation with fixed values
+  InputImage? _createInputImageMinimal(CameraImage image, CameraDescription camera) {
+    final WriteBuffer allBytes = WriteBuffer();
+    for (final Plane plane in image.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    final bytes = allBytes.done().buffer.asUint8List();
+
+    return InputImage.fromBytes(
+      bytes: bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: InputImageRotation.rotation0deg, // Fixed rotation
+        format: Platform.isAndroid ? InputImageFormat.nv21 : InputImageFormat.bgra8888,
+        bytesPerRow: image.planes.isNotEmpty ? image.planes.first.bytesPerRow : image.width,
+      ),
+    );
+  }
+
+  /// Get safe InputImageFormat (only use formats that definitely exist)
+  InputImageFormat _getSafeInputImageFormat(ImageFormat format) {
+    switch (format.group) {
+      case ImageFormatGroup.yuv420:
+        return InputImageFormat.yuv420;
+      case ImageFormatGroup.bgra8888:
+        return InputImageFormat.bgra8888;
+      case ImageFormatGroup.nv21:
+        return InputImageFormat.nv21;
+      case ImageFormatGroup.jpeg:
+      case ImageFormatGroup.unknown:
+      default:
+        if(Platform.isAndroid) {
+          debugPrint('Using nv21 (Android) fallback for format: ${format.group}');
+          return InputImageFormat.nv21;
+        } else {
+          debugPrint('Using bgra8888 (iOS) fallback for format: ${format.group}');
+          return InputImageFormat.bgra8888;
+        }
+    }
+  }
+
+  /// Get InputImageRotation based on camera sensor orientation
+  InputImageRotation _getInputImageRotation(CameraDescription camera) {
+    try {
+      final sensorOrientation = camera.sensorOrientation;
+      switch (sensorOrientation) {
+        case 0:
+          return InputImageRotation.rotation0deg;
+        case 90:
+          return InputImageRotation.rotation90deg;
+        case 180:
+          return InputImageRotation.rotation180deg;
+        case 270:
+          return InputImageRotation.rotation270deg;
+        default:
+          debugPrint('Unknown sensor orientation: $sensorOrientation, using 0 degrees');
+          return InputImageRotation.rotation0deg;
+      }
+    } catch (e) {
+      debugPrint('Error getting rotation: $e');
+      return InputImageRotation.rotation0deg;
+    }
   }
 }
 

@@ -16,6 +16,7 @@ import '../../repository/face_registration_repository.dart';
 import '../../main.dart';
 import '../../services/theme_service.dart';
 import '../../utils/translation_helper.dart';
+import '../../utils/Util.dart';
 
 // Custom painter to create overlay with transparent circle
 class CircleOverlayPainter extends CustomPainter {
@@ -618,23 +619,47 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       return;
     }
 
-    // Take final picture
-    final XFile? picture = await controller.takePicture();
-    if (picture == null) {
-      setState(() {
-        angleStatus = tr('face_not_captured_properly_retrying');
-      });
-      correctAngleCount = 0;
-      isBusy = false;
-      HapticFeedback.lightImpact();
-      return;
-    }
+    // ✅ iOS: Use stream frame for consistent quality with recognition
+    // ✅ Android: Use takePicture for high quality
+    img.Image? capturedImage;
 
-    final Uint8List imageBytes = await picture.readAsBytes();
-    img.Image? capturedImage = img.decodeImage(imageBytes);
-    if (capturedImage == null) {
-      isBusy = false;
-      return;
+    if (Platform.isIOS) {
+      // Use stream frame directly (same as recognition)
+      if (frame == null) {
+        setState(() {
+          angleStatus = tr('face_not_captured_properly_retrying');
+        });
+        correctAngleCount = 0;
+        isBusy = false;
+        HapticFeedback.lightImpact();
+        return;
+      }
+
+      // Import Util for convertBGRA8888ToImage
+      capturedImage = Util.convertBGRA8888ToImage(frame!);
+      if (capturedImage == null) {
+        isBusy = false;
+        return;
+      }
+    } else {
+      // Android: Take picture for high quality
+      final XFile? picture = await controller.takePicture();
+      if (picture == null) {
+        setState(() {
+          angleStatus = tr('face_not_captured_properly_retrying');
+        });
+        correctAngleCount = 0;
+        isBusy = false;
+        HapticFeedback.lightImpact();
+        return;
+      }
+
+      final Uint8List imageBytes = await picture.readAsBytes();
+      capturedImage = img.decodeImage(imageBytes);
+      if (capturedImage == null) {
+        isBusy = false;
+        return;
+      }
     }
 
     // -----------------------------
