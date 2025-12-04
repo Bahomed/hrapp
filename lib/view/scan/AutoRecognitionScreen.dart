@@ -444,7 +444,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       SizedBox(height: 16),
 
                       Text(
-                        'face_recognized'.tr,
+                        tr('face_recognized'),
                         style: TextStyle(
                           fontSize: 22,
                           color: Colors.white,
@@ -456,7 +456,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       SizedBox(height: 12),
 
                       Text(
-                        'welcome_back'.tr,
+                        tr('welcome_back'),
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white70,
@@ -500,7 +500,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  'current_face'.tr,
+                                  tr('current_face'),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.white70,
@@ -533,7 +533,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  'stored_face'.tr,
+                                  tr('stored_face'),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.white70,
@@ -578,7 +578,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          "${'confidence'.tr}: ${similarityToConfidencePercent(recognition.distance).toStringAsFixed(1)}%",
+                          "${tr('confidence')}: ${similarityToConfidencePercent(recognition.distance).toStringAsFixed(1)}%",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
@@ -607,7 +607,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                                 ),
                               ),
                               child: Text(
-                                'cancel'.tr,
+                                tr('cancel'),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -630,7 +630,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                                 ),
                               ),
                               child: Text(
-                                'confirm'.tr,
+                                tr('confirm'),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -655,30 +655,30 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   String _getAttendanceTypeText() {
     switch (widget.attendanceType) {
       case 'clock_in':
-        return 'ready_to_clock_in'.tr;
+        return tr('ready_to_clock_in');
       case 'clock_out':
-        return 'ready_to_clock_out'.tr;
+        return tr('ready_to_clock_out');
       case 'break_start':
-        return 'ready_to_start_break'.tr;
+        return tr('ready_to_start_break');
       case 'break_end':
-        return 'ready_to_end_break'.tr;
+        return tr('ready_to_end_break');
       default:
-        return 'ready_to_record_attendance'.tr;
+        return tr('ready_to_record_attendance');
     }
   }
 
   String _getAppBarTitle() {
     switch (widget.attendanceType) {
       case 'clock_in':
-        return 'clock_in'.tr;
+        return tr('clock_in');
       case 'clock_out':
-        return 'clock_out'.tr;
+        return tr('clock_out');
       case 'break_start':
-        return 'break_start'.tr;
+        return tr('break_start');
       case 'break_end':
-        return 'break_end'.tr;
+        return tr('break_end');
       default:
-        return 'face_recognition'.tr;
+        return tr('face_recognition');
     }
   }
 
@@ -711,7 +711,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                   Icon(Icons.check_circle, color: Colors.white, size: 48),
                   SizedBox(height: 16),
                   Text(
-                    'face_recognized'.tr,
+                    tr('face_recognized'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -720,7 +720,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'welcome_user'.trParams({'name': recognition.name}),
+                    trParams('welcome_user', {'name': recognition.name}),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -728,7 +728,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'processing_attendance_type'.trParams({'type': _getAttendanceTypeText()}),
+                    trParams('processing_attendance_type', {'type': _getAttendanceTypeText()}),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -816,7 +816,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       Icon(Icons.error_outline, color: Colors.white, size: 48),
                       SizedBox(height: 16),
                       Text(
-                        'error'.tr,
+                        tr('error'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -825,7 +825,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        result.message.isNotEmpty ? result.message : 'an_error_occurred'.tr,
+                        result.message.isNotEmpty ? result.message : tr('an_error_occurred'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -868,7 +868,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       Icon(Icons.warning_amber, color: Colors.white, size: 48),
                       SizedBox(height: 16),
                       Text(
-                        'notice'.tr,
+                        tr('notice'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -920,7 +920,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       Icon(Icons.check_circle, color: Colors.white, size: 48),
                       SizedBox(height: 16),
                       Text(
-                        'success_title'.tr,
+                        tr('success_title'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -929,7 +929,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        result.message.isNotEmpty ? result.message : 'attendance_recorded_successfully'.trParams({'type': _getAttendanceTypeText()}),
+                        result.message.isNotEmpty ? result.message : trParams('attendance_recorded_successfully', {'type': _getAttendanceTypeText()}),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -993,8 +993,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('error'.tr),
-            content: Text('${'failed_to_submit_attendance'.tr}: ${e.toString()}'),
+            title: Text(tr('error')),
+            content: Text('${tr('failed_to_submit_attendance')}: ${e.toString()}'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -1002,10 +1002,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                   Navigator.of(context).pop({
                     'success': false,
                     'error': true,
-                    'message': '${'failed_to_submit_attendance'.tr}: ${e.toString()}',
+                    'message': '${tr('failed_to_submit_attendance')}: ${e.toString()}',
                   });
                 },
-                child: Text('ok'.tr),
+                child: Text(tr('ok')),
               ),
             ],
           ),
@@ -1084,8 +1084,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text('error'.tr),
-              content: Text(result.message.isNotEmpty ? result.message : 'an_error_occurred'.tr),
+              title: Text(tr('error')),
+              content: Text(result.message.isNotEmpty ? result.message : tr('an_error_occurred')),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -1096,7 +1096,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       'message': result.message,
                     });
                   },
-                  child: Text('ok'.tr),
+                  child: Text(tr('ok')),
                 ),
               ],
             ),
@@ -1105,7 +1105,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text('notice'.tr),
+              title: Text(tr('notice')),
               content: Text(result.validationMessage),
               actions: [
                 TextButton(
@@ -1117,7 +1117,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       'message': result.validationMessage,
                     });
                   },
-                  child: Text('ok'.tr),
+                  child: Text(tr('ok')),
                 ),
               ],
             ),
@@ -1126,8 +1126,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text('success_title'.tr),
-              content: Text(result.message.isNotEmpty ? result.message : 'attendance_recorded_successfully'.trParams({'type': _getAttendanceTypeText()})),
+              title: Text(tr('success_title')),
+              content: Text(result.message.isNotEmpty ? result.message : trParams('attendance_recorded_successfully', {'type': _getAttendanceTypeText()})),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -1167,7 +1167,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       'message': result.message,
                     });
                   },
-                  child: Text('ok'.tr),
+                  child: Text(tr('ok')),
                 ),
               ],
             ),
@@ -1182,8 +1182,8 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('error'.tr),
-          content: Text('${'failed_to_submit_attendance'.tr}: ${e.toString()}'),
+          title: Text(tr('error')),
+          content: Text('${tr('failed_to_submit_attendance')}: ${e.toString()}'),
           actions: [
             TextButton(
               onPressed: () {
@@ -1191,10 +1191,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                 Navigator.of(context).pop({
                   'success': false,
                   'error': true,
-                  'message': '${'failed_to_submit_attendance'.tr}: ${e.toString()}',
+                  'message': '${tr('failed_to_submit_attendance')}: ${e.toString()}',
                 });
               },
-              child: Text('ok'.tr),
+              child: Text(tr('ok')),
             ),
           ],
         ),
@@ -1342,7 +1342,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'spoofing_detected'.tr,
+                          tr('spoofing_detected'),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -1367,9 +1367,9 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       child: Text(
                         isRecognizing
                             ? (recognitions.isEmpty
-                            ? 'looking_for_faces'.tr
-                            : 'recognizing_faces'.trParams({'count': recognitions.length.toString()}))
-                            : 'recognition_paused'.tr,
+                            ? tr('looking_for_faces')
+                            : trParams('recognizing_faces', {'count': recognitions.length.toString()}))
+                            : tr('recognition_paused'),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

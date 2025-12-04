@@ -13,18 +13,36 @@ class _Rgb {
 }
 
 class Util{
-  static var IOS_BYTES_OFFSET = 28;
   static img.Image convertBGRA8888ToImage(CameraImage cameraImage) {
     final plane = cameraImage.planes[0];
+    final int width = cameraImage.width;
+    final int height = cameraImage.height;
 
-    return img.Image.fromBytes(
-      width: cameraImage.width,
-      height: cameraImage.height,
-      bytes: plane.bytes.buffer,
-      rowStride: plane.bytesPerRow,
-      bytesOffset: IOS_BYTES_OFFSET,
-      order: img.ChannelOrder.bgra,
-    );
+    // ✅ Create output image
+    final img.Image image = img.Image(width: width, height: height);
+
+    // ✅ Manually convert BGRA to RGB
+    final Uint8List bytes = plane.bytes;
+    final int bytesPerRow = plane.bytesPerRow;
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        final int rowOffset = y * bytesPerRow;
+        final int pixelOffset = rowOffset + (x * 4); // 4 bytes per pixel (BGRA)
+
+        if (pixelOffset + 3 < bytes.length) {
+          final int b = bytes[pixelOffset];
+          final int g = bytes[pixelOffset + 1];
+          final int r = bytes[pixelOffset + 2];
+          final int a = bytes[pixelOffset + 3];
+
+          // ✅ Set pixel as RGB (swapping B and R from BGRA)
+          image.setPixelRgba(x, y, r, g, b, a);
+        }
+      }
+    }
+
+    return image;
   }
 
   static img.Image convertNV21(CameraImage image) {
