@@ -75,8 +75,41 @@ const Map<String, String> enTranslations = {
   'verification_failed': 'Verification Failed',
   'face_verification_failed': 'Face doesn\'t match registered Face ID',
   'no_face_detected': 'No face detected. Please try again.',
+  'looking_for_faces': 'Looking for faces...',
+  'recognizing_faces': 'Recognizing {count} face(s)',
+  'recognition_paused': 'Recognition paused',
   'try_again': 'Try Again',
-  
+
+  // Face Recognition Dialog
+  'face_recognized': 'Face Recognized!',
+  'welcome_back': 'Welcome back,',
+  'current_face': 'Current',
+  'stored_face': 'Stored',
+  'confidence': 'Confidence',
+  'spoofing_detected': '⚠️ Spoofing detected! Use your real face',
+
+  // Attendance Type Messages
+  'ready_to_clock_in': 'Ready to Clock In',
+  'ready_to_clock_out': 'Ready to Clock Out',
+  'ready_to_start_break': 'Ready to Start Break',
+  'ready_to_end_break': 'Ready to End Break',
+  'ready_to_record_attendance': 'Ready to Record Attendance',
+  'face_recognition': 'Face Recognition',
+
+  // Progress Messages
+  'face_verification_attendance': 'Face verification attendance',
+  'processing_attendance_type': 'Processing {type}...',
+  'welcome_user': 'Welcome {name}',
+  'attendance_recorded_successfully': '{type} recorded successfully!',
+  'an_error_occurred': 'An error occurred',
+  'notice': 'Notice',
+  'success_title': 'Success!',
+  'failed_to_submit_attendance': 'Failed to submit attendance',
+
+  // Location Messages
+  'location_not_available': 'Location not available',
+  'unknown_location': 'Unknown',
+
   // Face ID Registration
   'face_has_been_saved': 'Face has been saved',
   'face_saved': 'Face Saved',
@@ -917,6 +950,11 @@ const Map<String, String> enTranslations = {
   'start_auto_registration': 'Start Auto Registration',
   'perfect_hold_position': 'Perfect! Hold that position...',
   'captured_angles_count': 'Captured: {current}/{total} angles',
+  'face_not_captured_properly_retrying': 'Face not captured properly. Retrying...',
+  'no_cameras_available': 'No cameras available on this device',
+  'no_camera_available_initialization': 'No camera available for initialization',
+  'camera_error': 'Camera Error',
+  'go_back': 'Go Back',
   'req#':'Req#',
   '#_name':'# Name',
   'type':'Type',

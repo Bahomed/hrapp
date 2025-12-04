@@ -165,7 +165,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       if (description == null) {
         setState(() {
           hasCameraError = true;
-          cameraErrorMessage = 'No cameras available on this device';
+          cameraErrorMessage = tr('no_cameras_available');
           isInitialized = true;
         });
         return;
@@ -198,7 +198,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     if (description == null) {
       setState(() {
         hasCameraError = true;
-        cameraErrorMessage = 'No camera available for initialization';
+        cameraErrorMessage = tr('no_camera_available_initialization');
         isInitialized = true;
       });
       return;
@@ -609,7 +609,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     face = latest ?? face;
 
     if (face.boundingBox.width < 40 || face.boundingBox.height < 40) {
-      angleStatus = tr('face_not_captured_properly_retrying');
+      setState(() {
+        angleStatus = tr('face_not_captured_properly_retrying');
+      });
       correctAngleCount = 0;
       isBusy = false;
       HapticFeedback.lightImpact();
@@ -619,7 +621,9 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     // Take final picture
     final XFile? picture = await controller.takePicture();
     if (picture == null) {
-      angleStatus = tr('face_not_captured_properly_retrying');
+      setState(() {
+        angleStatus = tr('face_not_captured_properly_retrying');
+      });
       correctAngleCount = 0;
       isBusy = false;
       HapticFeedback.lightImpact();
@@ -1212,7 +1216,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                         ),
                         SizedBox(height: 24),
                         Text(
-                          'Camera Error',
+                          tr('camera_error'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -1247,7 +1251,7 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
                             ),
                           ),
                           child: Text(
-                            'Go Back',
+                            tr('go_back'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

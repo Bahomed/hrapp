@@ -75,7 +75,40 @@ const Map<String, String> arTranslations = {
   'verification_failed': 'فشل التحقق',
   'face_verification_failed': 'الوجه لا يطابق Face ID المسجل',
   'no_face_detected': 'لم يتم اكتشاف وجه. يرجى المحاولة مرة أخرى.',
+  'looking_for_faces': 'البحث عن الوجوه...',
+  'recognizing_faces': 'التعرف على {count} وجه',
+  'recognition_paused': 'تم إيقاف التعرف مؤقتاً',
   'try_again': 'حاول مرة أخرى',
+
+  // Face Recognition Dialog
+  'face_recognized': 'تم التعرف على الوجه!',
+  'welcome_back': 'مرحباً بعودتك،',
+  'current_face': 'الحالي',
+  'stored_face': 'المحفوظ',
+  'confidence': 'الثقة',
+  'spoofing_detected': '⚠️ تم اكتشاف محاولة تزوير! يرجى إظهار وجهك الحقيقي',
+
+  // Attendance Type Messages
+  'ready_to_clock_in': 'جاهز لتسجيل الدخول',
+  'ready_to_clock_out': 'جاهز لتسجيل الخروج',
+  'ready_to_start_break': 'جاهز لبدء الاستراحة',
+  'ready_to_end_break': 'جاهز لإنهاء الاستراحة',
+  'ready_to_record_attendance': 'جاهز لتسجيل الحضور',
+  'face_recognition': 'التعرف على الوجه',
+
+  // Progress Messages
+  'face_verification_attendance': 'حضور التحقق من الوجه',
+  'processing_attendance_type': 'جاري معالجة {type}...',
+  'welcome_user': 'مرحباً {name}',
+  'attendance_recorded_successfully': 'تم تسجيل {type} بنجاح!',
+  'an_error_occurred': 'حدث خطأ',
+  'notice': 'ملاحظة',
+  'success_title': 'نجح!',
+  'failed_to_submit_attendance': 'فشل في إرسال الحضور',
+
+  // Location Messages
+  'location_not_available': 'الموقع غير متاح',
+  'unknown_location': 'غير معروف',
 
   // Face ID Registration
   'face_has_been_saved': 'تم حفظ الوجه',
@@ -923,6 +956,11 @@ const Map<String, String> arTranslations = {
   'start_auto_registration': 'بدء التسجيل التلقائي',
   'perfect_hold_position': 'ممتاز! اثبت على هذه الوضعية...',
   'captured_angles_count': 'تم التقاط: {current}/{total} زوايا',
+  'face_not_captured_properly_retrying': 'لم يتم التقاط الوجه بشكل صحيح. إعادة المحاولة...',
+  'no_cameras_available': 'لا توجد كاميرات متاحة على هذا الجهاز',
+  'no_camera_available_initialization': 'لا توجد كاميرا متاحة للتهيئة',
+  'camera_error': 'خطأ في الكاميرا',
+  'go_back': 'رجوع',
   'req#':'رقم الطلب',
   '#_name':'# الاسم',
   'type':'النوع',
