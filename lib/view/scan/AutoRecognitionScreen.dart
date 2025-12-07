@@ -372,12 +372,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     if (!mounted) return;
 
     // ✅ For production: Skip dialog and auto-submit
-    // await _autoSubmitAttendance(recognition, faceImage);
+    await _autoSubmitAttendance(recognition, faceImage);
     // return;
 
     // ✅ For debugging: Uncomment below to show preview dialog
 
-    showDialog(
+   /* showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -649,7 +649,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         );
       },
     );
-    // */
+    */
   }
 
   String _getAttendanceTypeText() {

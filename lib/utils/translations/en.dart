@@ -451,6 +451,8 @@ const Map<String, String> enTranslations = {
   'approved': 'Approved',
   'for_approval': 'For Approval',
   'rejected': 'Rejected',
+  'generated': 'Generated',
+  'executed': 'Executed',
   'approve': 'Approve',
   'reject': 'Reject',
   'cancelled': 'Cancelled',

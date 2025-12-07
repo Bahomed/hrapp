@@ -14,7 +14,7 @@ import '../../../widgets/saudi_riyal_display.dart';
 import '../request_controller.dart'; // Fixed import
 
 // Enum for request status if not defined elsewhere
-enum RequestStatus { forApproval, approved, rejected }
+enum RequestStatus { forApproval, approved, rejected, generated, executed }
 
 // Extension to get status from string
 extension RequestStatusExtension on String {
@@ -24,6 +24,10 @@ extension RequestStatusExtension on String {
         return RequestStatus.approved;
       case 'rejected':
         return RequestStatus.rejected;
+      case 'generated':
+        return RequestStatus.generated;
+      case 'executed':
+        return RequestStatus.executed;
       case 'for-approval':
       default:
         return RequestStatus.forApproval;
@@ -60,6 +64,18 @@ class RequestStatusChip extends StatelessWidget {
         textColor = themeService.getErrorColor();
         text = tr('rejected');
         icon = Icons.cancel_outlined;
+        break;
+      case RequestStatus.generated:
+        backgroundColor = themeService.getSuccessColor().withValues(alpha: 0.1);
+        textColor = themeService.getSuccessColor();
+        text = tr('generated');
+        icon = Icons.description_outlined;
+        break;
+      case RequestStatus.executed:
+        backgroundColor = themeService.getActionColor('profile').withValues(alpha: 0.1);
+        textColor = themeService.getActionColor('profile');
+        text = tr('executed');
+        icon = Icons.done_all_outlined;
         break;
       case RequestStatus.forApproval:
         backgroundColor = themeService.getWarningColor().withValues(alpha: 0.1);
@@ -279,6 +295,15 @@ class LeaveRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getActionColor('profile'),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -601,6 +626,15 @@ class LoanRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                  if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getActionColor('profile'),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
@@ -740,6 +774,15 @@ class LetterRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                  if (request.status.toLowerCase() == 'generated' && request.approvedDate != null)
+                    Text(
+                      '${tr('generated')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                     Text(
                       '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
@@ -771,7 +814,7 @@ class LetterRequestCard extends StatelessWidget {
                     //   color: ThemeService.instance.getTextSecondaryColor(),
                     //   onTap: () => controller.viewLetterDetails(request),
                     // ),
-                    if (request.status.toLowerCase() == 'approved')
+                    if (request.status.toLowerCase() == 'approved' || request.status.toLowerCase() == 'generated')
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: RequestActionButton(

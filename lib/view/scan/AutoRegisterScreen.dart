@@ -728,10 +728,10 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
       });
     } else {
       // For production: go directly to registration
-      //_completeRegistration();
+      _completeRegistration();
 
       // For debugging: show preview dialog
-      _showCapturedFacesPreview();
+    //  _showCapturedFacesPreview();
     }
   }
 

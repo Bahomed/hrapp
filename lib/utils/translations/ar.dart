@@ -451,6 +451,8 @@ const Map<String, String> arTranslations = {
   'approved': 'موافق عليه',
   'for_approval': 'في انتظار الموافقة',
   'rejected': 'مرفوض',
+  'generated': 'تم الإنشاء',
+  'executed': 'تم التنفيذ',
   'approve': 'موافقة',
   'reject': 'رفض',
   'cancelled': 'ملغي',
