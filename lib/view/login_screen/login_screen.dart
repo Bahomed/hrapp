@@ -89,24 +89,23 @@ class LoginScreen extends StatelessWidget {
                     ),
                     
                     SizedBox(height: ResponsiveUtils.responsiveHeight(context, 4)),
-                    
-                    // Mobile No Field
-                    InputWidgets.buildInputField(
-                      controller: emailController,
-                      label: tr('mobile_no'),
-                      hint: tr('enter_mobile'),
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return tr('enter_mobile');
-                        }
-                        if (value.length < 10) {
-                          return tr('please_enter_valid_mobile');
-                        }
-                        return null;
-                      },
-                    ),
+
+                    // Dynamic Login Field (Mobile/Email/Iqama based on company preference)
+                    Obx(() => model.isLoadingLoginMethod.value
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : InputWidgets.buildInputField(
+                            controller: emailController,
+                            label: model.getLoginFieldLabel(),
+                            hint: model.getLoginFieldHint(),
+                            icon: model.getLoginFieldIcon(),
+                            keyboardType: model.getLoginFieldKeyboardType(),
+                            validator: model.validateLoginField,
+                          )),
                     
                     const SizedBox(height: 20),
                     

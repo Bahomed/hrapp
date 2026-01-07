@@ -13,6 +13,143 @@ class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final LoginRepository repository = LoginRepository();
 
+  // Observable login method
+  var loginMethod = 'mobile'.obs;
+  var isLoadingLoginMethod = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCompanyLoginMethod();
+  }
+
+  /// Fetch company login method from API
+  void fetchCompanyLoginMethod() async {
+    try {
+      isLoadingLoginMethod.value = true;
+      final response = await repository.getCompanyLoginMethod();
+
+      if (response != null && response.loginMethod != null) {
+        loginMethod.value = response.loginMethod!;
+      } else {
+        loginMethod.value = 'mobile'; // Default fallback
+      }
+    } catch (e) {
+      loginMethod.value = 'mobile'; // Default fallback on error
+    } finally {
+      isLoadingLoginMethod.value = false;
+    }
+  }
+
+  /// Get label for login field based on login method
+  String getLoginFieldLabel() {
+    switch (loginMethod.value) {
+      case 'email':
+        return tr('email');
+      case 'iqama_no':
+        return tr('iqama_no');
+      case 'mobile':
+        return tr('mobile_no');
+      case 'email_or_iqama':
+        return tr('email_or_iqama');
+      case 'email_or_mobile':
+        return tr('email_or_mobile');
+      case 'all':
+        return tr('email_mobile_or_iqama');
+      default:
+        return tr('mobile_no');
+    }
+  }
+
+  /// Get hint for login field based on login method
+  String getLoginFieldHint() {
+    switch (loginMethod.value) {
+      case 'email':
+        return tr('enter_email');
+      case 'iqama_no':
+        return tr('enter_iqama_no');
+      case 'mobile':
+        return tr('enter_mobile');
+      case 'email_or_iqama':
+        return tr('enter_email_or_iqama');
+      case 'email_or_mobile':
+        return tr('enter_email_or_mobile');
+      case 'all':
+        return tr('enter_email_mobile_or_iqama');
+      default:
+        return tr('enter_mobile');
+    }
+  }
+
+  /// Get icon for login field based on login method
+  IconData getLoginFieldIcon() {
+    switch (loginMethod.value) {
+      case 'email':
+        return Icons.email_outlined;
+      case 'iqama_no':
+        return Icons.badge_outlined;
+      case 'mobile':
+        return Icons.phone_outlined;
+      case 'email_or_iqama':
+      case 'email_or_mobile':
+      case 'all':
+        return Icons.person_outline;
+      default:
+        return Icons.phone_outlined;
+    }
+  }
+
+  /// Get keyboard type based on login method
+  TextInputType getLoginFieldKeyboardType() {
+    switch (loginMethod.value) {
+      case 'email':
+      case 'email_or_iqama':
+      case 'email_or_mobile':
+        return TextInputType.emailAddress;
+      case 'iqama_no':
+      case 'mobile':
+        return TextInputType.number;
+      case 'all':
+        return TextInputType.text;
+      default:
+        return TextInputType.phone;
+    }
+  }
+
+  /// Validate login field based on login method
+  String? validateLoginField(String? value) {
+    if (value == null || value.isEmpty) {
+      return tr('field_required');
+    }
+
+    switch (loginMethod.value) {
+      case 'email':
+        if (!GetUtils.isEmail(value)) {
+          return tr('please_enter_valid_email');
+        }
+        break;
+      case 'iqama_no':
+        if (value.length < 10) {
+          return tr('please_enter_valid_iqama');
+        }
+        break;
+      case 'mobile':
+        if (value.length < 10) {
+          return tr('please_enter_valid_mobile');
+        }
+        break;
+      case 'email_or_iqama':
+      case 'email_or_mobile':
+      case 'all':
+        // Accept any non-empty value
+        if (value.length < 3) {
+          return tr('field_minimum_3_characters');
+        }
+        break;
+    }
+    return null;
+  }
+
   void loginClicked(String email, String password) {
     if (!formKey.currentState!.validate()) {
       return;
@@ -23,7 +160,7 @@ class LoginController extends GetxController {
   void loginApi(String email, String password) async {
     try {
       customLoader();
-      var response = await repository.loginApi(email, password);
+      var response = await repository.loginApi(email, password, loginMethod.value);
       Get.back();
 
       if (response != null && response.isSuccess) {

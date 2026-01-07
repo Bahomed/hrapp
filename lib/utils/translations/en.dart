@@ -1051,4 +1051,15 @@ const Map<String, String> enTranslations = {
   'password_requirements': 'Password Requirements',
   'minimum_6_characters': 'Minimum 6 characters',
   'passwords_must_match': 'Both passwords must match',
+
+  // Dynamic Login Method Labels
+  'email_or_iqama': 'Email or Iqama',
+  'email_or_mobile': 'Email or Mobile',
+  'email_mobile_or_iqama': 'Email, Mobile or Iqama',
+  'enter_iqama_no': 'Enter your Iqama number',
+  'enter_email_or_iqama': 'Enter your email or Iqama number',
+  'enter_email_or_mobile': 'Enter your email or mobile number',
+  'enter_email_mobile_or_iqama': 'Enter your email, mobile or Iqama number',
+  'please_enter_valid_iqama': 'Please enter a valid Iqama number',
+  'field_minimum_3_characters': 'This field must be at least 3 characters',
 };

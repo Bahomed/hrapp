@@ -2,10 +2,12 @@ import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
 import 'package:co.injazathr.injazathr/data/remote/network_url/network_url.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/login_response.dart' as login_response;
+import 'package:co.injazathr.injazathr/data/remote/response/login_method_response.dart';
 import 'package:co.injazathr.injazathr/utils/exceptionhandler.dart';
 import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 import 'package:co.injazathr.injazathr/services/fcm_service.dart';
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 
 class LoginRepository {
   final DioClient dioClient = DioClient();
@@ -20,6 +22,63 @@ class LoginRepository {
 
   void clearWorkspaceData() {
     preferences.clearWorkspace();
+  }
+
+  /// Get company login method (email, iqama_no, mobile, email_or_iqama, email_or_mobile, all)
+  Future<LoginMethodResponse?> getCompanyLoginMethod() async {
+    try {
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final loginMethodUrl = '$workspaceUrl/api/company-login-method';
+
+      var response = await dioClient.get(
+        loginMethodUrl,
+        {},
+        {},
+      );
+
+      if (response.data != null) {
+        return LoginMethodResponse.fromJson(response.data);
+      } else {
+        // Return default mobile if no data
+        return LoginMethodResponse(
+          error: false,
+          loginMethod: 'mobile',
+          message: 'Using default login method',
+          code: 200,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        try {
+          var errorResponse = LoginMethodResponse.fromJson(e.response!.data);
+          return errorResponse;
+        } catch (parseError) {
+          // Return default on error
+          return LoginMethodResponse(
+            error: false,
+            loginMethod: 'mobile',
+            message: 'Using default login method',
+            code: 200,
+          );
+        }
+      } else {
+        // Return default on error
+        return LoginMethodResponse(
+          error: false,
+          loginMethod: 'mobile',
+          message: 'Using default login method',
+          code: 200,
+        );
+      }
+    } catch (e) {
+      // Return default on error
+      return LoginMethodResponse(
+        error: false,
+        loginMethod: 'mobile',
+        message: 'Using default login method',
+        code: 200,
+      );
+    }
   }
 
   Future<bool> updateFCMToken() async {
@@ -61,7 +120,7 @@ class LoginRepository {
     }
   }
 
-  Future<login_response.LoginResponse?> loginApi(String email, String password) async {
+  Future<login_response.LoginResponse?> loginApi(String loginValue, String password, String loginMethod) async {
     try {
       // Get workspace URL and construct login URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
@@ -70,17 +129,62 @@ class LoginRepository {
       // Get FCM token
       String? fcmToken = await FCMService.getFCMToken();
 
-      // Prepare login data with dynamic locale and FCM token
+      // Prepare login data based on login method
       Map<String, dynamic> loginData = {
-        'mobile_no': email, 
         'password': password
       };
-      
+
+      // Add the appropriate field based on login method
+      switch (loginMethod) {
+        case 'email':
+          loginData['email'] = loginValue;
+          break;
+        case 'iqama_no':
+          loginData['iqama_no'] = loginValue;
+          break;
+        case 'mobile':
+          loginData['mobile_no'] = loginValue;
+          break;
+        case 'email_or_iqama':
+          // Check if it's an email or iqama
+          if (GetUtils.isEmail(loginValue)) {
+            loginData['email'] = loginValue;
+          } else {
+            loginData['iqama_no'] = loginValue;
+          }
+          break;
+        case 'email_or_mobile':
+          // Check if it's an email or mobile
+          if (GetUtils.isEmail(loginValue)) {
+            loginData['email'] = loginValue;
+          } else {
+            loginData['mobile_no'] = loginValue;
+          }
+          break;
+        case 'all':
+          // Try to detect what type of input it is
+          if (GetUtils.isEmail(loginValue)) {
+            loginData['email'] = loginValue;
+          } else if (loginValue.length >= 10 && RegExp(r'^[0-9]+$').hasMatch(loginValue)) {
+            // If it's all numbers and >= 10 digits, treat as mobile/iqama
+            // Backend will handle whether it's mobile or iqama
+            loginData['mobile_no'] = loginValue;
+            loginData['iqama_no'] = loginValue;
+          } else {
+            // Default to mobile_no for any other input
+            loginData['mobile_no'] = loginValue;
+          }
+          break;
+        default:
+          // Default to mobile_no
+          loginData['mobile_no'] = loginValue;
+      }
+
       // Add FCM token if available
       if (fcmToken != null) {
         loginData['fcm_id'] = fcmToken;
       }
-      
+
       loginData = ApiHelper.instance.addLocaleToData(loginData);
 
       var response = await dioClient.post(
