@@ -1,5 +1,6 @@
 import 'package:co.injazathr.injazathr/utils/appconstants.dart';
 import 'package:co.injazathr.injazathr/view/login_screen/login_controller.dart';
+import 'package:co.injazathr.injazathr/view/forgot_password_screen/forgot_password_screen.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/input_widgets.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
@@ -117,8 +118,28 @@ class LoginScreen extends StatelessWidget {
                       icon: Icons.lock_outline,
                     ),
                     
-                    SizedBox(height: ResponsiveUtils.responsiveHeight(context, 4)),
-                    
+                    SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2)),
+
+                    // Forgot Password Link
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Get.to(() => ForgotPasswordScreen());
+                        },
+                        child: Text(
+                          tr('forgot_password'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: themeService.getActionColor('requests'),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2)),
+
                     // Login Button
                     SizedBox(
                       width: double.infinity,
