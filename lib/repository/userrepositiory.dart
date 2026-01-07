@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
 import 'package:co.injazathr.injazathr/utils/exceptionhandler.dart';
 import 'package:dio/dio.dart';
+import 'package:image/image.dart' as img;
 import '../data/local/preferences.dart';
 import '../data/remote/response/login_response.dart' as login_response;
 import '../utils/language_service.dart';
@@ -72,6 +75,98 @@ class UserRepositiory {
         currentUser.preferredLang = languageCode;
         await preferences.saveUserData(currentUser);
       }
+      rethrow;
+    }
+  }
+
+  // Upload profile picture
+  Future<login_response.LoginResponse> uploadProfilePicture(String imagePath) async {
+    final token = await preferences.getToken();
+    final workspaceUrl = await preferences.getWorkspaceUrl();
+    final apiUrl = '$workspaceUrl/api/upload-profile-picture';
+    final currentLanguage = LanguageService.instance.getLanguageCode();
+
+    try {
+      // Create FormData for file upload
+      String originalFilename = imagePath.split('/').last;
+
+      // Read and decode the image
+      final originalBytes = await File(imagePath).readAsBytes();
+      img.Image? image = img.decodeImage(originalBytes);
+
+      if (image == null) {
+        throw Exception('Failed to decode image');
+      }
+
+      // Convert to JPEG format with 85% quality
+      // This ensures the backend's file signature validation will pass
+      final Uint8List jpegBytes = Uint8List.fromList(img.encodeJpg(image, quality: 85));
+
+      // Create filename with .jpg extension
+      String filename = originalFilename
+          .replaceAll('scaled_', '') // Remove "scaled_" prefix that image_picker adds
+          .replaceAll(RegExp(r'\.(png|jpeg|jpg)$', caseSensitive: false), '.jpg');
+
+      // Ensure filename has .jpg extension
+      if (!filename.toLowerCase().endsWith('.jpg')) {
+        filename = '${filename.split('.').first}.jpg';
+      }
+
+      FormData formData = FormData.fromMap({
+        'locale': currentLanguage,
+        'image': MultipartFile.fromBytes(
+          jpegBytes,
+          filename: filename,
+          contentType: DioMediaType('image', 'jpeg'),
+        ),
+      });
+
+      var response = await dioClient.postForImageUpload(
+        apiUrl,
+        formData,
+        {'Authorization': 'Bearer $token'}
+      );
+
+
+      if (response.data != null) {
+        // Transform the response to match LoginResponse format
+        var transformedResponse = {
+          'status': response.data['success'] ?? response.data['error'] == false,
+          'status_code': 200,
+          'message': response.data['message'],
+          'data': response.data['data']
+        };
+
+        var loginResponse = login_response.LoginResponse.fromJson(transformedResponse);
+
+        // Update preferences with new user data if available
+        if (loginResponse.data != null) {
+          await preferences.saveUserData(loginResponse.data!);
+        }
+
+        return loginResponse;
+      } else {
+        throw Exception("No data received from server");
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        try {
+          var transformedErrorResponse = {
+            'status': e.response!.data['success'] ?? false,
+            'status_code': e.response!.statusCode ?? 500,
+            'message': e.response!.data['message'] ?? 'Failed to upload image',
+            'data': e.response!.data['data']
+          };
+
+          var errorResponse = login_response.LoginResponse.fromJson(transformedErrorResponse);
+          return errorResponse;
+        } catch (parseError) {
+          throw exceptionHandler(e);
+        }
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
       rethrow;
     }
   }

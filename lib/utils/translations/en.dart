@@ -1062,4 +1062,13 @@ const Map<String, String> enTranslations = {
   'enter_email_mobile_or_iqama': 'Enter your email, mobile or Iqama number',
   'please_enter_valid_iqama': 'Please enter a valid Iqama number',
   'field_minimum_3_characters': 'This field must be at least 3 characters',
+
+  // Profile Picture Upload
+  'change_profile_picture': 'Change Profile Picture',
+  'take_photo': 'Take Photo',
+  'choose_from_gallery': 'Choose from Gallery',
+  'profile_picture_updated': 'Profile picture updated successfully',
+  'error_selecting_image': 'Error selecting image',
+  'error_uploading_image': 'Error uploading image',
+  'failed_to_upload_image': 'Failed to upload image',
 };

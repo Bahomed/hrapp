@@ -204,19 +204,33 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
               ),
-              // Online status indicator
+              // Camera button to change profile picture
               Positioned(
-                bottom: 8,
-                right: 8,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: themeService.getSuccessColor(),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: themeService.getCardColor(),
-                      width: 3,
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: controller.changeProfilePicture,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: themeService.getPrimaryColor(),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: themeService.getCardColor(),
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: themeService.getPrimaryColor().withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.camera_alt,
+                      size: 20,
+                      color: themeService.getSilver(),
                     ),
                   ),
                 ),

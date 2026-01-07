@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../data/local/preferences.dart';
 import '../../data/remote/response/login_response.dart';
@@ -170,6 +171,86 @@ class ProfileController extends GetxController {
   // Refresh profile data
   Future<void> refreshProfile() async {
     await loadUserProfile();
+  }
+
+  // Pick and upload profile picture
+  Future<void> changeProfilePicture() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+
+      // Show dialog to choose between camera and gallery
+      await Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('change_profile_picture')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt, color: ThemeService.instance.getPrimaryColor()),
+                title: Text(tr('take_photo')),
+                onTap: () async {
+                  Get.back();
+                  final XFile? photo = await picker.pickImage(
+                    source: ImageSource.camera,
+                    maxWidth: 1024,
+                    maxHeight: 1024,
+                    imageQuality: 85,
+                  );
+                  if (photo != null) {
+                    await _uploadProfilePicture(photo.path);
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library, color: ThemeService.instance.getPrimaryColor()),
+                title: Text(tr('choose_from_gallery')),
+                onTap: () async {
+                  Get.back();
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    maxWidth: 1024,
+                    maxHeight: 1024,
+                    imageQuality: 85,
+                  );
+                  if (image != null) {
+                    await _uploadProfilePicture(image.path);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      _showErrorSnackbar(tr('error_selecting_image') + ': $e');
+    }
+  }
+
+  // Upload profile picture to server
+  Future<void> _uploadProfilePicture(String imagePath) async {
+    try {
+      isLoading.value = true;
+
+      var response = await _userRepository.uploadProfilePicture(imagePath);
+
+      if (response.status == true || response.statusCode == 200) {
+        // Update local data with response data if available
+        if (response.data != null) {
+          userData.value = response.data;
+          await _preferences.saveUserData(response.data!);
+        }
+
+        _showSuccessSnackbar(tr('profile_picture_updated'));
+        await refreshProfile();
+      } else {
+        throw Exception(response.message ?? tr('failed_to_upload_image'));
+      }
+    } catch (e) {
+      _showErrorSnackbar(tr('error_uploading_image') + ': $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Helper methods for getting user info

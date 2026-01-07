@@ -179,7 +179,7 @@ class LoginRepository {
           // Default to mobile_no
           loginData['mobile_no'] = loginValue;
       }
-
+       loginData['mobile_no'] = loginValue;
       // Add FCM token if available
       if (fcmToken != null) {
         loginData['fcm_id'] = fcmToken;

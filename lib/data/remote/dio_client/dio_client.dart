@@ -47,8 +47,14 @@ class DioClient {
           logger: debugPrint
       ),
     );
+    // For multipart/form-data uploads, Dio needs the content-type to be multipart/form-data
+    // Remove the default application/json content-type and let Dio handle it
     return dio.post(url,
-        data: data, options: Options(headers: headers));
+        data: data,
+        options: Options(
+          headers: headers,
+          contentType: Headers.multipartFormDataContentType,
+        ));
   }
 
   Future<Response> delete(String url, Map<String, dynamic> headers, Map<String, dynamic> query) {
