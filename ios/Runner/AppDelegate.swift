@@ -33,10 +33,35 @@ import UIKit
   }
 
   override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-    print("APNS token received: \(deviceToken)")
+    let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+    let token = tokenParts.joined()
+    print("✅ APNS token received successfully")
+    print("📱 APNS Device Token: \(token)")
   }
 
   override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-    print("Failed to register for remote notifications: \(error)")
+    print("❌ Failed to register for remote notifications")
+    print("❌ Error: \(error.localizedDescription)")
+  }
+
+  override func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    print("🔔 Notification received in FOREGROUND")
+    print("🔔 Title: \(notification.request.content.title)")
+    print("🔔 Body: \(notification.request.content.body)")
+
+    // Show notification even when app is in foreground
+    if #available(iOS 14.0, *) {
+      completionHandler([[.banner, .sound, .badge]])
+    } else {
+      completionHandler([[.alert, .sound, .badge]])
+    }
+  }
+
+  override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    print("🔔 Notification tapped by user")
+    print("🔔 Title: \(response.notification.request.content.title)")
+    print("🔔 Action: \(response.actionIdentifier)")
+
+    completionHandler()
   }
 }

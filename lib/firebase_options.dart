@@ -16,16 +16,13 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
-    if (kIsWeb) {
-      return web;
-    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
         return ios;
-      case TargetPlatform.macOS:
-        return macos;
+
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -43,38 +40,39 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
-    appId: '1:615617259720:web:27a5e7244b4c19ae5d5dfd',
-    messagingSenderId: '615617259720',
-    projectId: 'injazathr-defdb',
-    authDomain: 'injazathr-defdb.firebaseapp.com',
-    storageBucket: 'injazathr-defdb.firebasestorage.app',
-  );
+  // static const FirebaseOptions web = FirebaseOptions(
+  //   apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
+  //   appId: '1:615617259720:web:27a5e7244b4c19ae5d5dfd',
+  //   messagingSenderId: '615617259720',
+  //   projectId: 'injazathr-13f0f',
+  //   authDomain: 'injazathr-13f0f.firebaseapp.com',
+  //   storageBucket: 'injazathr-13f0f.firebasestorage.app',
+  // );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
-    appId: '1:615617259720:android:27a5e7244b4c19ae5d5dfd',
-    messagingSenderId: '615617259720',
-    projectId: 'injazathr-defdb',
-    storageBucket: 'injazathr-defdb.firebasestorage.app',
-  );
+ static const FirebaseOptions android = FirebaseOptions(
+  apiKey: 'AIzaSyD0OVzs_27D7NI9Ej8ffjqCAnMqEkYsqH4',
+  appId: '1:948730820759:android:2e1d1052c40027c2af91d2',
+  messagingSenderId: '948730820759',
+  projectId: 'injazathr-13f0f',
+  storageBucket: 'injazathr-13f0f.firebasestorage.app',
+);
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
-    appId: '1:615617259720:ios:27a5e7244b4c19ae5d5dfd',
-    messagingSenderId: '615617259720',
-    projectId: 'injazathr-defdb',
-    storageBucket: 'injazathr-defdb.firebasestorage.app',
-    iosBundleId: 'co.injazathr.injazathr',
-  );
+static const FirebaseOptions ios = FirebaseOptions(
+  apiKey: 'AIzaSyCzHmDJOx1f-VLe_fkRnIzjcIH7V7pIlOw',
+  appId: '1:948730820759:ios:4770ee8d6eb02a3eaf91d2',
+  messagingSenderId: '948730820759',
+  projectId: 'injazathr-13f0f',
+  storageBucket: 'injazathr-13f0f.firebasestorage.app',
+  iosBundleId: 'co.injazathr.injazathr',
+);
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
-    appId: '1:615617259720:ios:27a5e7244b4c19ae5d5dfd',
-    messagingSenderId: '615617259720',
-    projectId: 'injazathr-defdb',
-    storageBucket: 'injazathr-defdb.firebasestorage.app',
-    iosBundleId: 'co.injazathr.injazathr',
-  );
+
+  // static const FirebaseOptions macos = FirebaseOptions(
+  //   apiKey: 'AIzaSyAvdoh7vHV_qeeTz-J2quBFygUovBIPLM4',
+  //   appId: '1:615617259720:ios:27a5e7244b4c19ae5d5dfd',
+  //   messagingSenderId: '615617259720',
+  //   projectId: 'injazathr-13f0f',
+  //   storageBucket: 'injazathr-13f0f.firebasestorage.app',
+  //   iosBundleId: 'co.injazathr.injazathr',
+  // );
 }
