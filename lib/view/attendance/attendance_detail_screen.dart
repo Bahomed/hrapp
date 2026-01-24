@@ -199,9 +199,9 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            startDate != null 
+                            startDate != null
                                 ? '${startDate!.day}-${startDate!.month}-${startDate!.year}'
-                                : 'Select start date',
+                                : tr('select_start_date'),
                             style: TextStyle(
                               color: themeService.getTextPrimaryColor(),
                               fontSize: 16,
@@ -230,9 +230,18 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
                   const SizedBox(height: 8),
                   InkWell(
                     onTap: () async {
+                      // Ensure initialDate is within valid range
+                      DateTime initialEndDate = endDate ?? now;
+                      if (initialEndDate.isAfter(now)) {
+                        initialEndDate = now;
+                      }
+                      if (startDate != null && initialEndDate.isBefore(startDate!)) {
+                        initialEndDate = startDate!;
+                      }
+
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate: endDate ?? now,
+                        initialDate: initialEndDate,
                         firstDate: startDate ?? DateTime(1998, 1, 1),
                         lastDate: now,
                         builder: (context, child) {
@@ -272,9 +281,9 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            endDate != null 
+                            endDate != null
                                 ? '${endDate!.day}-${endDate!.month}-${endDate!.year}'
-                                : 'Select end date',
+                                : tr('select_end_date'),
                             style: TextStyle(
                               color: themeService.getTextPrimaryColor(),
                               fontSize: 16,

@@ -234,30 +234,30 @@ class WeeklyAttendanceTable extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              tr('penalty'),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: ThemeService.instance.getTextSecondaryColor(),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              tr('overtime'),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: ThemeService.instance.getTextSecondaryColor(),
-              ),
-            ),
-          ),
+          // Expanded(
+          //   flex: 1,
+          //   child: Text(
+          //     tr('penalty'),
+          //     textAlign: TextAlign.center,
+          //     style: TextStyle(
+          //       fontSize: 10,
+          //       fontWeight: FontWeight.w700,
+          //       color: ThemeService.instance.getTextSecondaryColor(),
+          //     ),
+          //   ),
+          // ),
+          // Expanded(
+          //   flex: 1,
+          //   child: Text(
+          //     tr('overtime'),
+          //     textAlign: TextAlign.center,
+          //     style: TextStyle(
+          //       fontSize: 10,
+          //       fontWeight: FontWeight.w700,
+          //       color: ThemeService.instance.getTextSecondaryColor(),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -359,37 +359,37 @@ class WeeklyAttendanceTable extends StatelessWidget {
             ),
           ),
           
-          // Penalty Column
-          Expanded(
-            flex: 1,
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                item.penalty,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.errorColor,
-                ),
-              ),
-            ),
-          ),
+          // // Penalty Column
+          // Expanded(
+          //   flex: 1,
+          //   child: Container(
+          //     alignment: Alignment.center,
+          //     child: Text(
+          //       item.penalty,
+          //       style: TextStyle(
+          //         fontSize: 10,
+          //         fontWeight: FontWeight.w600,
+          //         color: AppTheme.errorColor,
+          //       ),
+          //     ),
+          //   ),
+          // ),
           
-          // Overtime Column
-          Expanded(
-            flex: 1,
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                item.overtime,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.successColor,
-                ),
-              ),
-            ),
-          ),
+          // // Overtime Column
+          // Expanded(
+          //   flex: 1,
+          //   child: Container(
+          //     alignment: Alignment.center,
+          //     child: Text(
+          //       item.overtime,
+          //       style: TextStyle(
+          //         fontSize: 10,
+          //         fontWeight: FontWeight.w600,
+          //         color: AppTheme.successColor,
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -476,14 +476,15 @@ class WeeklyAttendanceTable extends StatelessWidget {
         }
       }
 
-      // Use penaltyAmount field for penalty total
-      totalPenalty += item.penaltyAmount;
+      // Sum penalty minutes (will convert to hours for display)
+      final penaltyMinutes = double.tryParse(item.penalty.toString()) ?? 0.0;
+      totalPenalty += penaltyMinutes;
 
-      // Parse overtime amount from overtimeAmount field
-      final overtimeValue = double.tryParse(item.overtimeAmount.toString()) ?? 0.0;
-      totalOvertime += overtimeValue;
+      // Sum overtime minutes (will convert to hours for display)
+      final overtimeMinutes = double.tryParse(item.overtime.toString()) ?? 0.0;
+      totalOvertime += overtimeMinutes;
     }
-
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -523,7 +524,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
             child: Container(
               alignment: Alignment.center,
               child: Text(
-                '${totalHours.toStringAsFixed(1)}h',
+                '${totalHours.toStringAsFixed(2)}h',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
@@ -533,37 +534,37 @@ class WeeklyAttendanceTable extends StatelessWidget {
             ),
           ),
           
-          // Total Penalty Column
-          Expanded(
-            flex: 1,
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                '${totalPenalty.toStringAsFixed(1)}h',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.errorColor,
-                ),
-              ),
-            ),
-          ),
-          
-          // Total Overtime Column
-          Expanded(
-            flex: 1,
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                '${totalOvertime.toStringAsFixed(1)}h',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.successColor,
-                ),
-              ),
-            ),
-          ),
+          // // Total Penalty Column
+          // Expanded(
+          //   flex: 1,
+          //   child: Container(
+          //     alignment: Alignment.center,
+          //     child: Text(
+          //       '${(totalPenalty / 60.0).toStringAsFixed(2)}h',
+          //       style: TextStyle(
+          //         fontSize: 11,
+          //         fontWeight: FontWeight.w800,
+          //         color: AppTheme.errorColor,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+
+          // // Total Overtime Column
+          // Expanded(
+          //   flex: 1,
+          //   child: Container(
+          //     alignment: Alignment.center,
+          //     child: Text(
+          //       '${(totalOvertime / 60).toStringAsFixed(2)} h',
+          //       style: TextStyle(
+          //         fontSize: 11,
+          //         fontWeight: FontWeight.w800,
+          //         color: AppTheme.successColor,
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
