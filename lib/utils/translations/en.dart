@@ -1019,6 +1019,21 @@ const Map<String, String> enTranslations = {
   'and': 'and',
   'terms_and_conditions': 'Terms & Conditions',
 
+  // Notifications
+  'unread_only': 'Unread Only',
+  'no_notifications': 'No Notifications',
+  'no_notifications_description': 'You don\'t have any notifications yet',
+  'error_loading_notifications': 'Error loading notifications',
+  'days_ago': '{days}d ago',
+  'hours_ago': '{hours}h ago',
+  'minutes_ago': '{minutes}m ago',
+  'just_now': 'Just now',
+  'notification_type_general': 'General',
+  'notification_type_payroll': 'Payroll',
+  'notification_type_request_status': 'Request Status',
+  'notification_type_message': 'Message',
+  'notification_type_approval': 'Approval',
+
   // Forgot Password & OTP
   'forgot_password': 'Forgot Password?',
   'forgot_password_title': 'Reset Your Password',

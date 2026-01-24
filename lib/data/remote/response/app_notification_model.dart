@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
 enum NotificationType {
   general,
@@ -105,15 +106,15 @@ class AppNotification {
   String get typeDisplayName {
     switch (type) {
       case NotificationType.general:
-        return 'General';
+        return tr('notification_type_general');
       case NotificationType.payroll:
-        return 'Payroll';
+        return tr('notification_type_payroll');
       case NotificationType.requestStatus:
-        return 'Request Status';
+        return tr('notification_type_request_status');
       case NotificationType.message:
-        return 'Message';
+        return tr('notification_type_message');
       case NotificationType.approval:
-        return 'Approval';
+        return tr('notification_type_approval');
     }
   }
 

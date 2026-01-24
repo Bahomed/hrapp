@@ -1025,4 +1025,19 @@ const Map<String, String> arTranslations = {
   'by_continuing_you_agree': 'بالمتابعة، أنت توافق على',
   'and': 'و',
   'terms_and_conditions': 'الشروط والأحكام',
+
+  // Notifications
+  'unread_only': 'غير المقروء فقط',
+  'no_notifications': 'لا توجد إشعارات',
+  'no_notifications_description': 'ليس لديك أي إشعارات حتى الآن',
+  'error_loading_notifications': 'خطأ في تحميل الإشعارات',
+  'days_ago': 'منذ {days} يوم',
+  'hours_ago': 'منذ {hours} ساعة',
+  'minutes_ago': 'منذ {minutes} دقيقة',
+  'just_now': 'الآن',
+  'notification_type_general': 'عام',
+  'notification_type_payroll': 'كشف الراتب',
+  'notification_type_request_status': 'حالة الطلب',
+  'notification_type_message': 'رسالة',
+  'notification_type_approval': 'موافقة',
 };

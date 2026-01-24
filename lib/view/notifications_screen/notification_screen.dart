@@ -386,13 +386,13 @@ class NotificationScreen extends StatelessWidget {
     final difference = now.difference(timestamp);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return trParams('days_ago', {'days': difference.inDays.toString()});
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return trParams('hours_ago', {'hours': difference.inHours.toString()});
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return trParams('minutes_ago', {'minutes': difference.inMinutes.toString()});
     } else {
-      return 'Just now';
+      return tr('just_now');
     }
   }
 
