@@ -14,7 +14,7 @@ import '../../../widgets/saudi_riyal_display.dart';
 import '../request_controller.dart'; // Fixed import
 
 // Enum for request status if not defined elsewhere
-enum RequestStatus { forApproval, approved, rejected, generated, executed }
+enum RequestStatus { forApproval, approved, rejected, generated, executed, approvedUnexecuted }
 
 // Extension to get status from string
 extension RequestStatusExtension on String {
@@ -28,6 +28,8 @@ extension RequestStatusExtension on String {
         return RequestStatus.generated;
       case 'executed':
         return RequestStatus.executed;
+      case 'approved_unexecuted':
+        return RequestStatus.approvedUnexecuted;
       case 'for-approval':
       default:
         return RequestStatus.forApproval;
@@ -76,6 +78,12 @@ class RequestStatusChip extends StatelessWidget {
         textColor = themeService.getActionColor('profile');
         text = tr('executed');
         icon = Icons.done_all_outlined;
+        break;
+      case RequestStatus.approvedUnexecuted:
+        backgroundColor = themeService.getWarningColor().withValues(alpha: 0.1);
+        textColor = themeService.getWarningColor();
+        text = '${tr('approved')} - ${tr('un_executed')}';
+        icon = Icons.pending_outlined;
         break;
       case RequestStatus.forApproval:
         backgroundColor = themeService.getWarningColor().withValues(alpha: 0.1);
@@ -295,6 +303,15 @@ class LeaveRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'approved_unexecuted' && request.approvedDate != null)
+                    Text(
+                    '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getWarningColor(),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -623,6 +640,15 @@ class LoanRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'approved_unexecuted' && request.approvedDate != null)
+                    Text(
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getWarningColor(),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
