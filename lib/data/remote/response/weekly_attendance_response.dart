@@ -24,6 +24,7 @@ class WeeklyAttendanceItem {
   final String dayName;
   final String timeIn;
   final String timeOut;
+  final String? breakTime;
   final String penalty;
   final double penaltyAmount;
   final String overtime;
@@ -35,6 +36,7 @@ class WeeklyAttendanceItem {
     required this.dayName,
     required this.timeIn,
     required this.timeOut,
+    this.breakTime,
     required this.penalty,
     required this.penaltyAmount,
     required this.overtime,
@@ -48,6 +50,7 @@ class WeeklyAttendanceItem {
       dayName: json['day_name'] ?? '',
       timeIn: json['in'] ?? '',
       timeOut: json['out'] ?? '',
+      breakTime: json['break_time'] ?? '00:00',
       penalty: json['penalty'] ?? '0.00',
       penaltyAmount: double.tryParse(json['penalty_amount'].toString()) ?? 0.0,
       overtime: json['overtime'] ?? '0.00',
@@ -68,21 +71,32 @@ class WeeklyAttendanceItem {
 
   String get workingHours {
     if (timeIn.isEmpty || timeOut.isEmpty) return '--';
-    
+
     try {
       final inTime = _parseTime(timeIn);
       final outTime = _parseTime(timeOut);
-      
+
       if (inTime != null && outTime != null) {
-        final difference = outTime.difference(inTime);
-        final hours = difference.inHours;
-        final minutes = difference.inMinutes % 60;
+        var totalMinutes = outTime.difference(inTime).inMinutes;
+
+        // Subtract break time if available
+        if (breakTime != null && breakTime!.isNotEmpty && breakTime != '00:00') {
+          final breakParts = breakTime!.split(':');
+          if (breakParts.length >= 2) {
+            final breakHours = int.parse(breakParts[0]);
+            final breakMinutes = int.parse(breakParts[1]);
+            totalMinutes -= (breakHours * 60 + breakMinutes);
+          }
+        }
+
+        final hours = totalMinutes ~/ 60;
+        final minutes = totalMinutes % 60;
         return '${hours}h ${minutes}m';
       }
     } catch (e) {
       // Handle parsing errors
     }
-    
+
     return '--';
   }
 
@@ -129,5 +143,21 @@ class WeeklyAttendanceItem {
       // Handle parsing errors
     }
     return timeOut;
+  }
+
+  String get formattedBreakTime {
+    if (breakTime == null || breakTime!.isEmpty || breakTime == '00:00') return '--';
+    try {
+      final parts = breakTime!.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        if (hour == 0 && minute == 0) return '--';
+        return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+      }
+    } catch (e) {
+      // Handle parsing errors
+    }
+    return breakTime ?? '--';
   }
 }

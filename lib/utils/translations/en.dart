@@ -425,12 +425,14 @@ const Map<String, String> enTranslations = {
   // Time and Attendance
   'work_hours': 'Work Hours',
   'total_hours': 'Total Hours',
+  'break': 'Break',
   'break_time': 'Break Time',
   'late_arrival': 'Late Arrival',
   'early_departure': 'Early Departure',
   'absent': 'Absent',
   'present': 'Present',
   'half_day': 'Half Day',
+  'half_day_absent': 'Half Day Absent',
   'work_from_home': 'Work From Home',
   'on_leave': 'On Leave',
   

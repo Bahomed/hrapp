@@ -225,6 +225,18 @@ class WeeklyAttendanceTable extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
+              tr('break'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: ThemeService.instance.getTextSecondaryColor(),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
               tr('hours'),
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -234,6 +246,7 @@ class WeeklyAttendanceTable extends StatelessWidget {
               ),
             ),
           ),
+          
           // Expanded(
           //   flex: 1,
           //   child: Text(
@@ -343,6 +356,22 @@ class WeeklyAttendanceTable extends StatelessWidget {
             ),
           ),
           
+          
+          // Break Time Column
+          Expanded(
+            flex: 1,
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                item.formattedBreakTime,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
+              ),
+            ),
+          ),
           // Working Hours Column
           Expanded(
             flex: 1,
@@ -358,7 +387,8 @@ class WeeklyAttendanceTable extends StatelessWidget {
               ),
             ),
           ),
-          
+
+
           // // Penalty Column
           // Expanded(
           //   flex: 1,
@@ -533,7 +563,10 @@ class WeeklyAttendanceTable extends StatelessWidget {
               ),
             ),
           ),
-          
+
+          // Break Column - Empty
+          const Expanded(flex: 1, child: SizedBox()),
+
           // // Total Penalty Column
           // Expanded(
           //   flex: 1,

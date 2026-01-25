@@ -425,6 +425,7 @@ const Map<String, String> arTranslations = {
   // Time and Attendance
   'work_hours': 'ساعات العمل',
   'total_hours': 'إجمالي الساعات',
+  'break': 'استراحة',
   'break_time': 'وقت الاستراحة',
   'late_arrival': 'وصول متأخر',
   'early_departure': 'مغادرة مبكرة',
