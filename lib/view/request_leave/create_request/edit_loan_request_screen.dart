@@ -120,7 +120,7 @@ class EditLoanRequestScreen extends StatelessWidget {
                     Icon(Icons.info_outline, color: themeService.getTextSecondaryColor(), size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '${tr('request_id')}: ${request.id}',
+                      '${tr('request_id')}: #${request.requestNumber}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -140,7 +140,8 @@ class EditLoanRequestScreen extends StatelessWidget {
                           'rejected' => tr(request.status),
                           'pending' || 'for-approval' => tr('for_approval'),
                           _ => tr(request.status),
-                        },                        style: const TextStyle(
+                        },
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

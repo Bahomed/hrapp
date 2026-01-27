@@ -101,25 +101,48 @@ class EditLeaveRequestScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Status Badge
+              // Request ID Info
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(request.status, themeService).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: themeService.getCardColor(),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
                 ),
-                child: Text(
-                  switch (request.status.toLowerCase()) {
-                    'approved' => tr(request.status),
-                    'rejected' => tr(request.status),
-                    'pending' || 'for-approval' => tr('for_approval'),
-                    _ => tr(request.status),
-                  },
-                  style: TextStyle(
-                    color: _getStatusColor(request.status, themeService),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: themeService.getTextSecondaryColor(), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${tr('request_id')}: #${request.requestNumber}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: themeService.getTextPrimaryColor(),
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(request.status, themeService),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        switch (request.status.toLowerCase()) {
+                          'approved' => tr(request.status),
+                          'rejected' => tr(request.status),
+                          'pending' || 'for-approval' => tr('for_approval'),
+                          _ => tr(request.status),
+                        },
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

@@ -154,6 +154,15 @@ class _LoanDetailsScreenState extends State<LoanDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildInfoRow(tr('request_number'), Text(
+            '#${loan.requestNumber}',
+            style: TextStyle(
+              color: ThemeService.instance.getTextPrimaryColor(),
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          )),
+          const SizedBox(height: 12),
           _buildInfoRow(tr('amount'), SaudiRiyalDisplay(
             customText: '${double.tryParse(loan.amount) ?? 0.0}',
             style: TextStyle(
@@ -175,7 +184,7 @@ class _LoanDetailsScreenState extends State<LoanDetailsScreen> {
 
           if (loan.startDate != null && loan.startDate!.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _buildInfoRow(tr('start_date'), Text(
+            _buildInfoRow(tr('repayment_start_date'), Text(
               _formatDate(loan.startDate!),
               style: TextStyle(
                 color: ThemeService.instance.getActionColor('requests'),

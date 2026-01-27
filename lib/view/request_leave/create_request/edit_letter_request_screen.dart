@@ -117,7 +117,7 @@ class EditLetterRequestScreen extends StatelessWidget {
                     Icon(Icons.info_outline, color: themeService.getTextSecondaryColor(), size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '${tr('request_id')}: ${request.id}',
+                      '${tr('request_id')}: #${request.requestNumber}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

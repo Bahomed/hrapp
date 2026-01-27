@@ -17,6 +17,7 @@ class LetterRequest {
   final String? executedDate;
   final List<Attachment> attachments;
   final String? generatedFilePath;
+  final String requestNumber;
   final String createdAt;
   final String updatedAt;
 
@@ -33,6 +34,7 @@ class LetterRequest {
     this.executedDate,
     required this.attachments,
     this.generatedFilePath,
+    required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -54,6 +56,7 @@ class LetterRequest {
               .toList() ??
           [],
       generatedFilePath: json['generated_file_path'],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -77,6 +80,7 @@ class LetterRequestDetails extends LetterRequest {
     super.executedDate,
     required super.attachments,
     super.generatedFilePath,
+    required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
     this.user,
@@ -100,6 +104,7 @@ class LetterRequestDetails extends LetterRequest {
               .toList() ??
           [],
       generatedFilePath: json['generated_file_path'],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       user: json['user'] != null ? User.fromJson(json['user']) : null,

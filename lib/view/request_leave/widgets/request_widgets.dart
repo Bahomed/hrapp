@@ -201,23 +201,32 @@ class LeaveRequestCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-      Text(
-      '${request.startDate} ${tr('to')} ${request.endDate}',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: ThemeService.instance.getTextPrimaryColor(),
-        ),
-      ),
-      const SizedBox(width: 12),
-      RequestTag(
-        text: '${request.days} ${tr('days')}',
-        textColor: ThemeService.instance.getWarningColor(),
-        backgroundColor:
-        ThemeService.instance.getWarningColor().withOpacity(0.1),
-      ),
-
+              Expanded(
+                child: Text(
+                  '${request.leaveType} #${request.requestNumber}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+              ),
+              RequestTag(
+                text: '${request.days} ${tr('days')}',
+                textColor: ThemeService.instance.getWarningColor(),
+                backgroundColor:
+                    ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
+              ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${request.startDate} ${tr('to')} ${request.endDate}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: ThemeService.instance.getTextSecondaryColor(),
+            ),
           ),
 
 
@@ -387,33 +396,41 @@ class PermissionRequestCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: RichText(
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${tr('purpose')}:',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                      TextSpan(
-                        text: request.purpose,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400, // lighter for content
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                    ],
+                child: Text(
+                  '${tr('permission_request')} #${request.requestNumber}',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
-
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          RichText(
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${tr('purpose')}: ',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                TextSpan(
+                  text: request.purpose,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -535,27 +552,13 @@ class LoanRequestCard extends StatelessWidget {
         children: [
           // Header - Loan Type
           Text(
-            request.loanType,
+            '${request.loanType} #${request.requestNumber}',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: ThemeService.instance.getTextPrimaryColor(),
             ),
           ),
-          const SizedBox(height: 8),
-
-          // Purpose
-          Text(
-            request.purpose,
-            style: TextStyle(
-              fontSize: 14,
-              color: ThemeService.instance.getTextSecondaryColor(),
-              fontWeight: FontWeight.w400,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-
           const SizedBox(height: 16),
           Divider(
             height: 1,
@@ -581,6 +584,32 @@ class LoanRequestCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+           // Purpose
+          const SizedBox(height: 10),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${tr('purpose')}: ',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                TextSpan(
+                  text: request.purpose,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: ThemeService.instance.getTextSecondaryColor(),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 10),
           Row(
@@ -677,7 +706,7 @@ class LoanRequestCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${tr('start_date')}: ',
+                    '${tr('repayment_start_date')}: ',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -696,6 +725,8 @@ class LoanRequestCard extends StatelessWidget {
               ),
             ),
           ],
+
+         
 
           // Executed Details Section (if executed)
           if (request.status.toLowerCase() == 'executed' &&
@@ -931,35 +962,18 @@ class LetterRequestCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: RichText(
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${tr('letter_type')}: ',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                      TextSpan(
-                        text: request.letterType,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                    ],
+                child: Text(
+                  '${request.letterType} #${request.requestNumber}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
-
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           RichText(
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -968,15 +982,15 @@ class LetterRequestCard extends StatelessWidget {
                 TextSpan(
                   text: '${tr('reason')}: ',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),
                 ),
                 TextSpan(
                   text: request.reason,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w400,
                     color: ThemeService.instance.getTextPrimaryColor(),
                   ),

@@ -16,6 +16,7 @@ class PermissionRequest {
   final String? approvedDate;
   final String? rejectedReason;
   final String? executedDate;
+  final String requestNumber;
   final String createdAt;
   final String updatedAt;
 
@@ -31,6 +32,7 @@ class PermissionRequest {
     this.approvedDate,
     this.rejectedReason,
     this.executedDate,
+    required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -48,6 +50,7 @@ class PermissionRequest {
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -70,6 +73,7 @@ class PermissionRequestDetails extends PermissionRequest {
     super.approvedDate,
     super.rejectedReason,
     super.executedDate,
+    required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
     this.user,
@@ -89,6 +93,7 @@ class PermissionRequestDetails extends PermissionRequest {
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       user: json['user'] != null ? User.fromJson(json['user']) : null,

@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/app_notification_mod
 import 'package:dio/dio.dart';
 
 import '../utils/exceptionhandler.dart';
+import '../utils/translation_helper.dart';
 
 class NotificationRepository {
   final Preferences preferences = Preferences();
@@ -18,7 +19,7 @@ class NotificationRepository {
       final response = await dioClient.get(
         '$workspaceUrl$notificationsUrl',
         {'Authorization': 'Bearer $token'},
-        {},
+        {'locale': getCurrentLanguage()},
       );
 
       if (response.statusCode == 200) {
@@ -43,7 +44,7 @@ class NotificationRepository {
       final response = await dioClient.get(
         '$workspaceUrl$notificationsUrl/$id',
         {'Authorization': 'Bearer $token'},
-        {},
+        {'locale': getCurrentLanguage()},
       );
 
       if (response.statusCode == 200) {
@@ -67,7 +68,7 @@ class NotificationRepository {
       final response = await dioClient.post(
         '$workspaceUrl$notificationsUrl/$id/mark-read',
         {},
-        {},
+        {'locale': getCurrentLanguage()},
         {'Authorization': 'Bearer $token'},
       );
 

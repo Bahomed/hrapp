@@ -23,6 +23,7 @@ class LoanRequest {
   final String? executedDeductionStartDate;
   final int? executedDeductionId;
   final List<Attachment> attachments;
+  final String requestNumber;
   final String createdAt;
   final String updatedAt;
 
@@ -45,6 +46,7 @@ class LoanRequest {
     this.executedDeductionStartDate,
     this.executedDeductionId,
     required this.attachments,
+    required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -72,6 +74,7 @@ class LoanRequest {
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
           [],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -134,6 +137,7 @@ class LoanRequestDetails extends LoanRequest {
     super.executedDeductionStartDate,
     super.executedDeductionId,
     required super.attachments,
+    required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
     this.user,
@@ -164,6 +168,7 @@ class LoanRequestDetails extends LoanRequest {
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
           [],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       user: json['user'] != null ? User.fromJson(json['user']) : null,

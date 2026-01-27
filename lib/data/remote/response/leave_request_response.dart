@@ -19,6 +19,7 @@ class LeaveRequest {
   final String? rejectedReason;
   final String? executedDate;
   final List<Attachment> attachments;
+  final String requestNumber;
   final String createdAt;
   final String updatedAt;
 
@@ -37,6 +38,7 @@ class LeaveRequest {
     this.rejectedReason,
     this.executedDate,
     required this.attachments,
+    required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -60,6 +62,7 @@ class LeaveRequest {
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
           [],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -85,6 +88,7 @@ class LeaveRequestDetails extends LeaveRequest {
     super.rejectedReason,
     super.executedDate,
     required super.attachments,
+    required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
     this.user,
@@ -110,6 +114,7 @@ class LeaveRequestDetails extends LeaveRequest {
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
           [],
+      requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       user: json['user'] != null ? User.fromJson(json['user']) : null,

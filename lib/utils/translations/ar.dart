@@ -594,6 +594,7 @@ const Map<String, String> arTranslations = {
   'start_date': 'تاريخ البداية',
   'end_date': 'تاريخ النهاية',
   'deduction_start_date': 'بداية القرض',
+  'repayment_start_date': 'تاريخ بدء السداد',
   'from_time': 'من الوقت',
   'to_time': 'إلى الوقت',
 
