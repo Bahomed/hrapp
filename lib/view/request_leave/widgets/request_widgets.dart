@@ -533,181 +533,353 @@ class LoanRequestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${tr('loan_type')}: ',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                      TextSpan(
-                        text: request.loanType,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: ThemeService.instance.getTextPrimaryColor(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              ),
-            ],
+          // Header - Loan Type
+          Text(
+            request.loanType,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: ThemeService.instance.getTextPrimaryColor(),
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+
           // Purpose
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '${tr('purpose')}: ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: ThemeService.instance.getTextPrimaryColor(),
-                  ),
-                ),
-                TextSpan(
-                  text: request.purpose,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: ThemeService.instance.getTextSecondaryColor(),
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
+          Text(
+            request.purpose,
+            style: TextStyle(
+              fontSize: 14,
+              color: ThemeService.instance.getTextSecondaryColor(),
+              fontWeight: FontWeight.w400,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
 
-          // Start Date Display
+          const SizedBox(height: 16),
+          Divider(
+            height: 1,
+            color: ThemeService.instance.getTextSecondaryColor().withValues(alpha: 0.1),
+          ),
+          const SizedBox(height: 16),
+
+          // Requested Details Section
+          Row(
+            children: [
+              Icon(
+                Icons.request_quote_outlined,
+                size: 16,
+                color: ThemeService.instance.getTextSecondaryColor(),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                tr('requested'),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: ThemeService.instance.getTextSecondaryColor(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tr('amount'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SaudiRiyalDisplay(
+                        customText: '${double.tryParse(request.amount) ?? 0.0}',
+                        style: TextStyle(
+                          color: ThemeService.instance.getSuccessColor(),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: ThemeService.instance.getWarningColor().withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: ThemeService.instance.getWarningColor().withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tr('instalment'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: ThemeService.instance.getWarningColor().withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${request.repaymentMonths} ${tr('months')}',
+                        style: TextStyle(
+                          color: ThemeService.instance.getWarningColor(),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
           if (request.startDate != null && request.startDate!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            RichText(
-              text: TextSpan(
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: ThemeService.instance.getActionColor('requests').withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextSpan(
-                    text: '${tr('start_date')}: ',
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 14,
+                    color: ThemeService.instance.getActionColor('requests'),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${tr('start_date')}: ',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       color: ThemeService.instance.getTextPrimaryColor(),
                     ),
                   ),
-                  TextSpan(
-                    text: _formatDate(request.startDate!),
+                  Text(
+                    _formatDate(request.startDate!),
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 13,
                       color: ThemeService.instance.getActionColor('requests'),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+
+          // Executed Details Section (if executed)
+          if (request.status.toLowerCase() == 'executed' &&
+              (request.executedAmount != null || request.executedInstallments != null ||
+               (request.executedDeductionStartDate != null && request.executedDeductionStartDate!.isNotEmpty))) ...[
+            const SizedBox(height: 16),
+            Divider(
+              height: 1,
+              color: ThemeService.instance.getTextSecondaryColor().withValues(alpha: 0.1),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 16,
+                  color: ThemeService.instance.getActionColor('profile'),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  tr('executed'),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: ThemeService.instance.getActionColor('profile'),
                   ),
-                  child: SaudiRiyalDisplay(
-                    customText: '${tr('amount') } ${double.tryParse(request.amount) ?? 0.0}',
-                    style: TextStyle(
-                      color: ThemeService.instance.getSuccessColor(),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                if (request.executedAmount != null)
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tr('executed_amount'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          SaudiRiyalDisplay(
+                            customText: '${double.tryParse(request.executedAmount!) ?? 0.0}',
+                            style: TextStyle(
+                              color: ThemeService.instance.getActionColor('profile'),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: RequestTag(
-                  text: '${tr('instalment')} ${request.repaymentMonths} ${tr('months')}',
-                  textColor: ThemeService.instance.getWarningColor(),
-                  backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
-                ),
-              ),
-            ],
+                if (request.executedAmount != null && request.executedInstallments != null)
+                  const SizedBox(width: 10),
+                if (request.executedInstallments != null)
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tr('executed_installments'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${request.executedInstallments} ${tr('months')}',
+                            style: TextStyle(
+                              color: ThemeService.instance.getActionColor('profile'),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 16),
+          Divider(
+            height: 1,
+            color: ThemeService.instance.getTextSecondaryColor().withValues(alpha: 0.1),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
+          // Timeline Section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
-                    style: TextStyle(
-                      fontSize: 14,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTimelineItem(
+                      label: tr('submitted'),
+                      date: _formatDate(request.submittedDate),
                       color: ThemeService.instance.getTextSecondaryColor(),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
-                    Text(
-                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: ThemeService.instance.getSuccessColor(),
-                        fontWeight: FontWeight.w400,
+                      isLast: !(
+                        (request.status.toLowerCase() == 'approved' && request.approvedDate != null) ||
+                        (request.status.toLowerCase() == 'approved_unexecuted' && request.approvedDate != null) ||
+                        (request.status.toLowerCase() == 'executed' && request.approvedDate != null) ||
+                        (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                       ),
                     ),
-                  if (request.status.toLowerCase() == 'approved_unexecuted' && request.approvedDate != null)
-                    Text(
-                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
-                      style: TextStyle(
-                        fontSize: 14,
+                    if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
+                      _buildTimelineItem(
+                        label: tr('approved'),
+                        date: _formatDate(request.approvedDate!),
+                        color: ThemeService.instance.getSuccessColor(),
+                        isLast: true,
+                      ),
+                    if (request.status.toLowerCase() == 'approved_unexecuted' && request.approvedDate != null)
+                      _buildTimelineItem(
+                        label: tr('approved'),
+                        date: _formatDate(request.approvedDate!),
                         color: ThemeService.instance.getWarningColor(),
-                        fontWeight: FontWeight.w400,
+                        isLast: true,
                       ),
-                    ),
-                  if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
-                    Text(
-                      '${tr('approved')}: ${_formatDate(request.approvedDate!)} ',
-                      style: TextStyle(
-                        fontSize: 14,
+                    if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
+                      _buildTimelineItem(
+                        label: tr('approved'),
+                        date: _formatDate(request.approvedDate!),
                         color: ThemeService.instance.getSuccessColor(),
-                        fontWeight: FontWeight.w400,
+                        isLast: false,
                       ),
-                    ),
-                  if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
-                    Text(
-                      '${tr('executed')}: ${_formatDate(request.executedDate!)}',
-                      style: TextStyle(
-                        fontSize: 14,
+                    if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
+                      _buildTimelineItem(
+                        label: tr('executed'),
+                        date: _formatDate(request.executedDate!),
                         color: ThemeService.instance.getActionColor('profile'),
-                        fontWeight: FontWeight.w400,
+                        isLast: !(request.executedDeductionStartDate != null && request.executedDeductionStartDate!.isNotEmpty),
                       ),
-                    ),
-                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
-                    Text(
-                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
-                      style: TextStyle(
-                        fontSize: 14,
+                    if (request.status.toLowerCase() == 'executed' &&
+                        request.executedDeductionStartDate != null &&
+                        request.executedDeductionStartDate!.isNotEmpty)
+                      _buildTimelineItem(
+                        label: tr('deduction_start_date'),
+                        date: _formatDate(request.executedDeductionStartDate!),
+                        color: const Color(0xFF6366F1), // Indigo color like in the screenshot
+                        isLast: true,
+                      ),
+                    if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                      _buildTimelineItem(
+                        label: tr('rejected'),
+                        date: _formatDate(request.approvedDate!),
                         color: ThemeService.instance.getErrorColor(),
-                        fontWeight: FontWeight.w400,
+                        isLast: true,
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
+              // Action Buttons
               Row(
                 children: [
                   if (request.status.toLowerCase() == 'for-approval') ...[
@@ -723,11 +895,12 @@ class LoanRequestCard extends StatelessWidget {
                       onTap: () => controller.deleteLoanRequest(request),
                     ),
                   ] else ...[
-                    RequestActionButton(
-                      icon: Icons.visibility_outlined,
-                      color: ThemeService.instance.getTextSecondaryColor(),
-                      onTap: () => controller.viewLoanDetails(request),
-                    ),
+                    if (request.executedDeductionId != null)
+                      RequestActionButton(
+                        icon: Icons.visibility_outlined,
+                        color: ThemeService.instance.getTextSecondaryColor(),
+                        onTap: () => controller.viewLoanDetails(request),
+                      ),
                   ],
                 ],
               ),
@@ -1079,6 +1252,72 @@ class EmptyRequestState extends StatelessWidget {
 }
 
 // Helper functions
+Widget _buildTimelineItem({
+  required String label,
+  required String date,
+  required Color color,
+  required bool isLast,
+}) {
+  return IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Timeline indicator (dot and line)
+        Column(
+          children: [
+            // Dot
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            // Connecting line (if not last item)
+            if (!isLast)
+              Expanded(
+                child: Container(
+                  width: 2,
+                  color: ThemeService.instance.getTextSecondaryColor().withValues(alpha: 0.2),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        // Content
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  date,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 String _formatDate(String dateString) {
   try {
     final date = DateTime.parse(dateString);

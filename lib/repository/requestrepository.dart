@@ -505,6 +505,30 @@ class RequestRepository {
     }
   }
 
+  Future<LoanSettlementsResponse> getLoanSettlements(int id) async {
+    try {
+      final token = await preferences.getToken();
+      // Get workspace URL and construct API URL
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$loanRequestsUrl/$id';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return LoanSettlementsResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // ================ LETTER REQUEST METHODS ================
 
   Future<LetterRequestsResponse> getLetterRequests({String? status, int? year}) async {

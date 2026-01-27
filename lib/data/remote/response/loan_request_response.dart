@@ -18,6 +18,10 @@ class LoanRequest {
   final String? approvedDate;
   final String? rejectedReason;
   final String? executedDate;
+  final String? executedAmount;
+  final int? executedInstallments;
+  final String? executedDeductionStartDate;
+  final int? executedDeductionId;
   final List<Attachment> attachments;
   final String createdAt;
   final String updatedAt;
@@ -36,6 +40,10 @@ class LoanRequest {
     this.approvedDate,
     this.rejectedReason,
     this.executedDate,
+    this.executedAmount,
+    this.executedInstallments,
+    this.executedDeductionStartDate,
+    this.executedDeductionId,
     required this.attachments,
     required this.createdAt,
     required this.updatedAt,
@@ -56,6 +64,10 @@ class LoanRequest {
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
+      executedAmount: json['executed_amount'],
+      executedInstallments: json['executed_installments'] != null ? int.tryParse(json['executed_installments'].toString()) : null,
+      executedDeductionStartDate: json['executed_deduction_start_date'],
+      executedDeductionId: json['executed_deduction_id'] != null ? int.tryParse(json['executed_deduction_id'].toString()) : null,
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
@@ -66,9 +78,42 @@ class LoanRequest {
   }
 }
 
+class LoanSettlement {
+  final String settleDate;
+  final String loanAmount;
+  final String amountPaid;
+  final String status;
+  final String settlementId;
+  final dynamic amountToBePaid; // Can be int or double
+  final String? remarks;
+
+  LoanSettlement({
+    required this.settleDate,
+    required this.loanAmount,
+    required this.amountPaid,
+    required this.status,
+    required this.settlementId,
+    required this.amountToBePaid,
+    this.remarks,
+  });
+
+  factory LoanSettlement.fromJson(Map<String, dynamic> json) {
+    return LoanSettlement(
+      settleDate: json['settle_date'] ?? '',
+      loanAmount: json['loan_amount'] ?? '0.00',
+      amountPaid: json['amount_paid'] ?? '0.00',
+      status: json['status'] ?? '',
+      settlementId: json['settlement_id']?.toString() ?? '',
+      amountToBePaid: json['amount_to_be_paid'],
+      remarks: json['remarks'],
+    );
+  }
+}
+
 class LoanRequestDetails extends LoanRequest {
   final User? user;
   final User? approver;
+  final List<LoanSettlement>? settlements;
 
   LoanRequestDetails({
     required super.id,
@@ -84,11 +129,16 @@ class LoanRequestDetails extends LoanRequest {
     super.approvedDate,
     super.rejectedReason,
     super.executedDate,
+    super.executedAmount,
+    super.executedInstallments,
+    super.executedDeductionStartDate,
+    super.executedDeductionId,
     required super.attachments,
     required super.createdAt,
     required super.updatedAt,
     this.user,
     this.approver,
+    this.settlements,
   });
 
   factory LoanRequestDetails.fromJson(Map<String, dynamic> json) {
@@ -106,6 +156,10 @@ class LoanRequestDetails extends LoanRequest {
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
+      executedAmount: json['executed_amount'],
+      executedInstallments: json['executed_installments'] != null ? int.tryParse(json['executed_installments'].toString()) : null,
+      executedDeductionStartDate: json['executed_deduction_start_date'],
+      executedDeductionId: json['executed_deduction_id'] != null ? int.tryParse(json['executed_deduction_id'].toString()) : null,
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
@@ -114,6 +168,9 @@ class LoanRequestDetails extends LoanRequest {
       updatedAt: json['updated_at'] ?? '',
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
+      settlements: (json['settlements'] as List<dynamic>?)
+              ?.map((settlement) => LoanSettlement.fromJson(settlement))
+              .toList(),
     );
   }
 }
@@ -177,6 +234,29 @@ class LoanRequestDetailsResponse extends BaseResponse {
       message: json['message'] ?? '',
       error: json['error'],
       data: json['data'] != null ? LoanRequestDetails.fromJson(json['data']) : null,
+    );
+  }
+}
+
+class LoanSettlementsResponse extends BaseResponse {
+  final List<LoanSettlement> data;
+
+  LoanSettlementsResponse({
+    required super.success,
+    required super.message,
+    super.error,
+    required this.data,
+  });
+
+  factory LoanSettlementsResponse.fromJson(Map<String, dynamic> json) {
+    return LoanSettlementsResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      error: json['error'],
+      data: (json['data'] as List<dynamic>?)
+              ?.map((settlement) => LoanSettlement.fromJson(settlement))
+              .toList() ??
+          [],
     );
   }
 }

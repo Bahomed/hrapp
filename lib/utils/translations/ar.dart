@@ -452,8 +452,15 @@ const Map<String, String> arTranslations = {
   'approved': 'موافق عليه',
   'for_approval': 'في انتظار الموافقة',
   'rejected': 'مرفوض',
+  'requested': 'مطلوب',
   'generated': 'تم الإنشاء',
   'executed': 'تم التنفيذ',
+  'executed_amount': 'المبلغ الممنوح',
+  'executed_installments': 'الأقساط الممنوحة',
+  'loan_details': 'تفاصيل القرض',
+  'settlements': 'التسويات',
+  'timeline': 'الجدول الزمني',
+  'remarks': 'ملاحظات',
   'approve': 'موافقة',
   'reject': 'رفض',
   'cancelled': 'ملغي',
@@ -477,7 +484,6 @@ const Map<String, String> arTranslations = {
   'sar': 'ريال',
   'replacement_employee': 'الموظف البديل',
   'select_replacement': 'اختر البديل',
-  'remarks': 'ملاحظات',
   'optional': 'اختياري',
 
   // Payroll
@@ -582,8 +588,12 @@ const Map<String, String> arTranslations = {
   'repayment_period_months': 'فترة السداد (بالأشهر)',
   'purpose': 'الغرض',
   'reason': 'السبب',
+  'date': 'التاريخ',
+  'status': 'الحالة',
+  'balance': 'الرصيد',
   'start_date': 'تاريخ البداية',
   'end_date': 'تاريخ النهاية',
+  'deduction_start_date': 'بداية القرض',
   'from_time': 'من الوقت',
   'to_time': 'إلى الوقت',
 
@@ -889,11 +899,9 @@ const Map<String, String> arTranslations = {
   "weekly_attendance": "الحضور الأسبوعي",
 
 'current_week': "الأسبوع الحالي",
-'status': "الحالة",
 'in': "الدخول",
 'out': "الخروج",
 'penalty': "الجزاء",
-'date':"التاريخ",
 
 'grace': 'فترة السماح',
 
@@ -1009,7 +1017,6 @@ const Map<String, String> arTranslations = {
   'gosi_non_saudi_employee': 'تأمينات الموظف غير السعودي',
   'paid': 'مدفوع',
   'loading_attendance_data': 'loading attendance data ...',
-  'balance': 'الرصيد',
   'view_history':'عرض السجل',
   'deduction_history':'سجل الاستقطاعات',
   'notes': 'ملاحظات',

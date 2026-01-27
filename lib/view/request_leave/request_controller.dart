@@ -21,6 +21,7 @@ import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_le
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_loan_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_permission_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_leave_request_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/loan_details_screen.dart';
 
 import '../../utils/translation_helper.dart';
 
@@ -671,13 +672,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   }
 
   void viewLoanDetails(LoanRequest request) {
-    Get.snackbar(
-      tr('view_loan_details'),
-      '${tr('view_loan')}: ${request.loanType}',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: ThemeService.instance.getTextSecondaryColor(),
-      colorText: Colors.white,
-    );
+    Get.to(() => LoanDetailsScreen(request: request));
   }
 
   // Letter request actions
