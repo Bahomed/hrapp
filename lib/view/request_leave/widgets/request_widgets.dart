@@ -317,7 +317,16 @@ class LeaveRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
                     Text(
-                      '${tr('executed')}: ${_formatDate(request.approvedDate!)}',
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.executedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getActionColor('profile'),
@@ -446,6 +455,24 @@ class PermissionRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
+                    Text(
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.executedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getActionColor('profile'),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -654,7 +681,16 @@ class LoanRequestCard extends StatelessWidget {
                     ),
                   if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
                     Text(
-                      '${tr('executed')}: ${_formatDate(request.approvedDate!)}',
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)} ',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.executedDate!)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getActionColor('profile'),
@@ -806,6 +842,24 @@ class LetterRequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.approvedDate != null)
+                    Text(
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'executed' && request.executedDate != null)
+                    Text(
+                      '${tr('executed')}: ${_formatDate(request.executedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getActionColor('profile'),
                         fontWeight: FontWeight.w400,
                       ),
                     ),

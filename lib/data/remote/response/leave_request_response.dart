@@ -17,6 +17,7 @@ class LeaveRequest {
   final int? approvedBy;
   final String? approvedDate;
   final String? rejectedReason;
+  final String? executedDate;
   final List<Attachment> attachments;
   final String createdAt;
   final String updatedAt;
@@ -34,6 +35,7 @@ class LeaveRequest {
     this.approvedBy,
     this.approvedDate,
     this.rejectedReason,
+    this.executedDate,
     required this.attachments,
     required this.createdAt,
     required this.updatedAt,
@@ -53,6 +55,7 @@ class LeaveRequest {
       approvedBy: json['approved_by'] != null ? int.tryParse(json['approved_by'].toString()) : null,
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
+      executedDate: json['executed_date'],
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
@@ -80,6 +83,7 @@ class LeaveRequestDetails extends LeaveRequest {
     super.approvedBy,
     super.approvedDate,
     super.rejectedReason,
+    super.executedDate,
     required super.attachments,
     required super.createdAt,
     required super.updatedAt,
@@ -101,6 +105,7 @@ class LeaveRequestDetails extends LeaveRequest {
       approvedBy: json['approved_by'] != null ? int.tryParse(json['approved_by'].toString()) : null,
       approvedDate: json['approved_date'],
       rejectedReason: json['rejected_reason'],
+      executedDate: json['executed_date'],
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((attachment) => Attachment.fromJson(attachment))
               .toList() ??
