@@ -1,10 +1,10 @@
 import 'package:co.injazathr.injazathr/utils/appconstants.dart';
 import 'package:co.injazathr.injazathr/view/login_screen/login_controller.dart';
 import 'package:co.injazathr.injazathr/view/forgot_password_screen/forgot_password_screen.dart';
-import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/input_widgets.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
+import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,18 +26,21 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 60),
-              
-              // Logo that adapts to theme
-              Image.asset(
-                themeService.isDarkMode ? logoWhite : logoBlack,
-                height: 80,
-              ),
+        child: Stack(
+          children: [
+            // Main content
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 60),
+
+                  // Logo that adapts to theme
+                  Image.asset(
+                    themeService.isDarkMode ? logoWhite : logoBlack,
+                    height: 80,
+                  ),
 
 
               Text(
@@ -258,12 +261,84 @@ class LoginScreen extends StatelessWidget {
               // Privacy Policy & Terms
               _buildPrivacyTermsSection(context, themeService),
 
-              const SizedBox(height: 20),
-            ],
-          ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+
+            // Language button positioned at top right
+            Positioned(
+              top: 8,
+              right: 8,
+              child: _buildLanguageButton(themeService),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildLanguageButton(ThemeService themeService) {
+    final languageService = LanguageService.instance;
+
+    return Obx(() {
+      final currentLang = languageService.currentLanguage.value;
+      final isArabic = currentLang == 'ar';
+
+      return Container(
+        decoration: BoxDecoration(
+          color: themeService.getCardColor(),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: themeService.getTextSecondaryColor().withValues(alpha: 0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              final newLang = isArabic ? 'en' : 'ar';
+              await languageService.changeLanguage(newLang);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    getLanguageFlag(currentLang),
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    getLanguageName(currentLang),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: themeService.getTextPrimaryColor(),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 20,
+                    color: themeService.getTextSecondaryColor(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildPrivacyTermsSection(BuildContext context, ThemeService themeService) {

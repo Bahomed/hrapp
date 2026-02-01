@@ -835,6 +835,45 @@ class LoanRequestCard extends StatelessWidget {
                   ),
               ],
             ),
+            if (request.status.toLowerCase() == 'executed' &&
+                request.executedDeductionStartDate != null &&
+                request.executedDeductionStartDate!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: ThemeService.instance.getActionColor('profile').withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 14,
+                      color: const Color(0xFF6366F1),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${tr('deduction_start_date')}: ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: ThemeService.instance.getTextPrimaryColor(),
+                      ),
+                    ),
+                    Text(
+                      _formatDate(request.executedDeductionStartDate!),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: const Color(0xFF6366F1),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
 
           const SizedBox(height: 16),
@@ -891,15 +930,7 @@ class LoanRequestCard extends StatelessWidget {
                         color: ThemeService.instance.getActionColor('profile'),
                         isLast: !(request.executedDeductionStartDate != null && request.executedDeductionStartDate!.isNotEmpty),
                       ),
-                    if (request.status.toLowerCase() == 'executed' &&
-                        request.executedDeductionStartDate != null &&
-                        request.executedDeductionStartDate!.isNotEmpty)
-                      _buildTimelineItem(
-                        label: tr('deduction_start_date'),
-                        date: _formatDate(request.executedDeductionStartDate!),
-                        color: const Color(0xFF6366F1), // Indigo color like in the screenshot
-                        isLast: true,
-                      ),
+                    
                     if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
                       _buildTimelineItem(
                         label: tr('rejected'),
