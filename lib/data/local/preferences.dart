@@ -12,6 +12,8 @@ class Preferences {
   final address = 'ADDRESS';
   final companyImage = 'COMPANYIMAGE';
   final token = 'TOKEN';
+  final refreshToken = 'REFRESH_TOKEN';
+  final tokenExpiresAt = 'TOKEN_EXPIRES_AT';
   final apppassword = 'APPPASSWORD';
   final checkPassword = 'CHECKPASSWORD';
   final workspaceName = 'WORKSPACENAME';
@@ -83,6 +85,26 @@ class Preferences {
 
   Future<String> getToken() async => datacount.read(token) ?? '';
 
+  Future<void> saveRefreshToken(String value) async => datacount.write(refreshToken, value);
+
+  Future<String> getRefreshToken() async => datacount.read(refreshToken) ?? '';
+
+  Future<void> saveTokenExpiresAt(String value) async => datacount.write(tokenExpiresAt, value);
+
+  Future<String> getTokenExpiresAt() async => datacount.read(tokenExpiresAt) ?? '';
+
+  Future<bool> isTokenExpired() async {
+    final expiresAt = await getTokenExpiresAt();
+    if (expiresAt.isEmpty) return false;
+    try {
+      final expiryDate = DateTime.parse(expiresAt);
+      // Consider token expired 1 minute before actual expiry for safety
+      return DateTime.now().isAfter(expiryDate.subtract(const Duration(minutes: 1)));
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> saveAppPassword(String value) async => datacount.write(apppassword, value);
 
   Future<String> getAppPassword() async => datacount.read(apppassword) ?? '';
@@ -105,6 +127,8 @@ class Preferences {
 
   Future<void> clearToken() async {
     await datacount.remove(token);
+    await datacount.remove(refreshToken);
+    await datacount.remove(tokenExpiresAt);
     await datacount.remove(apppassword);
     await datacount.remove(checkPassword);
   }
@@ -136,10 +160,20 @@ class Preferences {
     return 'User';
   }
 
-  Future<void> saveLoginSession(login_response.Data userData, String token) async {
+  Future<void> saveLoginSession(
+    login_response.Data userData,
+    String token, {
+    String? refreshToken,
+    String? expiresAt,
+  }) async {
     await saveUserData(userData);
     await saveToken(token);
-
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await saveRefreshToken(refreshToken);
+    }
+    if (expiresAt != null && expiresAt.isNotEmpty) {
+      await saveTokenExpiresAt(expiresAt);
+    }
   }
 
   Future<void> clearLoginSession() async {

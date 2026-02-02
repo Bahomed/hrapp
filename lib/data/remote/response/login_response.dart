@@ -13,6 +13,8 @@ class LoginResponse {
   Data? data;
   Map<String, dynamic>? errors;
   String? token; // For success response format
+  String? refreshToken; // Refresh token for token renewal
+  String? expiresAt; // Token expiration timestamp
 
   LoginResponse({
     this.status,
@@ -23,6 +25,8 @@ class LoginResponse {
     this.data,
     this.errors,
     this.token,
+    this.refreshToken,
+    this.expiresAt,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
@@ -34,6 +38,8 @@ class LoginResponse {
     data: json["data"] != null ? Data.fromJson(json["data"]) : null,
     errors: json["errors"],
     token: json["token"], // Direct token field for success response
+    refreshToken: json["refresh_token"],
+    expiresAt: json["expires_at"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +51,8 @@ class LoginResponse {
     "data": data?.toJson(),
     "errors": errors,
     "token": token,
+    "refresh_token": refreshToken,
+    "expires_at": expiresAt,
   };
 
   // Helper methods

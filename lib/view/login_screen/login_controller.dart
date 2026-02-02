@@ -167,8 +167,14 @@ class LoginController extends GetxController {
         // Get token from response (either direct token field or from data)
         String token = response.accessToken;
 
-        // Save login details including user data
-        repository.saveLoginDetails(token, response.data);
+       
+        // Save login details including user data, refresh token and expiration
+        repository.saveLoginDetails(
+          token,
+          response.data,
+          refreshToken: response.refreshToken,
+          expiresAt: response.expiresAt,
+        );
 
         // Navigate to home screen
         Get.offAll(const HomeScreen());

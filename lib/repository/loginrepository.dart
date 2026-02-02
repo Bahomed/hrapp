@@ -13,8 +13,19 @@ class LoginRepository {
   final DioClient dioClient = DioClient();
   final Preferences preferences = Preferences();
 
-  void saveLoginDetails(String token, login_response.Data? userData) {
+  void saveLoginDetails(
+    String token,
+    login_response.Data? userData, {
+    String? refreshToken,
+    String? expiresAt,
+  }) {
     preferences.saveToken(token);
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      preferences.saveRefreshToken(refreshToken);
+    }
+    if (expiresAt != null && expiresAt.isNotEmpty) {
+      preferences.saveTokenExpiresAt(expiresAt);
+    }
     if (userData != null) {
       preferences.saveUserData(userData);
     }
