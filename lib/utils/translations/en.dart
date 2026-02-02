@@ -572,6 +572,7 @@ const Map<String, String> enTranslations = {
   'balance': 'Balance',
   'start_date': 'Start Date',
   'end_date': 'End Date',
+  'select_date_range': 'Select Date Range',
   'deduction_start_date': 'Approved Repayment Start Date',
   'repayment_start_date': 'Repayment Start Date',
   'from_time': 'From Time',

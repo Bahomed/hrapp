@@ -416,7 +416,6 @@ class ApprovalScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Text(
                       request.employeeName,
                       style: TextStyle(
@@ -426,6 +425,19 @@ class ApprovalScreen extends StatelessWidget {
                         color: themeService.getTextPrimaryColor(),
                       ),
                     ),
+                    if (request.requestNumber.isNotEmpty) ...[
+                      SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
+                          context, mobile: 2, tablet: 3, desktop: 4)),
+                      Text(
+                        '${tr('request_number')}: #${request.requestNumber}',
+                        style: TextStyle(
+                          fontSize: ResponsiveUtils.responsiveFontSize(
+                              context, mobile: 12, tablet: 13, desktop: 14),
+                          color: themeService.getTextSecondaryColor(),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

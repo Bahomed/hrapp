@@ -602,6 +602,7 @@ const Map<String, String> arTranslations = {
   'balance': 'الرصيد',
   'start_date': 'تاريخ البداية',
   'end_date': 'تاريخ النهاية',
+  'select_date_range': 'اختر نطاق التاريخ',
   'deduction_start_date': 'بداية القرض',
   'repayment_start_date': 'تاريخ بدء السداد',
   'from_time': 'من الوقت',

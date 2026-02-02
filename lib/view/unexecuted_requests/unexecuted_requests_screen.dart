@@ -288,7 +288,7 @@ class UnexecutedRequestsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  request.requestNumber,
+                  '#${request.requestNumber}',
                   style: TextStyle(
                     fontSize: ResponsiveUtils.responsiveFontSize(
                         context, mobile: 13, tablet: 14, desktop: 15),
