@@ -37,9 +37,9 @@ class EmployeeRequestsController extends GetxController {
 
   List<Map<String, dynamic>> get statusFilters => [
     {'key': 'all', 'name': tr('all'), 'color': Colors.grey},
-    {'key': 'Approved', 'name': tr('approved'), 'color': const Color(0xFF4CAF50)},
-    {'key': 'Rejected', 'name': tr('rejected'), 'color': const Color(0xFFF44336)},
-    {'key': 'For Approval', 'name': tr('for_approval'), 'color': const Color(0xFFFF9800)},
+    {'key': 'approved', 'name': tr('approved'), 'color': const Color(0xFF4CAF50)},
+    {'key': 'rejected', 'name': tr('rejected'), 'color': const Color(0xFFF44336)},
+    {'key': 'for-approval', 'name': tr('for_approval'), 'color': const Color(0xFFFF9800)},
   ];
 
   @override
