@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../approval/approval_screen.dart';
+import '../profile/employee_profile_screen.dart';
 import '../request_leave/request_home_screen.dart';
 
 class NotificationController extends GetxController {
@@ -166,10 +167,21 @@ class NotificationController extends GetxController {
   }
 
   void _navigateToMessageScreen(AppNotification notification) {
-    // Navigate to message/chat screen with message details
-    final messageId = notification.data?['message_id'];
-    final senderId = notification.data?['sender_id'];
-    // Get.to(() => MessagesScreen(messageId: messageId, senderId: senderId));
+    final employeeId = notification.data?['employee_id'];
+    if (employeeId != null) {
+      final id = int.tryParse(employeeId.toString());
+      if (id != null) {
+        Get.to(() => EmployeeProfileScreen(employeeId: id));
+        return;
+      }
+    }
+    // Fallback: show notification info if no employee_id
+    Get.snackbar(
+      notification.title,
+      notification.body,
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 4),
+    );
   }
 
   void _navigateToGeneralScreen(AppNotification notification) {

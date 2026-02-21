@@ -226,10 +226,13 @@ class NotificationScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: Text(
-                        notification.typeIcon,
-                        style: const TextStyle(fontSize: 20),
-                      ),
+                      child: notification.type == NotificationType.message &&
+                              notification.data?['employee_id'] != null
+                          ? const Icon(Icons.person, size: 22, color: Colors.purple)
+                          : Text(
+                              notification.typeIcon,
+                              style: const TextStyle(fontSize: 20),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 12),

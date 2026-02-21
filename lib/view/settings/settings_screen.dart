@@ -6,15 +6,38 @@ import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  String _appVersion = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _getVersion();
+  }
+
+  Future<void> _getVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _appVersion = info.version.isNotEmpty ? info.version : '1.0.2';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
     final themeService = Get.find<ThemeService>();
-    
+
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
@@ -415,7 +438,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          '1.0.0',
+                          _appVersion,
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).textTheme.bodySmall?.color,
