@@ -223,7 +223,7 @@ class LocationInfo {
     return LocationInfo(
       latitude: json['latitude']?.toString() ?? '',
       longitude: json['longitude']?.toString() ?? '',
-      radius: json['radius'] ?? 100,
+      radius: int.tryParse(json['radius']?.toString() ?? '') ?? json['radius'] ?? 100,
       wifiBssids: List<String>.from(json['wifi_bssids'] ?? []),
       address: json['address'] ?? '',
     );

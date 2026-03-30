@@ -958,7 +958,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                 childAspectRatio: 2.2,
                 children: [
                   // Clock-in Button (Active)
-                  Obx(() => _buildActionButton(
+                  _buildActionButton(
                     title: tr('clock_in_button'),
                     time: _getClockInTime(),
                     isActive: _isClockInActive(),
@@ -1033,10 +1033,10 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         }
                       }
                     },
-                  )),
+                  ),
 
                   // Break start
-                  Obx(() => _buildActionButton(
+                  _buildActionButton(
                     title: tr('break_start_button'),
                     time: _getBreakTime(false),
                     isActive: _attendanceStatus?.attendanceData.breakIn != null && _attendanceStatus?.attendanceData.breakOut == null,
@@ -1088,10 +1088,10 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         }
                       }
                     },
-                  )),
+                  ),
 
                   // Break end
-                  Obx(() => _buildActionButton(
+                  _buildActionButton(
                     title: tr('break_end_button'),
                     time: _getBreakTime(true),
                     isActive: _attendanceStatus?.attendanceData.breakIn != null && _attendanceStatus?.attendanceData.breakOut != null,
@@ -1143,10 +1143,10 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         }
                       }
                     },
-                  )),
+                  ),
 
                   // Clock-out
-                  Obx(() => _buildActionButton(
+                  _buildActionButton(
                     title: tr('clock_out_button'),
                     time: _getClockOutTime(),
                     isActive: _attendanceStatus?.attendanceData.clockOut != null,
@@ -1201,7 +1201,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
                         }
                       }
                     },
-                  )),
+                  ),
                 ],
               ),
 

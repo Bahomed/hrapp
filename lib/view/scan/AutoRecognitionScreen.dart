@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image/image.dart' as img;
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import '../../ML/AntiSpoofingDetector.dart';
 import '../../ML/Recognition.dart';
@@ -682,6 +684,31 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     }
   }
 
+  /// Save face image to temporary file and return the file path
+  Future<String> _saveFaceImageToFile(img.Image faceImage) async {
+    try {
+      // Get temporary directory
+      final Directory tempDir = await getTemporaryDirectory();
+
+      // Create unique filename with timestamp
+      final String fileName = 'face_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String filePath = path.join(tempDir.path, fileName);
+
+      // Encode image to JPEG format
+      final List<int> imageBytes = img.encodeJpg(faceImage, quality: 85);
+
+      // Write to file
+      final File imageFile = File(filePath);
+      await imageFile.writeAsBytes(imageBytes);
+
+      print('✅ Face image saved to: $filePath');
+      return filePath;
+    } catch (e) {
+      print('❌ Error saving face image: $e');
+      return '';
+    }
+  }
+
   Future<void> _autoSubmitAttendance(Recognition recognition, img.Image faceImage) async {
     lastDialogTime = DateTime.now();
     lastRecognition = recognition;
@@ -754,6 +781,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
 
       final attendanceRepo = AttendanceRepository();
 
+      // 🔐 Save face image to file for server verification
+      final String imagePath = await _saveFaceImageToFile(faceImage);
+      if (imagePath.isEmpty) {
+        throw Exception('Failed to save face image');
+      }
+
       double? latitude;
       double? longitude;
       String? wifiSSID;
@@ -780,11 +813,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         address = 'Location not available';
       }
 
+      // ✅ Send attendance with face image proof
       final result = await attendanceRepo.saveEmployeeAttendanceWithLocation(
         userData.id!,
         widget.attendanceType,
         'Face verification attendance',
-        '',
+        imagePath,  // 🔐 Now sending actual face image!
         latitude: latitude,
         longitude: longitude,
         wifiSSID: wifiSSID,
