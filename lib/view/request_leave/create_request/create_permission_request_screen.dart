@@ -1,7 +1,9 @@
 // File: lib/view/create_request/create_permit_request_screen.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 
@@ -16,9 +18,15 @@ class CreatePermissionRequestScreen extends StatelessWidget {
     final themeService = ThemeService.instance;
     final formKey = GlobalKey<FormState>();
 
+    final now = DateTime.now();
+    final todayFormatted =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
     final purposeController = TextEditingController();
+    final dateController = TextEditingController(text: todayFormatted);
     final fromTimeController = TextEditingController();
     final toTimeController = TextEditingController();
+    final selectedFiles = <File>[].obs;
 
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
@@ -109,6 +117,21 @@ class CreatePermissionRequestScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              // Date Field
+              _buildDateField(
+                label: tr('permit_date'),
+                controller: dateController,
+                context: context,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return tr('please_select_date');
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 20),
+
               // From Time Field
               _buildTimeField(
                 label: tr('from_time'),
@@ -153,6 +176,87 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                 },
               ),
 
+              const SizedBox(height: 20),
+
+              // Attachments
+              Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tr('attachments'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: themeService.getTextPrimaryColor(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (selectedFiles.isNotEmpty) ...[
+                    ...selectedFiles.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final file = entry.value;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: themeService.getCardColor(),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: themeService.getActionColor('profile').withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.attach_file, size: 18, color: themeService.getActionColor('profile')),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                file.path.split('/').last,
+                                style: TextStyle(fontSize: 13, color: themeService.getTextPrimaryColor()),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close, size: 18, color: themeService.getErrorColor()),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () => selectedFiles.removeAt(index),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                  ],
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+                        allowMultiple: true,
+                      );
+                      if (result != null) {
+                        final files = result.files
+                            .where((f) => f.path != null)
+                            .map((f) => File(f.path!))
+                            .toList();
+                        selectedFiles.addAll(files);
+                      }
+                    },
+                    icon: Icon(Icons.upload_file, color: themeService.getActionColor('profile')),
+                    label: Text(
+                      tr('upload_attachment'),
+                      style: TextStyle(color: themeService.getActionColor('profile')),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: themeService.getActionColor('profile')),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
+                ],
+              )),
+
               const SizedBox(height: 32),
 
               // Submit Button
@@ -166,8 +270,10 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                     if (formKey.currentState!.validate()) {
                       final success = await controller.createPermissionRequestWithData(
                         purpose: purposeController.text,
+                        date: dateController.text,
                         fromTime: fromTimeController.text,
                         toTime: toTimeController.text,
+                        attachments: selectedFiles.isEmpty ? null : selectedFiles.toList(),
                       );
                       
                       // Only navigate if request was successful
@@ -315,6 +421,96 @@ class CreatePermissionRequestScreen extends StatelessWidget {
   }
 
 
+  Widget _buildDateField({
+    required String label,
+    required TextEditingController controller,
+    required BuildContext context,
+    String? Function(String?)? validator,
+  }) {
+    final themeService = ThemeService.instance;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: themeService.getTextPrimaryColor(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          readOnly: true,
+          style: TextStyle(color: themeService.getTextPrimaryColor()),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: themeService.getCardColor(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: themeService.getActionColor('profile')),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: themeService.getErrorColor()),
+            ),
+            contentPadding: const EdgeInsets.all(16),
+            suffixIcon: Icon(
+              Icons.calendar_today,
+              color: themeService.getTextSecondaryColor(),
+            ),
+            hintText: trParams('select_field', {'field': label}),
+            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
+          ),
+          onTap: () async {
+            final today = DateTime.now();
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: today,
+              firstDate: today,
+              lastDate: DateTime(2100),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: themeService.isDarkMode
+                        ? ColorScheme.dark(
+                            primary: themeService.getActionColor('profile'),
+                            onPrimary: Colors.white,
+                            surface: themeService.getCardColor(),
+                            onSurface: themeService.getTextPrimaryColor(),
+                          )
+                        : ColorScheme.light(
+                            primary: themeService.getActionColor('profile'),
+                            onPrimary: Colors.white,
+                            surface: themeService.getCardColor(),
+                            onSurface: themeService.getTextPrimaryColor(),
+                          ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null) {
+              controller.text =
+                  '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildTimeField({
     required String label,
     required TextEditingController controller,
@@ -322,7 +518,7 @@ class CreatePermissionRequestScreen extends StatelessWidget {
     String? Function(String?)? validator,
   }) {
     final themeService = ThemeService.instance;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

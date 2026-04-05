@@ -63,27 +63,46 @@ class RequestRepository {
     required String endDate,
     required int leaveTypeId,
     required String reason,
+    bool ticket = false,
+    bool exitPermit = false,
+    List<File>? attachments,
   }) async {
     try {
       final token = await preferences.getToken();
-      // Get workspace URL and construct API URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$leaveRequestsUrl';
-      
-      var data = {
-        'start_date': startDate,
-        'end_date': endDate,
-        'leave_type': leaveTypeId,
-        'reason': reason,
-      };
-      
-      var response = await dioClient.post(
-        apiUrl,
-        data,
-        {},
-        {'Authorization': 'Bearer $token'},
-      );
-      return LeaveRequestResponse.fromJson(response.data);
+      final headers = {'Authorization': 'Bearer $token'};
+
+      if (attachments != null && attachments.isNotEmpty) {
+        final files = await Future.wait(
+          attachments.map((f) async => await MultipartFile.fromFile(
+                f.path,
+                filename: f.path.split('/').last,
+              )),
+        );
+        final formData = FormData.fromMap({
+          'start_date': startDate,
+          'end_date': endDate,
+          'leave_type': leaveTypeId,
+          'reason': reason,
+          'ticket': ticket ? 1 : 0,
+          'exit_permit': exitPermit ? 1 : 0,
+          'attachments[]': files,
+        });
+        final response = await dioClient.postForImageUpload(apiUrl, formData, headers);
+        return LeaveRequestResponse.fromJson(response.data);
+      } else {
+        final data = {
+          'start_date': startDate,
+          'end_date': endDate,
+          'leave_type': leaveTypeId,
+          'reason': reason,
+          'ticket': ticket,
+          'exit_permit': exitPermit,
+        };
+        final response = await dioClient.post(apiUrl, data, {}, headers);
+        return LeaveRequestResponse.fromJson(response.data);
+      }
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';
@@ -219,28 +238,43 @@ class RequestRepository {
 
   Future<PermissionRequestResponse> createPermissionRequest({
     required String purpose,
+    required String date,
     required String fromTime,
     required String toTime,
+    List<File>? attachments,
   }) async {
     try {
       final token = await preferences.getToken();
-      // Get workspace URL and construct API URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$permitRequestsUrl';
-      
-      var data = {
-        'purpose': purpose,
-        'from_time': fromTime,
-        'to_time': toTime,
-      };
-      
-      var response = await dioClient.post(
-        apiUrl,
-        data,
-        {},
-        {'Authorization': 'Bearer $token'},
-      );
-      return PermissionRequestResponse.fromJson(response.data);
+      final headers = {'Authorization': 'Bearer $token'};
+
+      if (attachments != null && attachments.isNotEmpty) {
+        final files = await Future.wait(
+          attachments.map((f) async => await MultipartFile.fromFile(
+                f.path,
+                filename: f.path.split('/').last,
+              )),
+        );
+        final formData = FormData.fromMap({
+          'purpose': purpose,
+          'date': date,
+          'from_time': fromTime,
+          'to_time': toTime,
+          'attachments[]': files,
+        });
+        final response = await dioClient.postForImageUpload(apiUrl, formData, headers);
+        return PermissionRequestResponse.fromJson(response.data);
+      } else {
+        final data = {
+          'purpose': purpose,
+          'date': date,
+          'from_time': fromTime,
+          'to_time': toTime,
+        };
+        final response = await dioClient.post(apiUrl, data, {}, headers);
+        return PermissionRequestResponse.fromJson(response.data);
+      }
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';
@@ -255,27 +289,44 @@ class RequestRepository {
   Future<PermissionRequestResponse> updatePermissionRequest({
     required int id,
     required String purpose,
+    required String date,
     required String fromTime,
     required String toTime,
+    List<File>? attachments,
   }) async {
     try {
       final token = await preferences.getToken();
-      // Get workspace URL and construct API URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$permitRequestsUrl/$id';
-      
-      var data = {
-        'purpose': purpose,
-        'from_time': fromTime,
-        'to_time': toTime,
-      };
-      
-      var response = await dioClient.put(
-        apiUrl,
-        {'Authorization': 'Bearer $token'},
-        data,
-      );
-      return PermissionRequestResponse.fromJson(response.data);
+      final headers = {'Authorization': 'Bearer $token'};
+
+      if (attachments != null && attachments.isNotEmpty) {
+        final files = await Future.wait(
+          attachments.map((f) async => await MultipartFile.fromFile(
+                f.path,
+                filename: f.path.split('/').last,
+              )),
+        );
+        final formData = FormData.fromMap({
+          '_method': 'PUT',
+          'purpose': purpose,
+          'date': date,
+          'from_time': fromTime,
+          'to_time': toTime,
+          'attachments[]': files,
+        });
+        final response = await dioClient.postForImageUpload(apiUrl, formData, headers);
+        return PermissionRequestResponse.fromJson(response.data);
+      } else {
+        final data = {
+          'purpose': purpose,
+          'date': date,
+          'from_time': fromTime,
+          'to_time': toTime,
+        };
+        final response = await dioClient.put(apiUrl, headers, data);
+        return PermissionRequestResponse.fromJson(response.data);
+      }
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';

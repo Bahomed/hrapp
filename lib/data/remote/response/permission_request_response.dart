@@ -8,6 +8,7 @@ class PermissionRequest {
   final int id;
   final int userId;
   final String purpose;
+  final String date;
   final String fromTime;
   final String toTime;
   final String status;
@@ -24,6 +25,7 @@ class PermissionRequest {
     required this.id,
     required this.userId,
     required this.purpose,
+    required this.date,
     required this.fromTime,
     required this.toTime,
     required this.status,
@@ -42,6 +44,7 @@ class PermissionRequest {
       id: json['id'] ?? 0,
       userId: json['user_id'] ?? 0,
       purpose: json['purpose'] ?? '',
+      date: json['date'] ?? '',
       fromTime: json['from_time'] ?? '',
       toTime: json['to_time'] ?? '',
       status: json['status'] ?? '',
@@ -65,6 +68,7 @@ class PermissionRequestDetails extends PermissionRequest {
     required super.id,
     required super.userId,
     required super.purpose,
+    required super.date,
     required super.fromTime,
     required super.toTime,
     required super.status,
@@ -85,6 +89,7 @@ class PermissionRequestDetails extends PermissionRequest {
       id: json['id'] ?? 0,
       userId: json['user_id'] ?? 0,
       purpose: json['purpose'] ?? '',
+      date: json['date'] ?? '',
       fromTime: json['from_time'] ?? '',
       toTime: json['to_time'] ?? '',
       status: json['status'] ?? '',

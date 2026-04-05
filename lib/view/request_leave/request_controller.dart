@@ -1,5 +1,6 @@
 // Updated RequestController with navigation to create screens
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
@@ -827,16 +828,22 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   Future<bool> createLeaveRequestWithData({
     required String startDate,
     required String endDate,
-    required int leaveTypeId, // Changed to ID
+    required int leaveTypeId,
     required String reason,
+    bool ticket = false,
+    bool exitPermit = false,
+    List<File>? attachments,
   }) async {
     try {
       isLoading.value = true;
       final response = await _requestRepository.createLeaveRequest(
         startDate: startDate,
         endDate: endDate,
-        leaveTypeId: leaveTypeId, // Pass ID instead of name
+        leaveTypeId: leaveTypeId,
         reason: reason,
+        ticket: ticket,
+        exitPermit: exitPermit,
+        attachments: attachments,
       );
 
       if (response.success) {
@@ -863,15 +870,19 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   }
   Future<bool> createPermissionRequestWithData({
     required String purpose,
+    required String date,
     required String fromTime,
     required String toTime,
+    List<File>? attachments,
   }) async {
     try {
       isLoading.value = true;
       final response = await _requestRepository.createPermissionRequest(
         purpose: purpose,
+        date: date,
         fromTime: fromTime,
         toTime: toTime,
+        attachments: attachments,
       );
 
       if (response.success) {
@@ -1092,16 +1103,20 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   Future<bool> updatePermissionRequestWithData({
     required int id,
     required String purpose,
+    required String date,
     required String fromTime,
     required String toTime,
+    List<File>? attachments,
   }) async {
     try {
       isLoading.value = true;
       final response = await _requestRepository.updatePermissionRequest(
         id: id,
         purpose: purpose,
+        date: date,
         fromTime: fromTime,
         toTime: toTime,
+        attachments: attachments,
       );
 
       if (response.success) {

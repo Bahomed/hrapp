@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter build:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(mv:*)",
+      "Bash(flutter pub:*)",
+      "Bash(rm:*)",
+      "Bash(flutter:*)",
+      "Bash(grep:*)",
+      "Bash(pod cache clean:*)",
+      "Bash(osascript:*)",
+      "Bash(pod install:*)"
+    ],
+    "deny": []
+  }
+}

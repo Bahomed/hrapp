@@ -26,7 +26,7 @@ class WorkspaceRepository {
       queryParams = ApiHelper.instance.addLocaleToQuery(queryParams);
 
       var response = await dioClient.get(
-        'https://injazathr.co/api/companies', // URL
+        '$baseurl/companies', // URL
         {}, // Headers (empty or custom headers)
         queryParams, // Query parameters with locale
       );

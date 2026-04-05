@@ -22,6 +22,8 @@ class LeaveRequest {
   final String requestNumber;
   final String createdAt;
   final String updatedAt;
+  final bool ticket;
+  final bool exitPermit;
 
   LeaveRequest({
     required this.id,
@@ -41,6 +43,8 @@ class LeaveRequest {
     required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
+    this.ticket = false,
+    this.exitPermit = false,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,8 @@ class LeaveRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      ticket: json['ticket'] == true || json['ticket'] == 1,
+      exitPermit: json['exit_permit'] == true || json['exit_permit'] == 1,
     );
   }
 }

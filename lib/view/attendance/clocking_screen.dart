@@ -23,7 +23,7 @@ class ClockingScreen extends StatefulWidget {
   State<ClockingScreen> createState() => _ClockingScreenState();
 }
 
-class _ClockingScreenState extends State<ClockingScreen> {
+class _ClockingScreenState extends State<ClockingScreen> with WidgetsBindingObserver {
   late Timer _timer;
   DateTime now = DateTime.now();
   bool isClockedIn = false;
@@ -65,6 +65,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Initialize Face ID controller
     clockingController = Get.put(ClockingController());
     _startTimer();
@@ -72,6 +73,17 @@ class _ClockingScreenState extends State<ClockingScreen> {
     _initializeLocationServices();
     // Load attendance status
     _loadAttendanceStatus();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('[ClockingScreen] AppLifecycleState changed: $state');
+    if (state == AppLifecycleState.resumed) {
+      print('[ClockingScreen] App resumed - refreshing attendance status...');
+      // App came back to foreground — refresh attendance status
+      // in case the user was away overnight or forgot to clock out
+      _loadAttendanceStatus();
+    }
   }
 
   Future<void> _initializeLocationServices() async {
@@ -84,6 +96,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
   }
 
   Future<void> _loadAttendanceStatus() async {
+    print('[ClockingScreen] _loadAttendanceStatus called at ${DateTime.now()}');
     setState(() {
       _isLoadingAttendanceStatus = true;
       _attendanceStatusError = null;
@@ -92,26 +105,31 @@ class _ClockingScreenState extends State<ClockingScreen> {
     try {
       final response = await _attendanceRepository.getAttendanceStatus();
       final attendanceStatusResponse = AttendanceStatusResponse.fromJson(response);
-      
+      print('[ClockingScreen] Attendance status response - error: ${attendanceStatusResponse.error}, data: ${attendanceStatusResponse.data}');
+
       if (!attendanceStatusResponse.error && attendanceStatusResponse.data != null) {
+        print('[ClockingScreen] clockIn: ${attendanceStatusResponse.data!.attendanceData.clockIn}, clockOut: ${attendanceStatusResponse.data!.attendanceData.clockOut}');
         setState(() {
           _attendanceStatus = attendanceStatusResponse.data;
           _isLoadingAttendanceStatus = false;
-          
+
           // Update local state based on attendance status
-          if (_attendanceStatus!.attendanceData.clockIn != null && 
+          if (_attendanceStatus!.attendanceData.clockIn != null &&
               _attendanceStatus!.attendanceData.clockOut == null) {
             isClockedIn = true;
             clockInTime = _formatTimeFromString(_attendanceStatus!.attendanceData.clockIn!);
           }
         });
+        print('[ClockingScreen] isClockedIn: $isClockedIn, clockInTime: $clockInTime');
       } else {
+        print('[ClockingScreen] Attendance status error: ${attendanceStatusResponse.message}');
         setState(() {
           _attendanceStatusError = attendanceStatusResponse.message;
           _isLoadingAttendanceStatus = false;
         });
       }
     } catch (e) {
+      print('[ClockingScreen] Exception in _loadAttendanceStatus: $e');
       setState(() {
         _attendanceStatusError = '${tr('failed_to_load_attendance_data')}: ${e.toString()}';
         _isLoadingAttendanceStatus = false;
@@ -247,6 +265,7 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer.cancel();
     super.dispose();
   }
