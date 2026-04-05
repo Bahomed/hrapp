@@ -1,4 +1,5 @@
 import 'package:co.injazathr.injazathr/view/splash_screen/splash_screen.dart';
+import 'package:co.injazathr.injazathr/services/update_service.dart';
 import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
@@ -64,7 +65,7 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeService.themeMode,
       
-      home: const SplashScreen(),
+      home: UpdateService.wrapWithUpgrader(const SplashScreen()),
     ));
   }
 }

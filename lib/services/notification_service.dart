@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
 import 'package:co.injazathr.injazathr/data/local/preferences.dart';
-import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.dart';
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
@@ -25,12 +23,22 @@ class NotificationService {
   static Future<void> initialize() async {
     // Initialize local notifications with click handler
     await _initializeLocalNotifications();
-    
+
     // Initialize Firebase messaging handlers only for message taps
     await _initializeFirebaseMessaging();
-    
-    // Load saved notifications
+
+    // Load saved notifications and restore badge
     await _loadSavedNotifications();
+  }
+
+  /// Call this after the user grants notification permission (iOS).
+  /// Must be called to enable badge on iPhone.
+  static Future<void> requestBadgePermission() async {
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   static Future<void> _initializeFirebaseMessaging() async {
@@ -46,9 +54,12 @@ class NotificationService {
 
 
   static Future<void> _handleBackgroundMessageTap(RemoteMessage message) async {
-    // Debug logging removed
-
     final appNotification = _createAppNotificationFromFCM(message);
+    // Add to list if not already stored (e.g. iOS terminated state)
+    final exists = _notifications.any((n) => n.id == appNotification.id);
+    if (!exists) {
+      await _addNotification(appNotification);
+    }
     await _navigateToNotificationScreen(appNotification);
   }
 
@@ -112,6 +123,7 @@ class NotificationService {
   static Future<void> _addNotification(AppNotification notification) async {
     _notifications.insert(0, notification);
     await _saveNotifications();
+    await _updateBadge();
   }
 
   static Future<void> _saveNotifications() async {
@@ -124,8 +136,10 @@ class NotificationService {
       final savedNotifications = await _preferences.getNotifications();
       _notifications.clear();
       _notifications.addAll(savedNotifications.map((json) => AppNotification.fromJson(json)));
+      print('[Badge] loaded ${_notifications.length} notifications, unread=$unreadCount');
+      await _updateBadge();
     } catch (e) {
-      // Debug logging removed
+      print('[Badge] load error: $e');
     }
   }
 
@@ -134,6 +148,7 @@ class NotificationService {
     if (index != -1) {
       _notifications[index] = _notifications[index].copyWith(isRead: true);
       await _saveNotifications();
+      await _updateBadge();
     }
   }
 
@@ -142,16 +157,19 @@ class NotificationService {
       _notifications[i] = _notifications[i].copyWith(isRead: true);
     }
     await _saveNotifications();
+    await _updateBadge();
   }
 
   static Future<void> clearNotification(String notificationId) async {
     _notifications.removeWhere((n) => n.id == notificationId);
     await _saveNotifications();
+    await _updateBadge();
   }
 
   static Future<void> clearAllNotifications() async {
     _notifications.clear();
     await _saveNotifications();
+    await _updateBadge();
   }
 
   static List<AppNotification> getNotificationsByType(NotificationType type) {
@@ -160,6 +178,24 @@ class NotificationService {
 
   static int get unreadCount {
     return _notifications.where((n) => !n.isRead).length;
+  }
+
+  static Future<void> _updateBadge() async {
+    final count = unreadCount;
+    print('[Badge] unreadCount=$count');
+    try {
+      final supported = await FlutterAppBadger.isAppBadgeSupported();
+      print('[Badge] isSupported=$supported');
+      if (count > 0) {
+        await FlutterAppBadger.updateBadgeCount(count);
+        print('[Badge] set to $count');
+      } else {
+        await FlutterAppBadger.removeBadge();
+        print('[Badge] removed');
+      }
+    } catch (e) {
+      print('[Badge] error: $e');
+    }
   }
 
   static int getUnreadCountByType(NotificationType type) {
@@ -268,6 +304,7 @@ class NotificationService {
   static Future<void> _createLocalNotification(RemoteMessage message) async {
     final String title = message.notification?.title ?? message.data['title'] ?? '';
     final String body = message.notification?.body ?? message.data['body'] ?? '';
+    // ignore: unused_local_variable — will be used for rich notifications
     final String imageUrl = message.data['image'] ?? '';
 
     // Debug logging removed
@@ -286,14 +323,15 @@ class NotificationService {
       autoCancel: true,
     );
 
-    const DarwinNotificationDetails iosNotificationDetails =
+    final DarwinNotificationDetails iosNotificationDetails =
         DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      badgeNumber: unreadCount,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
+    final NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
       iOS: iosNotificationDetails,
     );
@@ -308,7 +346,7 @@ class NotificationService {
       };
       
       await _localNotifications.show(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        DateTime.now().millisecondsSinceEpoch % 2147483647, // unique per ms, within int32 range
         title,
         body,
         notificationDetails,

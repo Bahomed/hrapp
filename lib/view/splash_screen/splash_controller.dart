@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/services/update_service.dart';
 import 'package:co.injazathr.injazathr/view/workspace/workspace_screen.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/home_screen.dart';
@@ -19,18 +20,9 @@ class SplashController extends GetxController {
   void goToNextPage() async {
     var token = await perferences.getToken();
     var workspaceUrl = await perferences.getWorkspaceUrl();
-    
-    /// Print FCM token for testing (remove in production)
-    // print('About to call FCMTokenHelper.printFCMToken()');
-    // try {
-    //   // Add delay to ensure Firebase is ready
-      //await Future.delayed(const Duration(seconds: 3));
-      //await FCMTokenHelper.printFCMToken();
-      //print('FCMTokenHelper.printFCMToken() completed');
-    // } catch (e) {
-    //   print('Error in FCMTokenHelper.printFCMToken(): $e');
-    //   print('Stack trace: $e');
-    // }*/
+
+    // Check for update before navigating (Android official Play Store API)
+    await UpdateService.checkForUpdate();
 
     Timer(
         const Duration(seconds: 1),
