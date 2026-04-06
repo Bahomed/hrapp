@@ -646,6 +646,7 @@ const Map<String, String> arTranslations = {
   'exit_permit': 'تصريح خروج',
   'attachments': 'المرفقات',
   'upload_attachment': 'رفع مرفق',
+  'file_size_exceeded': 'ملف/ملفات تجاوزت حد 5MB وتم تجاهلها',
   'update_letter_request': 'تحديث طلب الرسالة',
   'update_loan_request': 'تحديث طلب القرض',
   'update_leave_request': 'تحديث طلب الإجازة',

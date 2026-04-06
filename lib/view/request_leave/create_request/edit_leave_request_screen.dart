@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/base_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/leave_request_response.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
@@ -21,13 +23,17 @@ class EditLeaveRequestScreen extends StatelessWidget {
     final startDateController = TextEditingController(text: request.startDate);
     final endDateController = TextEditingController(text: request.endDate);
     final reasonController = TextEditingController(text: request.reason);
-    
+
     // Find the matching leave type from controller's list
     final selectedLeaveType = Rx<RequestTypeOption?>(
       controller.leaveTypes.firstWhereOrNull(
         (type) => type.name == request.leaveType,
       ),
     );
+
+    final ticketChecked = request.ticket.obs;
+    final exitPermitChecked = request.exitPermit.obs;
+    final selectedFiles = <File>[].obs;
 
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
@@ -220,6 +226,153 @@ class EditLeaveRequestScreen extends StatelessWidget {
                 },
               ),
 
+              const SizedBox(height: 20),
+
+              // Ticket & Exit Permit Checkboxes
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: themeService.getCardColor(),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Obx(() => CheckboxListTile(
+                      value: ticketChecked.value,
+                      onChanged: (val) => ticketChecked.value = val ?? false,
+                      title: Text(
+                        tr('ticket'),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: themeService.getTextPrimaryColor(),
+                        ),
+                      ),
+                      activeColor: themeService.getActionColor('requests'),
+                      checkColor: Colors.white,
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    )),
+                    Obx(() => CheckboxListTile(
+                      value: exitPermitChecked.value,
+                      onChanged: (val) => exitPermitChecked.value = val ?? false,
+                      title: Text(
+                        tr('exit_permit'),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: themeService.getTextPrimaryColor(),
+                        ),
+                      ),
+                      activeColor: themeService.getActionColor('requests'),
+                      checkColor: Colors.white,
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    )),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Attachments
+              Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tr('attachments'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: themeService.getTextPrimaryColor(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (selectedFiles.isNotEmpty) ...[
+                    ...selectedFiles.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final file = entry.value;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: themeService.getCardColor(),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: themeService.getActionColor('requests').withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.attach_file, size: 18, color: themeService.getActionColor('requests')),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                file.path.split('/').last,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: themeService.getTextPrimaryColor(),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close, size: 18, color: themeService.getErrorColor()),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () => selectedFiles.removeAt(index),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                  ],
+                  if (selectedFiles.length < 3)
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final remaining = 3 - selectedFiles.length;
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                        allowMultiple: remaining > 1,
+                      );
+                      if (result != null) {
+                        final files = result.files
+                            .where((f) => f.path != null && (f.size ?? 0) <= 5 * 1024 * 1024)
+                            .map((f) => File(f.path!))
+                            .take(remaining)
+                            .toList();
+                        final rejected = result.files.where((f) => f.path != null && (f.size ?? 0) > 5 * 1024 * 1024).length;
+                        if (rejected > 0) {
+                          Get.snackbar(
+                            tr('error'),
+                            '$rejected ${tr('file_size_exceeded')}',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: ThemeService.instance.getErrorColor(),
+                            colorText: Colors.white,
+                          );
+                        }
+                        selectedFiles.addAll(files);
+                      }
+                    },
+                    icon: Icon(Icons.upload_file, color: themeService.getActionColor('requests')),
+                    label: Text(
+                      tr('upload_attachment'),
+                      style: TextStyle(color: themeService.getActionColor('requests')),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: themeService.getActionColor('requests')),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
+                ],
+              )),
+
               const SizedBox(height: 32),
 
               // Submit Button
@@ -237,6 +390,9 @@ class EditLeaveRequestScreen extends StatelessWidget {
                         endDate: endDateController.text,
                         leaveTypeId: selectedLeaveType.value!.id,
                         reason: reasonController.text,
+                        ticket: ticketChecked.value,
+                        exitPermit: exitPermitChecked.value,
+                        attachments: selectedFiles.isEmpty ? null : selectedFiles.toList(),
                       );
                       
                       if (success) {

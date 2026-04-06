@@ -120,26 +120,47 @@ class RequestRepository {
     required String endDate,
     required int leaveType,
     required String reason,
+    bool ticket = false,
+    bool exitPermit = false,
+    List<File>? attachments,
   }) async {
     try {
       final token = await preferences.getToken();
-      // Get workspace URL and construct API URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$leaveRequestsUrl/$id';
-      
-      var data = {
-        'start_date': startDate,
-        'end_date': endDate,
-        'leave_type': leaveType,
-        'reason': reason,
-      };
-      
-      var response = await dioClient.put(
-        apiUrl,
-        {'Authorization': 'Bearer $token'},
-        data,
-      );
-      return LeaveRequestResponse.fromJson(response.data);
+      final headers = {'Authorization': 'Bearer $token'};
+
+      if (attachments != null && attachments.isNotEmpty) {
+        final files = await Future.wait(
+          attachments.map((f) async => await MultipartFile.fromFile(
+                f.path,
+                filename: f.path.split('/').last,
+              )),
+        );
+        final formData = FormData.fromMap({
+          '_method': 'PUT',
+          'start_date': startDate,
+          'end_date': endDate,
+          'leave_type': leaveType,
+          'reason': reason,
+          'ticket': ticket ? 1 : 0,
+          'exit_permit': exitPermit ? 1 : 0,
+          'attachments[]': files,
+        });
+        final response = await dioClient.postForImageUpload(apiUrl, formData, headers);
+        return LeaveRequestResponse.fromJson(response.data);
+      } else {
+        final data = {
+          'start_date': startDate,
+          'end_date': endDate,
+          'leave_type': leaveType,
+          'reason': reason,
+          'ticket': ticket,
+          'exit_permit': exitPermit,
+        };
+        final response = await dioClient.put(apiUrl, headers, data);
+        return LeaveRequestResponse.fromJson(response.data);
+      }
     } on DioException catch (e) {
       if (e.error is SocketException) {
         throw 'No Internet Connection';

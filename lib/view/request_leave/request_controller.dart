@@ -1066,6 +1066,9 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     required String endDate,
     required int leaveTypeId,
     required String reason,
+    bool ticket = false,
+    bool exitPermit = false,
+    List<File>? attachments,
   }) async {
     try {
       isLoading.value = true;
@@ -1075,6 +1078,9 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         endDate: endDate,
         leaveType: leaveTypeId,
         reason: reason,
+        ticket: ticket,
+        exitPermit: exitPermit,
+        attachments: attachments,
       );
 
       if (response.success) {

@@ -272,18 +272,31 @@ class EditPermissionRequestScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 8),
                   ],
+                  if (selectedFiles.length < 3)
                   OutlinedButton.icon(
                     onPressed: () async {
+                      final remaining = 3 - selectedFiles.length;
                       final result = await FilePicker.platform.pickFiles(
                         type: FileType.custom,
-                        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-                        allowMultiple: true,
+                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                        allowMultiple: remaining > 1,
                       );
                       if (result != null) {
                         final files = result.files
-                            .where((f) => f.path != null)
+                            .where((f) => f.path != null && (f.size ?? 0) <= 5 * 1024 * 1024)
                             .map((f) => File(f.path!))
+                            .take(remaining)
                             .toList();
+                        final rejected = result.files.where((f) => f.path != null && (f.size ?? 0) > 5 * 1024 * 1024).length;
+                        if (rejected > 0) {
+                          Get.snackbar(
+                            tr('error'),
+                            '$rejected ${tr('file_size_exceeded')}',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: ThemeService.instance.getErrorColor(),
+                            colorText: Colors.white,
+                          );
+                        }
                         selectedFiles.addAll(files);
                       }
                     },
@@ -312,10 +325,18 @@ class EditPermissionRequestScreen extends StatelessWidget {
                       ? null
                       : () async {
                     if (formKey.currentState!.validate()) {
+                      // Normalize DD-MM-YYYY to YYYY-MM-DD if needed
+                      String dateValue = dateController.text;
+                      if (dateValue.contains('-')) {
+                        final parts = dateValue.split('-');
+                        if (parts.length == 3 && parts[0].length == 2) {
+                          dateValue = '${parts[2]}-${parts[1]}-${parts[0]}';
+                        }
+                      }
                       final success = await controller.updatePermissionRequestWithData(
                         id: request.id,
                         purpose: purposeController.text,
-                        date: dateController.text,
+                        date: dateValue,
                         fromTime: fromTimeController.text,
                         toTime: toTimeController.text,
                         attachments: selectedFiles.isEmpty ? null : selectedFiles.toList(),
@@ -484,14 +505,22 @@ class EditPermissionRequestScreen extends StatelessWidget {
             DateTime initialDate = today;
             if (controller.text.isNotEmpty) {
               try {
-                final parsed = DateTime.parse(controller.text);
-                initialDate = parsed.isBefore(today) ? today : parsed;
-              } catch (_) {}
+                // Try ISO format YYYY-MM-DD
+                initialDate = DateTime.parse(controller.text);
+              } catch (_) {
+                try {
+                  // Try DD-MM-YYYY format from API
+                  final parts = controller.text.split('-');
+                  if (parts.length == 3) {
+                    initialDate = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+                  }
+                } catch (_) {}
+              }
             }
             final DateTime? picked = await showDatePicker(
               context: context,
               initialDate: initialDate,
-              firstDate: today,
+              firstDate: DateTime(2000),
               lastDate: DateTime(2100),
               builder: (context, child) {
                 return Theme(
@@ -632,9 +661,9 @@ class EditPermissionRequestScreen extends StatelessWidget {
           return TimeOfDay(hour: hour, minute: minute);
         }
       } else {
-        // 24-hour format
+        // 24-hour format (HH:mm or HH:mm:ss)
         final parts = timeString.split(':');
-        if (parts.length == 2) {
+        if (parts.length >= 2) {
           final hour = int.parse(parts[0]);
           final minute = int.parse(parts[1]);
           return TimeOfDay(hour: hour, minute: minute);

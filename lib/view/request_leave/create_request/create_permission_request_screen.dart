@@ -228,18 +228,31 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 8),
                   ],
+                  if (selectedFiles.length < 3)
                   OutlinedButton.icon(
                     onPressed: () async {
+                      final remaining = 3 - selectedFiles.length;
                       final result = await FilePicker.platform.pickFiles(
                         type: FileType.custom,
-                        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-                        allowMultiple: true,
+                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                        allowMultiple: remaining > 1,
                       );
                       if (result != null) {
                         final files = result.files
-                            .where((f) => f.path != null)
+                            .where((f) => f.path != null && (f.size ?? 0) <= 5 * 1024 * 1024)
                             .map((f) => File(f.path!))
+                            .take(remaining)
                             .toList();
+                        final rejected = result.files.where((f) => f.path != null && (f.size ?? 0) > 5 * 1024 * 1024).length;
+                        if (rejected > 0) {
+                          Get.snackbar(
+                            tr('error'),
+                            '$rejected ${tr('file_size_exceeded')}',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: ThemeService.instance.getErrorColor(),
+                            colorText: Colors.white,
+                          );
+                        }
                         selectedFiles.addAll(files);
                       }
                     },

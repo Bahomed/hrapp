@@ -616,6 +616,7 @@ const Map<String, String> enTranslations = {
   'exit_permit': 'Exit Permit',
   'attachments': 'Attachments',
   'upload_attachment': 'Upload Attachment',
+  'file_size_exceeded': 'file(s) exceed 5MB limit and were skipped',
   'update_letter_request': 'Update Letter Request',
   'update_loan_request': 'Update Loan Request',
   'update_leave_request': 'Update Leave Request',

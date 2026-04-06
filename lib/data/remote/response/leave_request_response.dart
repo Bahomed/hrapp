@@ -63,14 +63,16 @@ class LeaveRequest {
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
       attachments: (json['attachments'] as List<dynamic>?)
-              ?.map((attachment) => Attachment.fromJson(attachment))
+              ?.map((attachment) => attachment is Map<String, dynamic>
+                  ? Attachment.fromJson(attachment)
+                  : Attachment(name: attachment.toString(), path: attachment.toString(), size: 0))
               .toList() ??
           [],
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
-      ticket: json['ticket'] == true || json['ticket'] == 1,
-      exitPermit: json['exit_permit'] == true || json['exit_permit'] == 1,
+      ticket: json['ticket'] == true || json['ticket'] == 1 || json['ticket'] == '1',
+      exitPermit: json['exit_permit'] == true || json['exit_permit'] == 1 || json['exit_permit'] == '1',
     );
   }
 }
@@ -117,7 +119,9 @@ class LeaveRequestDetails extends LeaveRequest {
       rejectedReason: json['rejected_reason'],
       executedDate: json['executed_date'],
       attachments: (json['attachments'] as List<dynamic>?)
-              ?.map((attachment) => Attachment.fromJson(attachment))
+              ?.map((attachment) => attachment is Map<String, dynamic>
+                  ? Attachment.fromJson(attachment)
+                  : Attachment(name: attachment.toString(), path: attachment.toString(), size: 0))
               .toList() ??
           [],
       requestNumber: json['request_number'] ?? '',
