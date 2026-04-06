@@ -118,6 +118,11 @@ class _ClockingScreenState extends State<ClockingScreen> with WidgetsBindingObse
               _attendanceStatus!.attendanceData.clockOut == null) {
             isClockedIn = true;
             clockInTime = _formatTimeFromString(_attendanceStatus!.attendanceData.clockIn!);
+          } else {
+            isClockedIn = false;
+            if (_attendanceStatus!.attendanceData.clockIn == null) {
+              clockInTime = "--:--";
+            }
           }
         });
         print('[ClockingScreen] isClockedIn: $isClockedIn, clockInTime: $clockInTime');
