@@ -238,7 +238,7 @@ class LoanRequestDetailsResponse extends BaseResponse {
       success: json['success'] ?? false,
       message: json['message'] ?? '',
       error: json['error'],
-      data: json['data'] != null ? LoanRequestDetails.fromJson(json['data']) : null,
+      data: json['data'] is Map<String, dynamic> ? LoanRequestDetails.fromJson(json['data']) : null,
     );
   }
 }

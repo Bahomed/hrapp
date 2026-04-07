@@ -20,6 +20,10 @@ class PermissionRequest {
   final String requestNumber;
   final String createdAt;
   final String updatedAt;
+  // Extra fields returned by the details endpoint
+  final String? title;
+  final String? permitType;
+  final String? duration;
 
   PermissionRequest({
     required this.id,
@@ -37,6 +41,9 @@ class PermissionRequest {
     required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
+    this.title,
+    this.permitType,
+    this.duration,
   });
 
   factory PermissionRequest.fromJson(Map<String, dynamic> json) {
@@ -56,6 +63,9 @@ class PermissionRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      title: json['title'],
+      permitType: json['permit_type'],
+      duration: json['duration'],
     );
   }
 }
@@ -80,6 +90,9 @@ class PermissionRequestDetails extends PermissionRequest {
     required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
+    super.title,
+    super.permitType,
+    super.duration,
     this.user,
     this.approver,
   });
@@ -101,6 +114,9 @@ class PermissionRequestDetails extends PermissionRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      title: json['title'],
+      permitType: json['permit_type'],
+      duration: json['duration'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
     );

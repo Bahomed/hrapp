@@ -5,10 +5,8 @@ final Preferences preferences = Preferences();
 // Keep this as Future<String>
 Future<String> get workspaceBaseUrl async => await preferences.getWorkspaceUrl();
 
-const liveurl = 'https://injazathr.co/api/';
-const demourl = 'http://192.168.0.207.nip.io/api';
-
-const baseurl = demourl;
+const liveurl = 'https://injazathr.co/api';
+const baseurl = liveurl;
 
 
 // Leave Request URLs
@@ -19,6 +17,7 @@ const String permitRequestsUrl = '/api/requests/permit';
 
 // Loan Request URLs
 const String loanRequestsUrl = '/api/requests/loan';
+const String loanRequestDetailUrl = '/api/requests/loan';
 
 // Letter Request URLs
 const String letterRequestsUrl = '/api/requests/letter';

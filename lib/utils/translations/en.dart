@@ -1050,6 +1050,20 @@ const Map<String, String> enTranslations = {
   'notification_type_request_status': 'Request Status',
   'notification_type_message': 'Message',
   'notification_type_approval': 'Approval',
+  'notification_detail': 'Notification Detail',
+  'notification_message': 'MESSAGE',
+  'notification_details': 'DETAILS',
+  'unread': 'Unread',
+  'view_payroll': 'View Payroll',
+  'view_request': 'View Request',
+  'view_approval': 'View Approval',
+  'view_profile': 'View Profile',
+  'people': 'PEOPLE',
+  'rejection_reason': 'Rejection Reason',
+  'error_loading_request': 'Error loading request',
+  'unknown_request_type': 'Unknown request type',
+  'repayment_months': 'Repayment Months',
+  'approver': 'Approver',
 
   // Forgot Password & OTP
   'forgot_password': 'Forgot Password?',
@@ -1094,6 +1108,18 @@ const Map<String, String> enTranslations = {
   'enter_email_mobile_or_iqama': 'Enter your email, mobile or Iqama number',
   'please_enter_valid_iqama': 'Please enter a valid Iqama number',
   'field_minimum_3_characters': 'This field must be at least 3 characters',
+
+  // Request Detail Screen
+  'download_letter': 'Download Letter',
+  'title': 'Title',
+  'duration': 'Duration',
+  'leave_details': 'Leave Details',
+  'permission_details': 'Permission Details',
+  'letter_details': 'Letter Details',
+  'submitted_date': 'Submitted Date',
+  'approved_date': 'Approved Date',
+  'executed_date': 'Executed Date',
+  'dates': 'Dates',
 
   // Profile Picture Upload
   'change_profile_picture': 'Change Profile Picture',

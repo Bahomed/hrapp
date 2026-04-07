@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../approval/approval_screen.dart';
 import '../profile/employee_profile_screen.dart';
 import '../request_leave/request_home_screen.dart';
+import '../request_detail/request_detail_screen.dart';
 
 class NotificationController extends GetxController {
   final NotificationRepository _repository = NotificationRepository();
@@ -148,17 +149,16 @@ class NotificationController extends GetxController {
   }
 
   void _navigateToRequestScreen(AppNotification notification) {
-    // Navigate to request details with request_id
     final requestId = notification.data?['request_id'];
-    // print('NotificationController: Navigating to request with ID: $requestId');
-    // if (requestId != null) {
-    //   // Navigate to specific request details - you may need to import the screen
-    //   print('NotificationController: Opening request details for ID: $requestId');
-    //   // Get.to(() => RequestDetailsScreen(requestId: requestId));
-    // } else {
-    //   // Navigate to general requests screen
-     Get.to(() => const RequestHomeScreen());
-    //}
+    final requestType = notification.data?['request_type']?.toString();
+    if (requestId != null) {
+      final id = int.tryParse(requestId.toString());
+      if (id != null) {
+        Get.to(() => RequestDetailScreen(requestId: id, requestType: requestType));
+        return;
+      }
+    }
+    Get.to(() => const RequestHomeScreen());
   }
 
   void _navigateToApprovalScreen(AppNotification notification) {

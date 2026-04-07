@@ -83,8 +83,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     tabController = TabController(length: 4, vsync: this);
     initializePagination();
     loadAllRequests();
-    loadAllRequestTypes(); // Load types on init
-
+    loadAllRequestTypes();
   }
 
   // Initialize pagination with current year - separate for each request type

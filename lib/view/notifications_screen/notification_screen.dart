@@ -194,7 +194,7 @@ class NotificationScreen extends StatelessWidget {
   }
 
   Widget _buildNotificationCard(BuildContext context, AppNotification notification, NotificationController controller) {
-    
+    final themeService = ThemeService.instance;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: notification.isRead ? 1 : 3,
@@ -206,11 +206,7 @@ class NotificationScreen extends StatelessWidget {
           padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 16, tablet: 20, desktop: 24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: notification.isRead ? null : Theme.of(context).primaryColor.withOpacity(0.05),
-            border: notification.isRead ? null : Border.all(
-              color: Theme.of(context).primaryColor.withOpacity(0.2),
-              width: 1,
-            ),
+            color: themeService.getCardColor(),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

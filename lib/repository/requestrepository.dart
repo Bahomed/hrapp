@@ -552,6 +552,29 @@ class RequestRepository {
     }
   }
 
+  Future<LoanRequestResponse> getLoanRequestById(int id) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$loanRequestDetailUrl/$id/show';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return LoanRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<LoanRequestDetailsResponse> getLoanRequestDetails(int id) async {
     try {
       final token = await preferences.getToken();
