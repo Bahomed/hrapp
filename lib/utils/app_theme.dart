@@ -226,15 +226,14 @@ class AppTheme {
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadiusLarge),
         ),
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: 0.1),
       ),
-
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -337,7 +336,7 @@ class AppTheme {
       ),
 
       // Tab Bar Theme
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: primaryColor,
         unselectedLabelColor: textSecondary,
         indicatorColor: primaryColor,
@@ -386,15 +385,7 @@ class AppTheme {
         centerTitle: false,
       ),
 
-      // Card Theme
-      cardTheme: CardTheme(
-        color: darkCardColor,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusLarge),
-        ),
-        shadowColor: Colors.black.withOpacity(0.4),
-      ),
+
 
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -498,12 +489,6 @@ class AppTheme {
       ),
 
       // Tab Bar Theme
-      tabBarTheme: const TabBarTheme(
-        labelColor: darkPrimaryColor,
-        unselectedLabelColor: darkTextSecondary,
-        indicatorColor: darkPrimaryColor,
-        indicatorSize: TabBarIndicatorSize.tab,
-      ),
 
       // List Tile Theme
       listTileTheme: const ListTileThemeData(
