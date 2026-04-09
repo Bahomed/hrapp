@@ -3,12 +3,18 @@ import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/employee_dropdown_response.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
+import 'package:co.injazathr.injazathr/repository/employees_repository.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
 
 class ApprovalController extends GetxController {
   final RequestRepository _requestRepository = RequestRepository();
+  final EmployeesRepository _employeesRepository = EmployeesRepository();
+
+  // Leave balances: employmentId → vacation_balance
+  final RxMap<int, double> leaveBalances = <int, double>{}.obs;
+  final RxSet<int> loadingBalances = <int>{}.obs;
 
   // Reactive variables
   final RxBool isLoading = false.obs;
@@ -65,7 +71,7 @@ class ApprovalController extends GetxController {
 
   void _applyCurrentFilter() {
     final filter = selectedFilter.value;
-    
+
     if (filter == 'all') {
       // Separate all requests by type
       leaveRequests.value = allRequests.where((r) => r.requestType == 'Leave').toList();
@@ -79,6 +85,24 @@ class ApprovalController extends GetxController {
       loanRequests.value = filter == 'Loan' ? allRequests.where((r) => r.requestType == 'Loan').toList() : [];
       letterRequests.value = filter == 'Letter' ? allRequests.where((r) => r.requestType == 'Letter').toList() : [];
     }
+
+    // Fetch leave balances for all visible leave requests
+    for (final r in leaveRequests) {
+      _fetchLeaveBalanceIfNeeded(r.employmentId);
+    }
+  }
+
+  void _fetchLeaveBalanceIfNeeded(int employmentId) {
+    if (leaveBalances.containsKey(employmentId)) return;
+    if (loadingBalances.contains(employmentId)) return;
+    loadingBalances.add(employmentId);
+    _employeesRepository.getLeaveBalance(employmentId).then((response) {
+      leaveBalances[employmentId] = response.vacationBalance;
+    }).catchError((_) {
+      // silently ignore — balance just won't show
+    }).whenComplete(() {
+      loadingBalances.remove(employmentId);
+    });
   }
 
   // Approve request

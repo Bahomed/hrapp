@@ -10,6 +10,7 @@ import '../../attendance/attendance_detail_screen.dart';
 import '../../schedule/schedule_screen.dart';
 import '../../profile/employee_profile_screen.dart';
 import '../../requests/employee_requests_screen.dart';
+import 'employee_detail_controller.dart';
 
 class EmployeeDetailScreen extends StatelessWidget {
   final Employee employee;
@@ -20,7 +21,12 @@ class EmployeeDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
-    
+
+    final controller = Get.put(
+      EmployeeDetailController(),
+      tag: 'employee_${employee.id}',
+    );
+    controller.loadLeaveBalance(employee.id);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -47,6 +53,10 @@ class EmployeeDetailScreen extends StatelessWidget {
 
             SizedBox(height: isTablet ? 24 : 20),
 
+            // Leave Balance Card
+            _buildLeaveBalanceCard(context, controller, isTablet),
+
+            SizedBox(height: isTablet ? 24 : 20),
 
             // Employee Delegation Actions
             Container(
@@ -86,6 +96,111 @@ class EmployeeDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildLeaveBalanceCard(
+    BuildContext context,
+    EmployeeDetailController controller,
+    bool isTablet,
+  ) {
+    final themeService = ThemeService.instance;
+    final primaryColor = themeService.getPrimaryColor();
+
+    return Obx(() {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(isTablet ? 24 : 20),
+        decoration: BoxDecoration(
+          color: themeService.getCardColor(),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: themeService.getTextPrimaryColor().withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.beach_access_outlined,
+                color: primaryColor,
+                size: isTablet ? 28 : 24,
+              ),
+            ),
+            SizedBox(width: isTablet ? 20 : 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tr('leave_balance'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 13 : 12,
+                      color: themeService.getTextSecondaryColor(),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (controller.isLoadingBalance.value)
+                    SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryColor,
+                      ),
+                    )
+                  else if (controller.balanceError.value.isNotEmpty)
+                    Text(
+                      controller.balanceError.value,
+                      style: TextStyle(
+                        fontSize: isTablet ? 13 : 12,
+                        color: themeService.getErrorColor(),
+                      ),
+                    )
+                  else
+                    Text(
+                      '${controller.vacationBalance.value % 1 == 0 ? controller.vacationBalance.value.toInt() : controller.vacationBalance.value} ${tr('days')}',
+                      style: TextStyle(
+                        fontSize: isTablet ? 22 : 20,
+                        fontWeight: FontWeight.w700,
+                        color: primaryColor,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (!controller.isLoadingBalance.value && controller.balanceError.value.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: themeService.getSuccessColor().withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: themeService.getSuccessColor().withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  tr('balance_remaining'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 11 : 10,
+                    color: themeService.getSuccessColor(),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildEmployeeHeader(BuildContext context) {

@@ -4,6 +4,7 @@ import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/data/remote/dio_client/dio_client.dart';
 import 'package:co.injazathr.injazathr/data/remote/network_url/network_url.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/employees_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/leave_balance_response.dart';
 import 'package:dio/dio.dart';
 
 import '../utils/exceptionhandler.dart';
@@ -32,6 +33,28 @@ class EmployeesRepository {
           .get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
       
       return EmployeesResponse.fromJson(response.data);
+    }
+    on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<LeaveBalanceResponse> getLeaveBalance(int empId) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$getLeaveBalanceUrl$empId';
+
+      var response = await dioClient
+          .get(apiUrl, {'Authorization': 'Bearer $token'}, {});
+
+      return LeaveBalanceResponse.fromJson(response.data);
     }
     on DioException catch (e) {
       if (e.error is SocketException) {

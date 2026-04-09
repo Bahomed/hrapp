@@ -28,7 +28,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             Icons.arrow_back,
             color: themeService.getTextPrimaryColor(),
           ),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           tr('forgot_password'),

@@ -35,3 +35,4 @@ const getallholidayurl = '/api/get-all-holiday';
 const getEmployeesUrl = '/api/manager/employees';
 const getEmployeeProfileUrl = '/api/manager/employee-profile/';
 const getEmployeeRequestsUrl = '/api/manager/employee-request/';
+const getLeaveBalanceUrl = '/api/manager/get-leave-balance/';

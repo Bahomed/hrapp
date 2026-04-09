@@ -66,7 +66,7 @@ class _LoanDetailsScreenState extends State<LoanDetailsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: ThemeService.instance.getTextPrimaryColor()),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           tr('loan_details'),

@@ -31,7 +31,7 @@ class RequestDetailScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.getTextPrimaryColor()),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           tr('request_details'),

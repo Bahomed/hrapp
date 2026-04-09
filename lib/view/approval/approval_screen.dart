@@ -289,6 +289,8 @@ class ApprovalScreen extends StatelessWidget {
           _buildSectionHeader(
               tr('leave_request'), controller.leaveRequestCount, themeService,
               context),
+          const SizedBox(height: 8),
+          _buildLeaveBalanceSummary(controller, themeService, context),
           const SizedBox(height: 12),
           ...controller.leaveRequests.map((request) =>
               _buildRequestCard(request, controller, themeService, context)),
@@ -867,6 +869,139 @@ class ApprovalScreen extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  Widget _buildLeaveBalanceSummary(ApprovalController controller, ThemeService themeService, BuildContext context) {
+    // Collect unique employees from leave requests
+    final seen = <int>{};
+    final uniqueLeaveRequests = controller.leaveRequests
+        .where((r) => seen.add(r.employmentId))
+        .toList();
+
+    return Obx(() {
+      final color = themeService.getPrimaryColor();
+      return Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        children: uniqueLeaveRequests.map((request) {
+          final isLoading = controller.loadingBalances.contains(request.employmentId);
+          final balance = controller.leaveBalances[request.employmentId];
+
+          // Label: employee name if multiple, generic if single
+          final label = uniqueLeaveRequests.length > 1
+              ? request.employeeName.split(' ').first
+              : null;
+
+          String balanceText;
+          if (isLoading) {
+            balanceText = '...';
+          } else if (balance == null) {
+            return const SizedBox.shrink();
+          } else {
+            final display = balance % 1 == 0
+                ? balance.toInt().toString()
+                : balance.toStringAsFixed(2);
+            balanceText = '$display ${tr('days')}';
+          }
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withOpacity(0.25)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.beach_access_outlined, size: 14, color: color),
+                const SizedBox(width: 6),
+                if (label != null) ...[
+                  Text(
+                    '$label · ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+                Text(
+                  '${tr('leave_balance')}: $balanceText',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (isLoading) ...[
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 10, height: 10,
+                    child: CircularProgressIndicator(strokeWidth: 1.5, color: color),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _buildLeaveBalanceChip(int employmentId, ThemeService themeService, BuildContext context) {
+    final controller = Get.find<ApprovalController>();
+    return Obx(() {
+      final isLoading = controller.loadingBalances.contains(employmentId);
+      final balance = controller.leaveBalances[employmentId];
+
+      if (isLoading) {
+        return Row(
+          children: [
+            Icon(Icons.beach_access_outlined,
+                size: 14, color: themeService.getTextSecondaryColor()),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: 12, height: 12,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: themeService.getTextSecondaryColor(),
+              ),
+            ),
+          ],
+        );
+      }
+
+      if (balance == null) return const SizedBox.shrink();
+
+      final displayBalance = balance % 1 == 0 ? balance.toInt().toString() : balance.toString();
+      final color = themeService.getPrimaryColor();
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.25)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.beach_access_outlined, size: 13, color: color),
+            const SizedBox(width: 4),
+            Text(
+              '${tr('leave_balance')}: $displayBalance ${tr('days')}',
+              style: TextStyle(
+                fontSize: ResponsiveUtils.responsiveFontSize(
+                    context, mobile: 12, tablet: 13, desktop: 14),
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   String _formatDate(String dateTimeString) {

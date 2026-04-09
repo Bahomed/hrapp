@@ -34,7 +34,7 @@ class CreateLeaveRequestScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeService.getTextPrimaryColor()),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           tr('create_leave_request'),
