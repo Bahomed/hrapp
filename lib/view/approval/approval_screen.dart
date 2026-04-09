@@ -289,8 +289,6 @@ class ApprovalScreen extends StatelessWidget {
           _buildSectionHeader(
               tr('leave_request'), controller.leaveRequestCount, themeService,
               context),
-          const SizedBox(height: 8),
-          _buildLeaveBalanceSummary(controller, themeService, context),
           const SizedBox(height: 12),
           ...controller.leaveRequests.map((request) =>
               _buildRequestCard(request, controller, themeService, context)),
@@ -439,6 +437,10 @@ class ApprovalScreen extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                    ],
+                    if (request.requestType == 'Leave') ...[
+                      const SizedBox(height: 6),
+                      _buildLeaveBalanceChip(request.employmentId, themeService, context),
                     ],
                   ],
                 ),
