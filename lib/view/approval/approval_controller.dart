@@ -225,12 +225,12 @@ class ApprovalController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Get.key.currentState?.pop(),
             child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () {
-              Get.back();
+              Get.key.currentState?.pop();
               _approveLeaveRequest(
                 request,
                 selectedEmployee.value?.id,
@@ -289,12 +289,12 @@ class ApprovalController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Get.key.currentState?.pop(),
             child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () {
-              Get.back();
+              Get.key.currentState?.pop();
               _approveOtherRequest(request, remarksController.text.trim());
             },
             child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
@@ -349,15 +349,15 @@ class ApprovalController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Get.key.currentState?.pop(),
             child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () {
-              Get.back();
+              Get.key.currentState?.pop();
               _rejectRequestWithRemarks(request, remarksController.text.trim());
             },
-            child: Text(tr('rejected'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            child: Text(tr('reject'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
           ),
         ],
       ),
@@ -366,6 +366,9 @@ class ApprovalController extends GetxController {
 
   // View request details
   void viewRequestDetails(ApprovalRequest request) {
+    if (request.requestType == 'Leave') {
+      _fetchLeaveBalanceIfNeeded(request.employmentId);
+    }
     Get.bottomSheet(
       Container(
         height: Get.height * 0.9,
@@ -430,6 +433,51 @@ class ApprovalController extends GetxController {
                   children: [
 
 
+                    // Leave Balance (only for leave requests)
+                    if (request.requestType == 'Leave')
+                      Obx(() {
+                        final isLoadingBal = loadingBalances.contains(request.employmentId);
+                        final balance = leaveBalances[request.employmentId];
+                        if (isLoadingBal) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                                const SizedBox(width: 8),
+                                Text(tr('loading'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+                              ],
+                            ),
+                          );
+                        }
+                        if (balance == null) return const SizedBox.shrink();
+                        final display = balance % 1 == 0 ? balance.toInt().toString() : balance.toStringAsFixed(2);
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: ThemeService.instance.getActionColor('leave').withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: ThemeService.instance.getActionColor('leave').withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.account_balance_wallet_outlined, size: 16, color: ThemeService.instance.getActionColor('leave')),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${tr('leave_balance')}: $display ${tr('days')}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeService.instance.getActionColor('leave'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+
                     // Combined Request Information Section
                     _buildCombinedRequestSection(request),
                     // Employee Information Section
@@ -473,6 +521,7 @@ class ApprovalController extends GetxController {
         break;
       case 'pending':
       case 'for approval':
+      case 'for-approval':
         backgroundColor = ThemeService.instance.getWarningColor().withOpacity(0.1);
         textColor = ThemeService.instance.getWarningColor();
         icon = Icons.schedule;
@@ -500,7 +549,12 @@ class ApprovalController extends GetxController {
           Icon(icon, size: 16, color: textColor),
           const SizedBox(width: 6),
           Text(
-            status,
+            switch (status.toLowerCase()) {
+              'for-approval' || 'for approval' || 'pending' => tr('for_approval'),
+              'approved' => tr('approved'),
+              'rejected' => tr('rejected'),
+              _ => status,
+            },
             style: TextStyle(
               color: textColor,
               fontSize: 14,
@@ -614,7 +668,7 @@ class ApprovalController extends GetxController {
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  Get.back();
+                  Get.key.currentState?.pop();
                   showRejectionDialog(request);
                 },
                 style: OutlinedButton.styleFrom(
@@ -644,7 +698,7 @@ class ApprovalController extends GetxController {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Get.back();
+                  Get.key.currentState?.pop();
                   showApprovalDialog(request);
                 },
                 style: ElevatedButton.styleFrom(
@@ -676,7 +730,7 @@ class ApprovalController extends GetxController {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Get.key.currentState?.pop(),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: ThemeService.instance.getTextSecondaryColor()),
               shape: RoundedRectangleBorder(

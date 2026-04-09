@@ -1124,4 +1124,6 @@ const Map<String, String> arTranslations = {
   'approved_date': 'تاريخ الموافقة',
   'executed_date': 'تاريخ التنفيذ',
   'dates': 'التواريخ',
+  'request_not_found': 'الطلب غير موجود',
+  'request_may_be_processed': 'ربما تمت معالجة هذا الطلب بالفعل أو أنه غير مخصص لك.',
 };

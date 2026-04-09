@@ -8,11 +8,19 @@ import 'package:co.injazathr.injazathr/view/approval/approval_controller.dart';
 import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
 
 class ApprovalScreen extends StatelessWidget {
-  const ApprovalScreen({super.key});
+  final int? requestId;
+  const ApprovalScreen({super.key, this.requestId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ApprovalController());
+
+    // If opened from a notification with a specific requestId, auto-open the detail
+    if (requestId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openRequestById(controller, requestId!);
+      });
+    }
     final themeService = Get.find<ThemeService>();
 
     return Scaffold(
@@ -871,6 +879,31 @@ class ApprovalScreen extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  void _openRequestById(ApprovalController controller, int targetId) async {
+    // Wait for loading to finish (max 5 seconds)
+    int attempts = 0;
+    while (controller.isLoading.value && attempts < 50) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
+    // Small extra buffer for UI to settle
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    final request = controller.allRequests
+        .firstWhereOrNull((r) => r.id == targetId);
+    if (request != null) {
+      controller.viewRequestDetails(request);
+    } else {
+      // Request not found — may have been approved/rejected already or not assigned to this manager
+      Get.snackbar(
+        tr('request_not_found'),
+        tr('request_may_be_processed'),
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 
   Widget _buildLeaveBalanceSummary(ApprovalController controller, ThemeService themeService, BuildContext context) {

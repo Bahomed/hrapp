@@ -110,8 +110,9 @@ class NotificationService {
         Get.to(() => const NotificationScreen());
         break;
       case NotificationType.approval:
-      // For now navigate to notifications screen, can be extended for chat later
-        Get.to(() => const ApprovalScreen());
+        final requestIdRaw = notification.data?['request_id'];
+        final requestId = requestIdRaw != null ? int.tryParse(requestIdRaw.toString()) : null;
+        Get.to(() => ApprovalScreen(requestId: requestId));
         break;
       case NotificationType.general:
       default:

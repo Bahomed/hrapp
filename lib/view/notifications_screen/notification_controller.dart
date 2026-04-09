@@ -162,8 +162,9 @@ class NotificationController extends GetxController {
   }
 
   void _navigateToApprovalScreen(AppNotification notification) {
-    // Navigate to approval screen - same pattern as other screens
-     Get.to(() => const ApprovalScreen());
+    final requestIdRaw = notification.data?['request_id'];
+    final requestId = requestIdRaw != null ? int.tryParse(requestIdRaw.toString()) : null;
+    Get.to(() => ApprovalScreen(requestId: requestId));
   }
 
   void _navigateToMessageScreen(AppNotification notification) {

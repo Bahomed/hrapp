@@ -1129,4 +1129,6 @@ const Map<String, String> enTranslations = {
   'error_selecting_image': 'Error selecting image',
   'error_uploading_image': 'Error uploading image',
   'failed_to_upload_image': 'Failed to upload image',
+  'request_not_found': 'Request Not Found',
+  'request_may_be_processed': 'This request may have already been processed or is not assigned to you.',
 };
