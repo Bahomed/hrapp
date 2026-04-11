@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../data/local/preferences.dart';
 import '../../data/remote/response/login_response.dart';
+import '../../repository/employees_repository.dart';
 import '../../repository/logoutrepository.dart';
 import '../../repository/userrepositiory.dart';
 import '../login_screen/login_screen.dart';
@@ -24,11 +25,17 @@ class ProfileController extends GetxController {
   final Preferences _preferences = Preferences();
   final LogoutRepository _logoutRepository = LogoutRepository();
   final UserRepositiory _userRepository = UserRepositiory();
+  final EmployeesRepository _employeesRepository = EmployeesRepository();
 
   // Reactive variables
   final RxBool isLoading = false.obs;
   final RxBool isEditing = false.obs;
   final Rx<Data?> userData = Rx<Data?>(null);
+
+  // Leave balance
+  final isLoadingBalance = false.obs;
+  final vacationBalance = 0.0.obs;
+  final balanceError = ''.obs;
 
   // Text controllers for editable fields
   final nameController = TextEditingController();
@@ -62,6 +69,7 @@ class ProfileController extends GetxController {
       if (user != null) {
         userData.value = user;
         _populateControllers();
+        if (user.id != null) loadLeaveBalance(user.id!);
       } else {
         _showErrorSnackbar(tr('no_user_data_found'));
       }
@@ -81,6 +89,19 @@ class ProfileController extends GetxController {
       mobileController.text = user.mobileNo ?? '';
       currentAddressController.text = user.currentAddress ?? '';
       permanentAddressController.text = user.permanentAddress ?? '';
+    }
+  }
+
+  Future<void> loadLeaveBalance(int empId) async {
+    isLoadingBalance.value = true;
+    balanceError.value = '';
+    try {
+      final response = await _employeesRepository.getLeaveBalance(empId);
+      vacationBalance.value = response.vacationBalance;
+    } catch (e) {
+      balanceError.value = e.toString();
+    } finally {
+      isLoadingBalance.value = false;
     }
   }
 

@@ -123,9 +123,14 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 // Profile Header
                 _buildProfileHeader(context, controller),
-                
-                const SizedBox(height: 30),
-                
+
+                const SizedBox(height: 20),
+
+                // Leave Balance Card
+                _buildLeaveBalanceCard(context, controller),
+
+                const SizedBox(height: 20),
+
                 // Action Buttons (only show save/cancel in edit mode)
                 if (controller.isEditing.value) ...[
                   _buildActionButtons(controller),
@@ -357,6 +362,106 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildLeaveBalanceCard(BuildContext context, ProfileController controller) {
+    final themeService = ThemeService.instance;
+    final primaryColor = themeService.getPrimaryColor();
+    final isTablet = MediaQuery.of(context).size.width > 600;
+
+    return Obx(() => Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isTablet ? 24 : 20),
+      decoration: BoxDecoration(
+        color: themeService.getCardColor(),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: themeService.getTextPrimaryColor().withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.beach_access_outlined,
+              color: primaryColor,
+              size: isTablet ? 28 : 24,
+            ),
+          ),
+          SizedBox(width: isTablet ? 20 : 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('leave_balance'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 13 : 12,
+                    color: themeService.getTextSecondaryColor(),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (controller.isLoadingBalance.value)
+                  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: primaryColor,
+                    ),
+                  )
+                else if (controller.balanceError.value.isNotEmpty)
+                  Text(
+                    controller.balanceError.value,
+                    style: TextStyle(
+                      fontSize: isTablet ? 13 : 12,
+                      color: themeService.getErrorColor(),
+                    ),
+                  )
+                else
+                  Text(
+                    '${controller.vacationBalance.value % 1 == 0 ? controller.vacationBalance.value.toInt() : controller.vacationBalance.value} ${tr('days')}',
+                    style: TextStyle(
+                      fontSize: isTablet ? 22 : 20,
+                      fontWeight: FontWeight.w700,
+                      color: primaryColor,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (!controller.isLoadingBalance.value && controller.balanceError.value.isEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: themeService.getSuccessColor().withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: themeService.getSuccessColor().withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                tr('balance_remaining'),
+                style: TextStyle(
+                  fontSize: isTablet ? 11 : 10,
+                  color: themeService.getSuccessColor(),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+    ));
   }
 
   Widget _buildQuickInfoCard(BuildContext context, String title, String value, IconData icon, Color color) {

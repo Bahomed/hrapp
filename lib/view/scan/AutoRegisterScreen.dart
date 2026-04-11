@@ -898,7 +898,6 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
     final userName = await preferences.getUserDisplayName();
     await _saveFaceRegistration(userName);
-    Get.back();
   }
 
   Future<void> _saveFaceRegistration(String name) async {
@@ -935,30 +934,41 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
 
           recognizer.refreshRegisteredFaces();
 
-          Get.snackbar(
-            tr('success'),
-            result?.message ??
-                tr('face_registered_successfully')
-                    .replaceAll('{name}', name)
-                    .replaceAll('{count}',
-                        capturedFaces.length.toString()),
-            backgroundColor:
-                Get.find<ThemeService>().getSuccessColor(),
-            colorText: Colors.white,
-          );
-
-          Future.delayed(Duration(milliseconds: 1500), () {
-            Get.back();
-          });
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  result?.message ??
+                      tr('face_registered_successfully')
+                          .replaceAll('{name}', name)
+                          .replaceAll('{count}', capturedFaces.length.toString()),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Get.find<ThemeService>().getSuccessColor(),
+                duration: const Duration(milliseconds: 1500),
+              ),
+            );
+            Future.delayed(const Duration(milliseconds: 1500), () {
+              if (mounted) Navigator.of(context).pop();
+            });
+          }
         }
       } catch (e) {
-        Get.snackbar(
-          tr('error'),
-          '${tr('failed_to_register_face')}: ${e.toString()}',
-          backgroundColor:
-              Get.find<ThemeService>().getErrorColor(),
-          colorText: Colors.white,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${tr('failed_to_register_face')}: ${e.toString()}',
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Get.find<ThemeService>().getErrorColor(),
+              duration: const Duration(milliseconds: 1500),
+            ),
+          );
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            if (mounted) Navigator.of(context).pop();
+          });
+        }
       } finally {
         setState(() {
           currentStep = 0;

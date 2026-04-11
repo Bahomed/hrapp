@@ -165,7 +165,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 // Back to Login
                 Center(
                   child: TextButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => Navigator.of(context).pop(),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

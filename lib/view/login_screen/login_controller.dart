@@ -157,11 +157,20 @@ class LoginController extends GetxController {
     loginApi(email, password);
   }
 
+  /// Closes the current dialog without triggering GetX snackbar lifecycle,
+  /// avoiding the LateInitializationError when a snackbar is queued but not yet shown.
+  void _closeDialog() {
+    final ctx = Get.overlayContext;
+    if (ctx != null) {
+      Navigator.of(ctx).pop();
+    }
+  }
+
   void loginApi(String email, String password) async {
     try {
       customLoader();
       var response = await repository.loginApi(email, password, loginMethod.value);
-      Get.back();
+      _closeDialog();
 
       if (response != null && response.isSuccess) {
         // Get token from response (either direct token field or from data)
@@ -195,7 +204,7 @@ class LoginController extends GetxController {
         _showErrorSnackbar(errorMessage);
       }
     } catch (e) {
-      Get.back();
+      _closeDialog();
       _showErrorSnackbar(tr('connection_error'));
     }
   }
@@ -242,12 +251,12 @@ class LoginController extends GetxController {
         content: Text(tr('change_workspace_confirmation')),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => _closeDialog(),
             child: Text(tr('cancel'), style: TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
-              Get.back();
+              _closeDialog();
               _navigateToWorkspaceSelection();
             },
             child: Text(tr('continue'), style: TextStyle(color: AppTheme.primaryColor)),
