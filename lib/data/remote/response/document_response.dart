@@ -57,6 +57,7 @@ class DocumentResponseData {
   final String? placeIssued;
   final String? country;
   final String? docNo;
+  final bool renewable;
 
   DocumentResponseData({
     required this.id,
@@ -73,6 +74,7 @@ class DocumentResponseData {
     this.placeIssued,
     this.country,
     this.docNo,
+    this.renewable = false,
   });
 
   factory DocumentResponseData.fromJson(Map<String, dynamic> json) {
@@ -91,7 +93,15 @@ class DocumentResponseData {
       placeIssued: json['place_issued'],
       country: json['country'],
       docNo: json['doc_no'],
+      renewable: _parseBool(json['renewable']),
     );
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.toLowerCase() == 'y' || value.toLowerCase() == 'yes' || value.toLowerCase() == 'true' || value == '1';
+    if (value is int) return value == 1;
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -110,6 +120,7 @@ class DocumentResponseData {
       'place_issued': placeIssued,
       'country': country,
       'doc_no': docNo,
+      'renewable': renewable,
     };
   }
 
@@ -288,6 +299,89 @@ class DocumentDownloadResponse {
   }
 }
 
+// Generic dropdown item (used for countries & cities)
+class DropdownItem {
+  final int value;
+  final String text;
+
+  DropdownItem({required this.value, required this.text});
+
+  factory DropdownItem.fromJson(Map<String, dynamic> json) {
+    return DropdownItem(
+      value: json['value'] is int ? json['value'] : int.tryParse(json['value'].toString()) ?? 0,
+      text: json['text'] ?? '',
+    );
+  }
+}
+
+class DropdownListResponse {
+  final bool success;
+  final String message;
+  final List<DropdownItem> data;
+
+  DropdownListResponse({required this.success, required this.message, required this.data});
+
+  factory DropdownListResponse.fromJson(Map<String, dynamic> json) {
+    return DropdownListResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      data: (json['data'] as List?)?.map((e) => DropdownItem.fromJson(e)).toList() ?? [],
+    );
+  }
+}
+
+// Document type item (from /filter/document-types)
+class DocumentTypeItem {
+  final int value;
+  final String text;
+  final bool inHijri;
+  final bool documentNo;
+  final bool renewable;
+
+  DocumentTypeItem({
+    required this.value,
+    required this.text,
+    required this.inHijri,
+    required this.documentNo,
+    required this.renewable,
+  });
+
+  factory DocumentTypeItem.fromJson(Map<String, dynamic> json) {
+    return DocumentTypeItem(
+      value: json['value'] is int ? json['value'] : int.tryParse(json['value'].toString()) ?? 0,
+      text: json['text'] ?? '',
+      inHijri: _parseBool(json['in_hijri']),
+      documentNo: _parseBool(json['document_no']),
+      renewable: _parseBool(json['renewable']),
+    );
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) {
+      return value.toLowerCase() == 'y' || value.toLowerCase() == 'yes' || value.toLowerCase() == 'true' || value == '1';
+    }
+    if (value is int) return value == 1;
+    return false;
+  }
+}
+
+class DocumentTypesResponse {
+  final bool success;
+  final String message;
+  final List<DocumentTypeItem> data;
+
+  DocumentTypesResponse({required this.success, required this.message, required this.data});
+
+  factory DocumentTypesResponse.fromJson(Map<String, dynamic> json) {
+    return DocumentTypesResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      data: (json['data'] as List?)?.map((e) => DocumentTypeItem.fromJson(e)).toList() ?? [],
+    );
+  }
+}
+
 
 
 // Request Models
@@ -302,6 +396,8 @@ class DocumentUploadRequest {
   final String? type;
   final String? remarks;
   final bool isDependant;
+  final int? countryId;
+  final int? cityId;
 
   DocumentUploadRequest({
     required this.docId,
@@ -314,6 +410,8 @@ class DocumentUploadRequest {
     this.type,
     this.remarks,
     this.isDependant = false,
+    this.countryId,
+    this.cityId,
   });
 
   Map<String, dynamic> toJson() {
@@ -328,6 +426,8 @@ class DocumentUploadRequest {
       if (type != null) 'type': type,
       if (remarks != null) 'remarks': remarks,
       'is_dependant': isDependant,
+      if (countryId != null) 'country_id': countryId,
+      if (cityId != null) 'city_id': cityId,
     };
   }
 }

@@ -186,7 +186,7 @@ class RequestDetailScreen extends StatelessWidget {
     final typeColor = _typeColor(controller.detectedType.value, theme);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.getCardColor(),
         borderRadius: BorderRadius.circular(16),
@@ -199,16 +199,18 @@ class RequestDetailScreen extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: typeColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(typeIcon, color: typeColor, size: 28),
+            child: Icon(typeIcon, color: typeColor, size: 26),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,23 +219,24 @@ class RequestDetailScreen extends StatelessWidget {
                   typeLabel,
                   style: TextStyle(
                     color: theme.getTextSecondaryColor(),
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
-                  '${tr('request_number')} ${controller.requestNumber}',
+                  '${tr('request_number_short')} ${controller.requestNumber}',
                   style: TextStyle(
                     color: theme.getTextPrimaryColor(),
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                const SizedBox(height: 8),
+                RequestStatusChip(statusString: controller.status),
               ],
             ),
           ),
-          RequestStatusChip(statusString: controller.status),
         ],
       ),
     );

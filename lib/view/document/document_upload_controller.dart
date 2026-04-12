@@ -6,34 +6,72 @@ import '../../data/remote/response/document_response.dart';
 import '../../repository/documentrepository.dart';
 import '../../utils/translation_helper.dart';
 
+void _showSnackbar(String message, {bool isError = true}) {
+  final context = Get.context;
+  if (context == null) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 3),
+    ),
+  );
+}
+
 class DocumentUploadController extends GetxController {
   final DocumentRepository _documentRepository = DocumentRepository();
-  
+
+  /// Pass an existing document to pre-fill the form (renew flow)
+  final DocumentResponseData? renewDocument;
+
+  DocumentUploadController({this.renewDocument});
+
   // Form key
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  
+
   // Text controllers
   final TextEditingController documentNoController = TextEditingController();
   final TextEditingController remarksController = TextEditingController();
-  
-  // Reactive variables
-  final RxString selectedCategory = ''.obs;
-  final RxList<String> availableCategories = <String>[].obs;
+
+  // Document types
+  final RxList<DocumentTypeItem> documentTypes = <DocumentTypeItem>[].obs;
+  final Rxn<DocumentTypeItem> selectedDocumentType = Rxn<DocumentTypeItem>();
+  final RxBool isDocumentTypesLoading = false.obs;
+
+  // Countries
+  final RxList<DropdownItem> countries = <DropdownItem>[].obs;
+  final Rxn<DropdownItem> selectedCountry = Rxn<DropdownItem>();
+  final RxBool isCountriesLoading = false.obs;
+
+  // Cities
+  final RxList<DropdownItem> cities = <DropdownItem>[].obs;
+  final Rxn<DropdownItem> selectedCity = Rxn<DropdownItem>();
+  final RxBool isCitiesLoading = false.obs;
+
+  // Dates
   final Rx<DateTime?> dateIssued = Rx<DateTime?>(null);
   final Rx<DateTime?> dateExpire = Rx<DateTime?>(null);
+
+  // File handling
   final RxString selectedFileName = ''.obs;
   final RxBool isUploading = false.obs;
-  final RxBool isCategoriesLoading = false.obs;
   final RxBool isPickingFile = false.obs;
-  
-  // File handling
+
+  // Inline field validation errors
+  final RxString documentTypeError = ''.obs;
+  final RxString fileError = ''.obs;
+
   File? selectedFile;
   PlatformFile? platformFile;
+
+  /// True when opened in renew mode
+  bool get isRenewMode => renewDocument != null;
 
   @override
   void onInit() {
     super.onInit();
-    loadCategories();
+    _loadInitialData();
   }
 
   @override
@@ -43,33 +81,94 @@ class DocumentUploadController extends GetxController {
     super.onClose();
   }
 
-  /// Load available document categories
-  Future<void> loadCategories() async {
+  Future<void> _loadInitialData() async {
+    await Future.wait([loadDocumentTypes(), loadCountries()]);
+    if (isRenewMode) _preFillFromDocument(renewDocument!);
+  }
+
+  /// Pre-fill form fields from an existing document (renew flow)
+  Future<void> _preFillFromDocument(DocumentResponseData doc) async {
+    // Doc number
+    if (doc.docNo != null && doc.docNo!.isNotEmpty) {
+      documentNoController.text = doc.docNo!;
+    }
+
+    // Match document type by category name (case-insensitive)
+    final matchedType = documentTypes.firstWhereOrNull(
+      (t) => t.text.toLowerCase() == doc.category.toLowerCase(),
+    );
+    if (matchedType != null) selectedDocumentType.value = matchedType;
+
+    // Match country by name
+    if (doc.country != null && doc.country!.isNotEmpty) {
+      final matchedCountry = countries.firstWhereOrNull(
+        (c) => c.text.toLowerCase() == doc.country!.toLowerCase(),
+      );
+      if (matchedCountry != null) {
+        // This also loads cities for the country
+        await onCountryChanged(matchedCountry);
+      }
+    }
+  }
+
+  /// Load document types from API
+  Future<void> loadDocumentTypes() async {
     try {
-      isCategoriesLoading.value = true;
-      
-      final response = await _documentRepository.getAvailableCategories();
+      isDocumentTypesLoading.value = true;
+      final response = await _documentRepository.getDocumentTypes();
       if (response.success) {
-        // Extract category names from the response
-        final categories = response.data.map((category) => category.documentName).toList();
-        availableCategories.assignAll(categories);
-        
+        documentTypes.assignAll(response.data);
       } else {
-        _showErrorSnackbar(tr('error'), tr('failed_to_load_categories'));
+        _showSnackbar(tr('failed_to_load_document_types'));
       }
     } catch (e) {
-      _showErrorSnackbar(tr('error'), tr('error_loading_categories'));
+      _showSnackbar(tr('error_loading_document_types'));
     } finally {
-      isCategoriesLoading.value = false;
+      isDocumentTypesLoading.value = false;
+    }
+  }
+
+  /// Load countries from API
+  Future<void> loadCountries() async {
+    try {
+      isCountriesLoading.value = true;
+      final response = await _documentRepository.getCountries();
+      if (response.success) {
+        countries.assignAll(response.data);
+      }
+    } catch (e) {
+      // silently fail — country is optional
+    } finally {
+      isCountriesLoading.value = false;
+    }
+  }
+
+  /// Called when user picks a country — loads cities for that country
+  Future<void> onCountryChanged(DropdownItem? country) async {
+    selectedCountry.value = country;
+    selectedCity.value = null;
+    cities.clear();
+
+    if (country == null) return;
+
+    try {
+      isCitiesLoading.value = true;
+      final response = await _documentRepository.getCities(countryId: country.value);
+      if (response.success) {
+        cities.assignAll(response.data);
+      }
+    } catch (e) {
+      // silently fail
+    } finally {
+      isCitiesLoading.value = false;
     }
   }
 
   /// Pick file for upload
   Future<void> pickFile() async {
     try {
-      // Set flag to prevent dashboard API calls during file picking
       isPickingFile.value = true;
-      
+
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
@@ -80,163 +179,105 @@ class DocumentUploadController extends GetxController {
         platformFile = result.files.first;
         selectedFile = File(platformFile!.path!);
         selectedFileName.value = platformFile!.name;
-        
-        // Check file size (limit to 10MB)
+
         if (selectedFile!.lengthSync() > 10 * 1024 * 1024) {
-          _showErrorSnackbar(tr('error'), tr('file_too_large'));
+          _showSnackbar(tr('file_too_large'));
           _clearSelectedFile();
           return;
         }
-        
-        _showSuccessSnackbar(tr('file_selected'), platformFile!.name);
+
+        fileError.value = '';
       }
     } catch (e) {
-      _showErrorSnackbar(tr('error'), tr('error_selecting_file'));
+      _showSnackbar(tr('error_selecting_file'));
     } finally {
-      // Reset flag after file picking is done
       Future.delayed(const Duration(milliseconds: 500), () {
         isPickingFile.value = false;
       });
     }
   }
 
-  /// Clear selected file
   void _clearSelectedFile() {
     selectedFile = null;
     platformFile = null;
     selectedFileName.value = '';
   }
 
-  /// Validate form
   bool _validateForm() {
-    if (!formKey.currentState!.validate()) {
-      return false;
-    }
+    bool valid = true;
 
-    if (selectedCategory.value.isEmpty) {
-      _showErrorSnackbar(tr('validation_error'), tr('please_select_category'));
-      return false;
+    if (!formKey.currentState!.validate()) valid = false;
+
+    if (selectedDocumentType.value == null) {
+      documentTypeError.value = tr('please_select_document_type');
+      valid = false;
+    } else {
+      documentTypeError.value = '';
     }
 
     if (selectedFile == null) {
-      _showErrorSnackbar(tr('validation_error'), tr('please_select_file'));
-      return false;
+      fileError.value = tr('please_select_file');
+      valid = false;
+    } else {
+      fileError.value = '';
     }
 
-    return true;
+    return valid;
   }
 
   /// Upload document
   Future<void> uploadDocument() async {
-    if (!_validateForm()) {
-      return;
-    }
+    if (!_validateForm()) return;
 
     try {
       isUploading.value = true;
 
-      // Find the category ID
-      final categoryResponse = await _documentRepository.getAvailableCategories();
-      int? categoryId;
-      
-      if (categoryResponse.success) {
-        final categoryData = categoryResponse.data.firstWhereOrNull(
-          (cat) => cat.documentName == selectedCategory.value,
-        );
-        categoryId = categoryData?.id;
-      }
-
-      if (categoryId == null) {
-        _showErrorSnackbar(tr('error'), tr('invalid_category_selected'));
-        return;
-      }
-
-      // Prepare upload request
       final uploadRequest = DocumentUploadRequest(
-        docId: categoryId,
+        docId: selectedDocumentType.value!.value,
         name: documentNoController.text.trim(),
-        notes: remarksController.text.trim().isNotEmpty 
-            ? remarksController.text.trim() 
-            : null,
-        dateIssuedG: dateIssued.value != null 
-            ? _formatDate(dateIssued.value!) 
-            : null,
-        dateExpireG: dateExpire.value != null 
-            ? _formatDate(dateExpire.value!) 
-            : null,
-        docNo: documentNoController.text.trim().isNotEmpty 
-            ? documentNoController.text.trim() 
-            : null,
-        category: selectedCategory.value,
-        type: selectedCategory.value, // Use category as type
-        remarks: remarksController.text.trim().isNotEmpty 
-            ? remarksController.text.trim() 
-            : null
+        notes: remarksController.text.trim().isNotEmpty ? remarksController.text.trim() : null,
+        dateIssuedG: dateIssued.value != null ? _formatDate(dateIssued.value!) : null,
+        dateExpireG: dateExpire.value != null ? _formatDate(dateExpire.value!) : null,
+        docNo: documentNoController.text.trim().isNotEmpty ? documentNoController.text.trim() : null,
+        category: selectedDocumentType.value!.text,
+        type: selectedDocumentType.value!.text,
+        remarks: remarksController.text.trim().isNotEmpty ? remarksController.text.trim() : null,
+        countryId: selectedCountry.value?.value,
+        cityId: selectedCity.value?.value,
       );
 
-      // Upload the document
-       final response = await _documentRepository.uploadDocument(
-         uploadRequest,
-         selectedFile!,
-      );
+      final response = await _documentRepository.uploadDocument(uploadRequest, selectedFile!);
 
       if (response.success) {
-        // Reset form first
+        _showSnackbar(tr('document_uploaded_successfully'), isError: false);
         _resetForm();
-
-        // Navigate back immediately without snackbar
+        await Future.delayed(const Duration(milliseconds: 500));
         Get.back(result: true);
-        
-        // Show success message after navigation
-        Future.delayed(const Duration(milliseconds: 100), () {
-          _showSuccessSnackbar(tr('success'), tr('document_uploaded_successfully'));
-        });
       } else {
-         _showErrorSnackbar(tr('upload_failed'), response.message);
-       }
+        _showSnackbar(response.message);
+      }
     } catch (e) {
-      _showErrorSnackbar(tr('upload_failed'), tr('error_uploading_document'));
+      _showSnackbar(tr('error_uploading_document'));
     } finally {
       isUploading.value = false;
     }
   }
 
-  /// Reset form
   void _resetForm() {
     formKey.currentState?.reset();
     documentNoController.clear();
     remarksController.clear();
-    selectedCategory.value = '';
+    selectedDocumentType.value = null;
+    selectedCountry.value = null;
+    selectedCity.value = null;
+    cities.clear();
     dateIssued.value = null;
     dateExpire.value = null;
     _clearSelectedFile();
   }
 
-  /// Format date for API
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  /// Snackbar helper methods
-  void _showSuccessSnackbar(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF4CAF50),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  void _showErrorSnackbar(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
-  }
 }

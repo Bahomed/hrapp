@@ -242,6 +242,81 @@ class DocumentRepository {
     }
   }
 
+  // Get document types for upload dropdown
+  Future<DocumentTypesResponse> getDocumentTypes() async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/filter/document-types';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return DocumentTypesResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get countries for dropdown
+  Future<DropdownListResponse> getCountries() async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/filter/countries';
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'locale': getCurrentLanguage()},
+      );
+      return DropdownListResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get cities for dropdown, optionally filtered by country
+  Future<DropdownListResponse> getCities({int? countryId}) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$documentBaseUrl/filter/cities';
+
+      final params = <String, dynamic>{'locale': getCurrentLanguage()};
+      if (countryId != null) params['country_id'] = countryId;
+
+      var response = await dioClient.get(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        params,
+      );
+      return DropdownListResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        throw 'No Internet Connection';
+      } else {
+        throw exceptionHandler(e);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Upload document with FormData (legacy method)
   Future<DocumentUploadResponse> uploadDocumentFormData(FormData formData) async {
     try {

@@ -7,6 +7,7 @@ import '../../services/theme_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/translation_helper.dart';
 import 'document_controller.dart';
+import 'document_upload_screen.dart';
 
 class DocumentStatusChip extends StatelessWidget {
   final String status;
@@ -163,13 +164,19 @@ class DocumentCard extends StatelessWidget {
                         Icons.folder_outlined,
                       ),
                       const SizedBox(width: 8),
-
-                      const SizedBox(width: 8),
                       _buildDetailChip(
                         document.fileType?.toUpperCase() ?? '',
                         ThemeService.instance.getDocumentColor(2),
                         Icons.insert_drive_file,
                       ),
+                      if (document.docNo != null && document.docNo!.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        _buildDetailChip(
+                          document.docNo!,
+                          ThemeService.instance.getDocumentColor(8),
+                          Icons.numbers,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -862,7 +869,7 @@ class DocumentDetailBottomSheet extends StatelessWidget {
 
           // Action Buttons
           const SizedBox(height: 20),
-          _buildDocumentActionButtons(document, controller),
+          _buildDocumentActionButtons(context, document, controller),
         ],
       ),
     );
@@ -996,8 +1003,14 @@ class DocumentDetailBottomSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        if (document.docNo != null && document.docNo!.isNotEmpty)
+          _buildDetailRow(tr('doc_number'), document.docNo!),
         if (document.expiryDate != null && document.expiryDate!.isNotEmpty)
           _buildDetailRow(tr('expiry_date'), document.expiryDate!),
+        if (document.placeIssued != null && document.placeIssued!.isNotEmpty)
+          _buildDetailRow(tr('place_issued'), document.placeIssued!),
+        if (document.country != null && document.country!.isNotEmpty)
+          _buildDetailRow(tr('country'), document.country!),
       ],
     );
   }
@@ -1034,49 +1047,87 @@ class DocumentDetailBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDocumentActionButtons(DocumentResponseData document, DocumentController controller) {
-    return Row(
+  Widget _buildDocumentActionButtons(BuildContext context, DocumentResponseData document, DocumentController controller) {
+    final ts = ThemeService.instance;
+
+    // Look up renewable flag from already-loaded categories
+    // (the document list endpoint doesn't return it, but /filter/categories does)
+    final isRenewable = controller.availableCategories
+        .firstWhereOrNull(
+          (c) => c.documentName.toLowerCase() == document.category.toLowerCase(),
+        )
+        ?.renewable ?? false;
+
+    return Column(
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Get.back();
-              controller.downloadDocument(document);
-            },
-            icon: const Icon(Icons.download, color: Colors.white),
-            label: const Text(
-              'Download',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeService.instance.getPrimaryColor(),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        // Renew button — only shown when document type is renewable
+        if (isRenewable) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final result = await Get.to(
+                  () => DocumentUploadScreen(renewDocument: document),
+                );
+                if (result == true) await controller.refreshDocuments();
+              },
+              icon: const Icon(Icons.autorenew, color: Colors.white),
+              label: Text(
+                tr('renew_document'),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Get.back();
-              controller.shareDocument(document);
-            },
-            icon: Icon(Icons.share, color: ThemeService.instance.getPrimaryColor()),
-            label: Text(
-              'Share',
-              style: TextStyle(color: ThemeService.instance.getPrimaryColor(), fontWeight: FontWeight.w600),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: ThemeService.instance.getPrimaryColor()),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          const SizedBox(height: 10),
+        ],
+
+        // Download + Share
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  controller.downloadDocument(document);
+                },
+                icon: const Icon(Icons.download, color: Colors.white),
+                label: Text(
+                  tr('download'),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ts.getPrimaryColor(),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  controller.shareDocument(document);
+                },
+                icon: Icon(Icons.share, color: ts.getPrimaryColor()),
+                label: Text(
+                  tr('share'),
+                  style: TextStyle(color: ts.getPrimaryColor(), fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: ts.getPrimaryColor()),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

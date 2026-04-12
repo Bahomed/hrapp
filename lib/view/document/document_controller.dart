@@ -460,35 +460,29 @@ Shared via HR Management System''';
   }
 
   // Snackbar helper methods
-  void _showLoadingSnackbar(String message) {
-    Get.snackbar(
-      'Loading',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppTheme.primaryColor,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 1),
+  void _showSnackbar(String message, {Color? backgroundColor, Duration? duration}) {
+    final context = Get.context;
+    if (context == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor ?? AppTheme.primaryColor,
+        behavior: SnackBarBehavior.floating,
+        duration: duration ?? const Duration(seconds: 3),
+      ),
     );
+  }
+
+  void _showLoadingSnackbar(String message) {
+    _showSnackbar(message, backgroundColor: AppTheme.primaryColor, duration: const Duration(seconds: 2));
   }
 
   void _showSuccessSnackbar(String message) {
-    Get.snackbar(
-      'Success',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppTheme.successColor,
-      colorText: Colors.white,
-    );
+    _showSnackbar(message, backgroundColor: AppTheme.successColor);
   }
 
   void _showErrorSnackbar(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppTheme.errorColor,
-      colorText: Colors.white,
-    );
+    _showSnackbar('$title: $message', backgroundColor: AppTheme.errorColor);
   }
 
   // Get filter color
