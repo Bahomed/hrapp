@@ -445,7 +445,7 @@ class PermissionRequestCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               RequestTag(
-                text: '${tr('to')} ${_formatTimeDisplay(request.fromTime)}',
+                text: '${tr('to')} ${_formatTimeDisplay(request.toTime)}',
                 textColor: ThemeService.instance.getWarningColor(),
                 backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
               ),
