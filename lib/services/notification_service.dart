@@ -10,6 +10,7 @@ import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.da
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
 
 import '../view/approval/approval_screen.dart';
+import '../view/request_detail/request_detail_screen.dart';
 
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -102,7 +103,15 @@ class NotificationService {
         break;
 
       case NotificationType.requestStatus:
-        // Navigate to requests screen - we can extend this later for specific request details
+        final requestIdRaw = notification.data?['request_id'];
+        final requestType = notification.data?['request_type']?.toString();
+        if (requestIdRaw != null) {
+          final id = int.tryParse(requestIdRaw.toString());
+          if (id != null) {
+            Get.to(() => RequestDetailScreen(requestId: id, requestType: requestType));
+            break;
+          }
+        }
         Get.to(() => const RequestHomeScreen());
         break;
       case NotificationType.message:

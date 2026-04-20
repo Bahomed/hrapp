@@ -7,20 +7,30 @@ import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:co.injazathr.injazathr/view/approval/approval_controller.dart';
 import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
 
-class ApprovalScreen extends StatelessWidget {
+class ApprovalScreen extends StatefulWidget {
   final int? requestId;
   const ApprovalScreen({super.key, this.requestId});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(ApprovalController());
+  State<ApprovalScreen> createState() => _ApprovalScreenState();
+}
 
-    // If opened from a notification with a specific requestId, auto-open the detail
-    if (requestId != null) {
+class _ApprovalScreenState extends State<ApprovalScreen> {
+  late final ApprovalController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(ApprovalController());
+    if (widget.requestId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _openRequestById(controller, requestId!);
+        _openRequestById(controller, widget.requestId!);
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeService = Get.find<ThemeService>();
 
     return Scaffold(

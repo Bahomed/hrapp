@@ -159,88 +159,191 @@ class ApprovalController extends GetxController {
 
   // Show enhanced approval dialog for leave requests
   void _showLeaveApprovalDialog(ApprovalRequest request) {
-    final RxList<EmployeeDropdownItem> employees = <EmployeeDropdownItem>[].obs;
-    final Rx<EmployeeDropdownItem?> selectedEmployee = Rx<EmployeeDropdownItem?>(null);
     final TextEditingController remarksController = TextEditingController();
-    final RxBool isLoadingEmployees = false.obs;
+    final TextEditingController searchController = TextEditingController();
 
-    // Load employees dropdown
-    _loadEmployees(employees, isLoadingEmployees);
+    // State lives in the method closure — stable across StatefulBuilder rebuilds
+    List<EmployeeDropdownItem> employees = [];
+    EmployeeDropdownItem? selectedEmployee;
+    bool isLoadingEmployees = true;
+    bool isDropdownOpen = false;
+    List<EmployeeDropdownItem> filteredEmployees = [];
+    bool _loadStarted = false;
 
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('approval')),
-        content: SizedBox(
-          width: Get.width * 0.8,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Approve leave request for:'),
-                const SizedBox(height: 20),
-                Text(request.employeeName),
-                const SizedBox(height: 20),
-                // Employee Dropdown with Search
-                Text(
-                  tr('replacement_employee'),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: ThemeService.instance.getTextPrimaryColor(),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Obx(() => isLoadingEmployees.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : _buildSearchableDropdown(employees, selectedEmployee),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Remarks
-                Text(
-                  '${tr('remarks')} (${tr('optional')})',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: ThemeService.instance.getTextPrimaryColor(),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: remarksController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+      StatefulBuilder(
+        builder: (context, setDialogState) {
+          if (!_loadStarted) {
+            _loadStarted = true;
+            _requestRepository.getEmployeesDropdown().then((response) {
+              if (response.statusCode == 200) {
+                employees = response.data;
+                filteredEmployees = List.from(response.data);
+              }
+              isLoadingEmployees = false;
+              setDialogState(() {});
+            }).catchError((_) {
+              isLoadingEmployees = false;
+              setDialogState(() {});
+            });
+          }
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Text(tr('approval')),
+            content: SizedBox(
+              width: Get.width * 0.8,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${tr('approve')} ${tr('leave_request')} ${tr('for')}:'),
+                    const SizedBox(height: 8),
+                    Text(request.employeeName,
+                        style: TextStyle(fontWeight: FontWeight.w600,
+                            color: ThemeService.instance.getTextPrimaryColor())),
+                    const SizedBox(height: 20),
+                    Text(tr('replacement_employee'),
+                        style: TextStyle(fontWeight: FontWeight.w600,
+                            color: ThemeService.instance.getTextPrimaryColor())),
+                    const SizedBox(height: 8),
+                    if (isLoadingEmployees)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => setDialogState(() => isDropdownOpen = !isDropdownOpen),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: ThemeService.instance.getDividerColor()),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedEmployee?.employeeName ?? tr('select_replacement'),
+                                      style: TextStyle(
+                                        color: selectedEmployee != null
+                                            ? ThemeService.instance.getTextPrimaryColor()
+                                            : ThemeService.instance.getTextSecondaryColor(),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Icon(Icons.keyboard_arrow_down,
+                                      color: ThemeService.instance.getTextSecondaryColor()),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (isDropdownOpen)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: ThemeService.instance.getDividerColor()),
+                                borderRadius: BorderRadius.circular(8),
+                                color: ThemeService.instance.getCardColor(),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: TextField(
+                                      controller: searchController,
+                                      decoration: InputDecoration(
+                                        hintText: tr('search'),
+                                        prefixIcon: const Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(6)),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        isDense: true,
+                                      ),
+                                      onChanged: (query) => setDialogState(() {
+                                        filteredEmployees = query.isEmpty
+                                            ? employees
+                                            : employees
+                                                .where((e) => e.employeeName
+                                                    .toLowerCase()
+                                                    .contains(query.toLowerCase()))
+                                                .toList();
+                                      }),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: filteredEmployees.length,
+                                      itemBuilder: (_, index) {
+                                        final emp = filteredEmployees[index];
+                                        return ListTile(
+                                          dense: true,
+                                          title: Text(emp.employeeName,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: ThemeService.instance.getTextPrimaryColor())),
+                                          onTap: () => setDialogState(() {
+                                            selectedEmployee = emp;
+                                            isDropdownOpen = false;
+                                            searchController.clear();
+                                            filteredEmployees = employees;
+                                          }),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    const SizedBox(height: 16),
+                    Text('${tr('remarks')} (${tr('optional')})',
+                        style: TextStyle(fontWeight: FontWeight.w600,
+                            color: ThemeService.instance.getTextPrimaryColor())),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: remarksController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        hintText: tr('enter_remarks'),
+                        contentPadding: const EdgeInsets.all(12),
+                      ),
                     ),
-                    hintText: tr('enter_remarks'),
-                    contentPadding: const EdgeInsets.all(12),
-                  ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
-                const SizedBox(height: 16),
-              ],
+              ),
             ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.key.currentState?.pop(),
-            child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.key.currentState?.pop();
-              _approveLeaveRequest(
-                request,
-                selectedEmployee.value?.id,
-                remarksController.text.trim(),
-              );
-            },
-            child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                child: Text(tr('cancel'),
+                    style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+              ),
+              TextButton(
+                onPressed: () {
+                  final empId = selectedEmployee?.id;
+                  final remarks = remarksController.text.trim();
+                  Navigator.of(context, rootNavigator: true).pop();
+                  _approveLeaveRequest(request, empId, remarks);
+                },
+                child: Text(tr('approved'),
+                    style: TextStyle(color: ThemeService.instance.getSuccessColor())),
+              ),
+            ],
+          );
+        },
       ),
+      barrierDismissible: false,
     );
   }
 
@@ -249,7 +352,7 @@ class ApprovalController extends GetxController {
     final TextEditingController remarksController = TextEditingController();
 
     Get.dialog(
-      AlertDialog(
+      Builder(builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(tr('approval')),
         content: SizedBox(
@@ -261,23 +364,17 @@ class ApprovalController extends GetxController {
               children: [
                 Text('Approve ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
                 const SizedBox(height: 20),
-                
-                // Remarks
                 Text(
                   '${tr('remarks')} (${tr('optional')})',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: ThemeService.instance.getTextPrimaryColor(),
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600,
+                      color: ThemeService.instance.getTextPrimaryColor()),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: remarksController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     hintText: tr('enter_remarks'),
                     contentPadding: const EdgeInsets.all(12),
                   ),
@@ -289,18 +386,20 @@ class ApprovalController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.key.currentState?.pop(),
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
             child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () {
-              Get.key.currentState?.pop();
-              _approveOtherRequest(request, remarksController.text.trim());
+              final remarks = remarksController.text.trim();
+              Navigator.of(context, rootNavigator: true).pop();
+              _approveOtherRequest(request, remarks);
             },
             child: Text(tr('approved'), style: TextStyle(color: ThemeService.instance.getSuccessColor())),
           ),
         ],
-      ),
+      )),
+      barrierDismissible: false,
     );
   }
 
@@ -309,9 +408,9 @@ class ApprovalController extends GetxController {
     final TextEditingController remarksController = TextEditingController();
 
     Get.dialog(
-      AlertDialog(
+      Builder(builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Reject Request'),
+        title: Text(tr('reject_request')),
         content: SizedBox(
           width: Get.width * 0.8,
           child: SingleChildScrollView(
@@ -321,23 +420,17 @@ class ApprovalController extends GetxController {
               children: [
                 Text('Reject ${request.requestType.toLowerCase()} request for ${request.employeeName}?'),
                 const SizedBox(height: 20),
-                
-                // Remarks
                 Text(
                   '${tr('remarks')} (${tr('optional')})',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: ThemeService.instance.getTextPrimaryColor(),
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600,
+                      color: ThemeService.instance.getTextPrimaryColor()),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: remarksController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     hintText: tr('enter_remarks'),
                     contentPadding: const EdgeInsets.all(12),
                   ),
@@ -349,18 +442,20 @@ class ApprovalController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.key.currentState?.pop(),
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
             child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
           ),
           TextButton(
             onPressed: () {
-              Get.key.currentState?.pop();
-              _rejectRequestWithRemarks(request, remarksController.text.trim());
+              final remarks = remarksController.text.trim();
+              Navigator.of(context, rootNavigator: true).pop();
+              _rejectRequestWithRemarks(request, remarks);
             },
             child: Text(tr('reject'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
           ),
         ],
-      ),
+      )),
+      barrierDismissible: false,
     );
   }
 
@@ -500,7 +595,7 @@ class ApprovalController extends GetxController {
 
             // Action Buttons
             const SizedBox(height: 20),
-            _buildActionButtons(request),
+            Builder(builder: (ctx) => _buildActionButtons(request, ctx)),
           ],
         ),
       ),
@@ -660,15 +755,16 @@ class ApprovalController extends GetxController {
     );
   }
 
-  Widget _buildActionButtons(ApprovalRequest request) {
+  Widget _buildActionButtons(ApprovalRequest request, BuildContext sheetContext) {
     return Column(
       children: [
         Row(
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () {
-                  Get.key.currentState?.pop();
+                onPressed: () async {
+                  Navigator.of(sheetContext).pop();
+                  await Future.delayed(const Duration(milliseconds: 300));
                   showRejectionDialog(request);
                 },
                 style: OutlinedButton.styleFrom(
@@ -697,8 +793,9 @@ class ApprovalController extends GetxController {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  Get.key.currentState?.pop();
+                onPressed: () async {
+                  Navigator.of(sheetContext).pop();
+                  await Future.delayed(const Duration(milliseconds: 300));
                   showApprovalDialog(request);
                 },
                 style: ElevatedButton.styleFrom(
@@ -730,7 +827,7 @@ class ApprovalController extends GetxController {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => Get.key.currentState?.pop(),
+            onPressed: () => Navigator.of(sheetContext).pop(),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: ThemeService.instance.getTextSecondaryColor()),
               shape: RoundedRectangleBorder(
