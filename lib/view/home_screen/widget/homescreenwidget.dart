@@ -8,6 +8,7 @@ import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 
+import '../../assetscreen/asset_screen.dart';
 import '../../attendance/clocking_screen.dart';
 import '../../document/document_screen.dart';
 import '../homescreen_controller.dart';
@@ -173,6 +174,12 @@ class HomeScreenWidget extends StatelessWidget {
           'label': tr('profile'),
           'key': 'profile',
           'onTap': () => model.goToProfileScreen(),
+        },
+        {
+          'icon': Icons.inventory_2_outlined,
+          'label': tr('my_assets'),
+          'key': 'assets',
+          'onTap': () => Get.to(const AssetScreen()),
         },
       ];
 

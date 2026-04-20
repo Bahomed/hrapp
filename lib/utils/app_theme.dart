@@ -546,6 +546,7 @@ class AppTheme {
     'attendance': Color(0xFFFF6B9D), // Pink
     'schedule': Color(0xFFFFB800), // Yellow
     'profile': Color(0xFF9F7AEA), // Light purple
+    'assets': Color(0xFF43A047), // Green
   };
 
   // Status Colors - Updated for better contrast

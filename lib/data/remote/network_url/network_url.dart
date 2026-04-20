@@ -36,3 +36,7 @@ const getEmployeesUrl = '/api/manager/employees';
 const getEmployeeProfileUrl = '/api/manager/employee-profile/';
 const getEmployeeRequestsUrl = '/api/manager/employee-request/';
 const getLeaveBalanceUrl = '/api/manager/get-leave-balance/';
+
+// Asset URLs
+const myAssetsUrl = '/api/my-assets';
+const myAssetsSummaryUrl = '/api/my-assets/summary';
