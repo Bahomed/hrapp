@@ -1,5 +1,6 @@
 import 'package:co.injazathr.injazathr/data/remote/response/holiday_response.dart';
 import 'package:co.injazathr.injazathr/repository/holidayrepository.dart';
+import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
@@ -7,22 +8,22 @@ import '../../utils/alertbox.dart';
 
 class HolidayScreenController extends GetxController {
   final repositiory = HolidayRepository();
-  final upcomingholidaylist = <Datum>[].obs;
-  final pastholidaylist = <Datum>[].obs;
-  final allholidaylist = <Datum>[].obs;
-  final filteredholidaylist = <Datum>[].obs;
+  final filteredholidaylist = <HolidayItem>[].obs;
 
   final controller = ScrollController();
-  
-  // Filter state
-  final selectedFilter = 'upcoming'.obs; // 'upcoming', 'past'
+
+  final selectedFilter = 'upcoming'.obs;
   final isLoading = false.obs;
+  final isLoadingMore = false.obs;
+
+  int _currentPage = 1;
+  bool _hasMore = true;
 
   @override
   void onInit() {
-    controller.addListener(loadmore);
+    controller.addListener(_onScroll);
     getAllholiday();
-
+    ever(LanguageService.instance.currentLanguage, (_) => getAllholiday());
     super.onInit();
   }
 
@@ -32,66 +33,56 @@ class HolidayScreenController extends GetxController {
     super.dispose();
   }
 
-  void loadmore() {
-    if (controller.position.pixels == controller.position.maxScrollExtent) {
-      getAllholiday();
+  void _onScroll() {
+    if (controller.position.pixels >= controller.position.maxScrollExtent - 200) {
+      loadMore();
     }
   }
 
-  Future<String> getAllholiday() async {
+  Future<void> getAllholiday() async {
     try {
       isLoading.value = true;
-      var response = await repositiory.getAllNotice();
+      _currentPage = 1;
+      _hasMore = true;
+      filteredholidaylist.clear();
 
-      final upcomingholiday = <Datum>[];
-      final pastHoliday = <Datum>[];
-      final allholiday = <Datum>[];
-
-      for (var data in response.data) {
-        allholiday.add(data);
-        
-        if (data.date.isAfter(DateTime(DateTime.now().year,
-                DateTime.now().month, DateTime.now().day)) ||
-            data.date.isAtSameMomentAs(DateTime(DateTime.now().year,
-                DateTime.now().month, DateTime.now().day))) {
-          upcomingholiday.add(data);
-        } else {
-          pastHoliday.add(data);
-        }
-      }
-
-      upcomingholidaylist.value = upcomingholiday;
-      pastholidaylist.value = pastHoliday.reversed.toList();
-      allholidaylist.value = allholiday;
-      
-      // Apply current filter
-      _applyFilter();
-      
-      isLoading.value = false;
-      return "loaded";
+      final response = await repositiory.getAllNotice(
+        page: _currentPage,
+        filter: selectedFilter.value,
+      );
+      _hasMore = response.data.pagination.hasMore;
+      filteredholidaylist.addAll(response.data.items);
     } catch (e) {
-      isLoading.value = false;
       showAlert(e.toString());
-      return "failed";
+    } finally {
+      isLoading.value = false;
     }
   }
-  
+
+  Future<void> loadMore() async {
+    if (isLoadingMore.value || !_hasMore) return;
+    try {
+      isLoadingMore.value = true;
+      _currentPage++;
+      final response = await repositiory.getAllNotice(
+        page: _currentPage,
+        filter: selectedFilter.value,
+      );
+      _hasMore = response.data.pagination.hasMore;
+      filteredholidaylist.addAll(response.data.items);
+    } catch (e) {
+      _currentPage--;
+      showAlert(e.toString());
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
   void filterByType(String filterType) {
     selectedFilter.value = filterType;
-    _applyFilter();
+    getAllholiday();
   }
-  
-  void _applyFilter() {
-    switch (selectedFilter.value) {
-      case 'upcoming':
-        filteredholidaylist.value = upcomingholidaylist.toList();
-        break;
-      case 'past':
-        filteredholidaylist.value = pastholidaylist.toList();
-        break;
-    }
-  }
-  
+
   Future<void> refreshHolidays() async {
     await getAllholiday();
   }

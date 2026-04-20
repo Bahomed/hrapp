@@ -13,19 +13,23 @@ class HolidayRepository{
   final DioClient dioClient = DioClient();
   final Preferences preferences = Preferences();
   
-  Future<HolidayResponse> getAllNotice() async {
+  Future<HolidayResponse> getAllNotice({int page = 1, String filter = 'all', int perPage = 15}) async {
     try {
       final token = await preferences.getToken();
-      // Get workspace URL and construct API URL
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$getallholidayurl';
-      
-      Map<String, dynamic> queryParams = {'locale': getCurrentLanguage()};
+
+      Map<String, dynamic> queryParams = {
+        'locale': getCurrentLanguage(),
+        'page': page,
+        'filter': filter,
+        'per_page': perPage,
+      };
       queryParams = ApiHelper.instance.addLocaleToQuery(queryParams);
-      
+
       var response = await dioClient.get(
-        apiUrl, 
-        {"Authorization": "Bearer $token"}, 
+        apiUrl,
+        {"Authorization": "Bearer $token"},
         queryParams
       );
 

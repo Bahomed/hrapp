@@ -1,5 +1,6 @@
 import 'package:co.injazathr.injazathr/view/holidayscreen/holidayscreencontroller.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -135,23 +136,34 @@ class CustomTabBar extends StatelessWidget {
   Widget _buildHolidaysList(BuildContext context, HolidayScreenController controller) {
     return RefreshIndicator(
       onRefresh: controller.refreshHolidays,
-      child: ListView.builder(
-        padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 16, tablet: 20, desktop: 24),
-        itemCount: controller.filteredholidaylist.length,
-        itemBuilder: (context, index) {
-          final holiday = controller.filteredholidaylist[index];
-          final isUpcoming = holiday.date.isAfter(DateTime.now()) || 
-                            holiday.date.isAtSameMomentAs(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
-          return _buildHolidayCard(holiday, isUpcoming, ThemeService.instance);
-        },
-      ),
+      child: Obx(() {
+        final items = controller.filteredholidaylist;
+        final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        return ListView.builder(
+          controller: controller.controller,
+          padding: ResponsiveUtils.responsiveHorizontalPadding(context, mobile: 16, tablet: 20, desktop: 24),
+          itemCount: items.length + (controller.isLoadingMore.value ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == items.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final holiday = items[index];
+            final isUpcoming = holiday.toDate.isAfter(today) || holiday.toDate.isAtSameMomentAs(today);
+            return _buildHolidayCard(holiday, isUpcoming, ThemeService.instance);
+          },
+        );
+      }),
     );
   }
 
   Widget _buildHolidayCard(dynamic holiday, bool isUpcoming, ThemeService themeService) {
-    final statusColor = isUpcoming 
+    final statusColor = isUpcoming
         ? themeService.getSuccessColor()
         : themeService.getWarningColor();
+    final days = holiday.toDate.difference(holiday.fromDate).inDays + 1;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -234,16 +246,16 @@ class CustomTabBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      DateFormat('dd').format(holiday.date),
-                      style: TextStyle(
+                      DateFormat('dd').format(holiday.fromDate),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      DateFormat('MMM').format(holiday.date),
-                      style: TextStyle(
+                      DateFormat('MMM').format(holiday.fromDate),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -254,11 +266,39 @@ class CustomTabBar extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat('MMM d, y').format(holiday.fromDate),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: themeService.getTextSecondaryColor(),
+                      ),
+                    ),
+                    Text(
+                      '${LanguageService.instance.isRTL() ? '←' : '→'} ${DateFormat('MMM d, y').format(holiday.toDate)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: themeService.getTextSecondaryColor(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: statusColor.withOpacity(0.3)),
+                ),
                 child: Text(
-                  DateFormat('EEEE, MMMM d, y').format(holiday.date),
+                  '$days ${tr('days')}',
                   style: TextStyle(
-                    fontSize: 13,
-                    color: themeService.getTextSecondaryColor(),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
                   ),
                 ),
               ),
