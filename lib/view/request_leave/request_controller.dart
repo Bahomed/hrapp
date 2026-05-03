@@ -501,23 +501,25 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void deleteLeaveRequest(LeaveRequest request) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('delete_request')),
-        content: Text(tr('confirm_delete_leave_request')),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _deleteLeaveRequest(request.id);
-            },
-            child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
-          ),
-        ],
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_request')),
+          content: Text(tr('confirm_delete_leave_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteLeaveRequest(request.id);
+              },
+              child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -564,23 +566,25 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void deletePermissionRequest(PermissionRequest request) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('delete_permission_request')),
-        content: Text(tr('confirm_delete_permission_request')),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _deletePermissionRequest(request.id);
-            },
-            child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
-          ),
-        ],
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_permission_request')),
+          content: Text(tr('confirm_delete_permission_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deletePermissionRequest(request.id);
+              },
+              child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -626,23 +630,25 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void deleteLoanRequest(LoanRequest request) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('delete_loan_request')),
-        content: Text(tr('confirm_delete_loan_request')),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _deleteLoanRequest(request.id);
-            },
-            child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
-          ),
-        ],
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_loan_request')),
+          content: Text(tr('confirm_delete_loan_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteLoanRequest(request.id);
+              },
+              child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -682,23 +688,25 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void deleteLetterRequest(LetterRequest request) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('delete_letter_request')),
-        content: Text(tr('confirm_delete_letter_request')),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _deleteLetterRequest(request.id);
-            },
-            child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
-          ),
-        ],
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_letter_request')),
+          content: Text(tr('confirm_delete_letter_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteLetterRequest(request.id);
+              },
+              child: Text('Delete', style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
       ),
     );
   }
