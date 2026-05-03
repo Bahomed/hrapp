@@ -220,28 +220,30 @@ class ScheduleController extends GetxController {
     if (schedule == null) return;
 
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(schedule.name),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(schedule.description, style: TextStyle(color: Colors.grey[600])),
-            const SizedBox(height: 16),
-            Text('${tr('working_hours')}: $workingHoursSummary', style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text('${tr('total_hours_week')}: $totalWeeklyHours ${tr('hours')}', style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text('${tr('working_days_count')}: $workingDaysCount ${tr('days')}', style: const TextStyle(fontWeight: FontWeight.w600)),
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(schedule.name),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(schedule.description, style: TextStyle(color: Colors.grey[600])),
+              const SizedBox(height: 16),
+              Text('${tr('working_hours')}: $workingHoursSummary', style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Text('${tr('total_hours_week')}: $totalWeeklyHours ${tr('hours')}', style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Text('${tr('working_days_count')}: $workingDaysCount ${tr('days')}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('close')),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(tr('close')),
-          ),
-        ],
       ),
     );
   }

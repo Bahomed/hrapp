@@ -13,64 +13,67 @@ void showLottieDialog(
   final themeService = ThemeService.instance;
   Get.dialog(
     barrierDismissible: false,
-    AlertDialog(
-      backgroundColor: themeService.getCardColor(),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 0,
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: themeService.getTextPrimaryColor(),
+    Builder(
+      builder: (context) => AlertDialog(
+        backgroundColor: themeService.getCardColor(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: themeService.getTextPrimaryColor(),
+          ),
         ),
-      ),
-      content: SizedBox(
-        height: 140,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Lottie.asset(lottiePath, repeat: false, width: 100, height: 100),
-            Text(
-              desc,
-              style: TextStyle(
-                fontWeight: FontWeight.normal, 
-                fontSize: 15,
-                color: themeService.getTextPrimaryColor(),
-              ),
-            )
-          ],
+        content: SizedBox(
+          height: 140,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Lottie.asset(lottiePath, repeat: false, width: 100, height: 100),
+              Text(
+                desc,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: 15,
+                  color: themeService.getTextPrimaryColor(),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              backgroundColor: type == AlertType.success
-                  ? themeService.getSuccessColor()
-                  : type == AlertType.warning
-                      ? themeService.getWarningColor()
-                      : themeService.getErrorColor()),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Okay",
-                style: TextStyle(color: themeService.getSilver()),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                backgroundColor: type == AlertType.success
+                    ? themeService.getSuccessColor()
+                    : type == AlertType.warning
+                        ? themeService.getWarningColor()
+                        : themeService.getErrorColor()),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Okay",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
               ),
             ),
+            onPressed: () {
+              final nav = Navigator.of(context, rootNavigator: true);
+              nav.pop();
+              nav.pop();
+            },
           ),
-          onPressed: () {
-            Get.back();
-            Get.back();
-          },
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -79,63 +82,63 @@ void showAlertDialog(String title, String desc) {
   final themeService = ThemeService.instance;
   Get.dialog(
     barrierDismissible: false,
-    AlertDialog(
-      backgroundColor: themeService.getCardColor(),
-      shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-      elevation: 0,
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: themeService.getTextPrimaryColor(),
-        ),
-      ),
-      content: SizedBox(
-        height: 100,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.warning,
-              color: themeService.getWarningColor(),
-              size: 80,
-            ),
-            Text(
-              desc,
-              style: TextStyle(
-                fontWeight: FontWeight.normal, 
-                fontSize: 15,
-                color: themeService.getTextPrimaryColor(),
-              ),
-            )
-          ],
-        ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-            backgroundColor: themeService.getPrimaryColor(),
+    Builder(
+      builder: (context) => AlertDialog(
+        backgroundColor: themeService.getCardColor(),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+        elevation: 0,
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: themeService.getTextPrimaryColor(),
           ),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Okay",
-                style: TextStyle(color: themeService.getSilver()),
+        ),
+        content: SizedBox(
+          height: 100,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.warning,
+                color: themeService.getWarningColor(),
+                size: 80,
+              ),
+              Text(
+                desc,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: 15,
+                  color: themeService.getTextPrimaryColor(),
+                ),
+              )
+            ],
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+              backgroundColor: themeService.getPrimaryColor(),
+            ),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Okay",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
               ),
             ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -236,80 +239,80 @@ void customDilogBox(
   final themeService = ThemeService.instance;
   Get.dialog(
     barrierDismissible: false,
-    AlertDialog(
-      backgroundColor: themeService.getCardColor(),
-      shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-      elevation: 0,
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: themeService.getTextPrimaryColor(),
+    Builder(
+      builder: (context) => AlertDialog(
+        backgroundColor: themeService.getCardColor(),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+        elevation: 0,
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: themeService.getTextPrimaryColor(),
+          ),
         ),
-      ),
-      content: SizedBox(
-        height: 125,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: themeService.getPrimaryColor(),
-              size: 100,
-            ),
-            Text(
-              desc,
-              style: TextStyle(
-                fontWeight: FontWeight.normal, 
-                fontSize: 15,
-                color: themeService.getTextPrimaryColor(),
+        content: SizedBox(
+          height: 125,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: themeService.getPrimaryColor(),
+                size: 100,
               ),
-            )
-          ],
+              Text(
+                desc,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: 15,
+                  color: themeService.getTextPrimaryColor(),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      actionsOverflowButtonSpacing: 10,
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-              backgroundColor: themeService.getPrimaryColor()),
-          onPressed: confirmBtn,
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Okay",
-                style: TextStyle(color: themeService.getSilver()),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        actionsOverflowButtonSpacing: 10,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+                backgroundColor: themeService.getPrimaryColor()),
+            onPressed: confirmBtn,
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Okay",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
               ),
             ),
           ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-              backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: themeService.getSilver()),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+                backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
               ),
             ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -318,60 +321,60 @@ void customDilogBoxForAttendance(String title, String image) {
   final themeService = ThemeService.instance;
   Get.dialog(
     barrierDismissible: false,
-    AlertDialog(
-      backgroundColor: themeService.getCardColor(),
-      shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-      elevation: 0,
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: themeService.getTextPrimaryColor(),
+    Builder(
+      builder: (context) => AlertDialog(
+        backgroundColor: themeService.getCardColor(),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+        elevation: 0,
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: themeService.getTextPrimaryColor(),
+          ),
         ),
-      ),
-      content: SizedBox(
-        height: 125,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-                child: ClipRRect(
-              borderRadius: borderRadius(),
-              child: Image.network(
-                image,
-                fit: BoxFit.cover,
-                width: 120,
-                height: 120,
-              ),
-            )),
-          ],
+        content: SizedBox(
+          height: 125,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                  child: ClipRRect(
+                borderRadius: borderRadius(),
+                child: Image.network(
+                  image,
+                  fit: BoxFit.cover,
+                  width: 120,
+                  height: 120,
+                ),
+              )),
+            ],
+          ),
         ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      actionsOverflowButtonSpacing: 10,
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-              backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: themeService.getSilver()),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        actionsOverflowButtonSpacing: 10,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+                backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
               ),
             ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -381,108 +384,108 @@ void dilogBoxForFaceId(int count, IconData icon, String title, String desc,
   final themeService = ThemeService.instance;
   Get.dialog(
     barrierDismissible: false,
-    AlertDialog(
-      backgroundColor: themeService.getCardColor(),
-      shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-      elevation: 0,
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: themeService.getTextPrimaryColor(),
+    Builder(
+      builder: (context) => AlertDialog(
+        backgroundColor: themeService.getCardColor(),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+        elevation: 0,
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: themeService.getTextPrimaryColor(),
+          ),
         ),
-      ),
-      content: SizedBox(
-        height: 155,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: themeService.getPrimaryColor(),
-              size: 100,
-            ),
-            Text(
-              desc,
-              style: TextStyle(
-                fontWeight: FontWeight.normal, 
-                fontSize: 15,
-                color: themeService.getTextPrimaryColor(),
+        content: SizedBox(
+          height: 155,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: themeService.getPrimaryColor(),
+                size: 100,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top:5),
-              child: Text(
-                "Total: $count",
+              Text(
+                desc,
                 style: TextStyle(
-                  fontWeight: FontWeight.normal, 
-                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  fontSize: 15,
                   color: themeService.getTextPrimaryColor(),
                 ),
               ),
-            )
-          ],
-        ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      actionsOverflowButtonSpacing: 10,
-      contentPadding: EdgeInsets.zero,
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-              backgroundColor: themeService.getPrimaryColor()),
-          onPressed: confirmBtn,
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Save FaceId",
-                style: TextStyle(color: themeService.getSilver()),
-              ),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Text(
+                  "Total: $count",
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 18,
+                    color: themeService.getTextPrimaryColor(),
+                  ),
+                ),
+              )
+            ],
           ),
         ),
-        ElevatedButton(
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        actionsOverflowButtonSpacing: 10,
+        contentPadding: EdgeInsets.zero,
+        actions: [
+          ElevatedButton(
             style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(borderRadius: borderRadius()),
                 backgroundColor: themeService.getPrimaryColor()),
-            onPressed: deleteBtn,
+            onPressed: confirmBtn,
             child: Container(
               width: double.infinity,
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Center(
                 child: Text(
-                  "Delete FaceId",
+                  "Save FaceId",
                   style: TextStyle(color: themeService.getSilver()),
                 ),
               ),
-            )),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: borderRadius()),
-              backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: themeService.getSilver()),
-              ),
             ),
           ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-      ],
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+                  backgroundColor: themeService.getPrimaryColor()),
+              onPressed: deleteBtn,
+              child: Container(
+                width: double.infinity,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Center(
+                  child: Text(
+                    "Delete FaceId",
+                    style: TextStyle(color: themeService.getSilver()),
+                  ),
+                ),
+              )),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: borderRadius()),
+                backgroundColor: themeService.getPrimaryColor().withOpacity(0.7)),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(color: themeService.getSilver()),
+                ),
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
     ),
   );
 }

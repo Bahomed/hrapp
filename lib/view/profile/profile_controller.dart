@@ -201,45 +201,47 @@ class ProfileController extends GetxController {
 
       // Show dialog to choose between camera and gallery
       await Get.dialog(
-        AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(tr('change_profile_picture')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.camera_alt, color: ThemeService.instance.getPrimaryColor()),
-                title: Text(tr('take_photo')),
-                onTap: () async {
-                  Get.back();
-                  final XFile? photo = await picker.pickImage(
-                    source: ImageSource.camera,
-                    maxWidth: 1024,
-                    maxHeight: 1024,
-                    imageQuality: 85,
-                  );
-                  if (photo != null) {
-                    await _uploadProfilePicture(photo.path);
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo_library, color: ThemeService.instance.getPrimaryColor()),
-                title: Text(tr('choose_from_gallery')),
-                onTap: () async {
-                  Get.back();
-                  final XFile? image = await picker.pickImage(
-                    source: ImageSource.gallery,
-                    maxWidth: 1024,
-                    maxHeight: 1024,
-                    imageQuality: 85,
-                  );
-                  if (image != null) {
-                    await _uploadProfilePicture(image.path);
-                  }
-                },
-              ),
-            ],
+        Builder(
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Text(tr('change_profile_picture')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.camera_alt, color: ThemeService.instance.getPrimaryColor()),
+                  title: Text(tr('take_photo')),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final XFile? photo = await picker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 1024,
+                      maxHeight: 1024,
+                      imageQuality: 85,
+                    );
+                    if (photo != null) {
+                      await _uploadProfilePicture(photo.path);
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_library, color: ThemeService.instance.getPrimaryColor()),
+                  title: Text(tr('choose_from_gallery')),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final XFile? image = await picker.pickImage(
+                      source: ImageSource.gallery,
+                      maxWidth: 1024,
+                      maxHeight: 1024,
+                      imageQuality: 85,
+                    );
+                    if (image != null) {
+                      await _uploadProfilePicture(image.path);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -365,23 +367,25 @@ class ProfileController extends GetxController {
   // Logout functionality
   Future<void> logout() async {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('logout')),
-        content: Text(tr('are_you_sure_logout')),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(tr('cancel'), style: TextStyle(color: Colors.grey[600])),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _performLogout();
-            },
-            child: Text(tr('logout'), style: const TextStyle(color: Color(0xFFF44336))),
-          ),
-        ],
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('logout')),
+          content: Text(tr('are_you_sure_logout')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('cancel'), style: TextStyle(color: Colors.grey[600])),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _performLogout();
+              },
+              child: Text(tr('logout'), style: const TextStyle(color: Color(0xFFF44336))),
+            ),
+          ],
+        ),
       ),
     );
   }
