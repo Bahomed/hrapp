@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:co.injazathr.injazathr/data/local/preferences.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/auth_interceptor.dart';
 import 'package:co.injazathr.injazathr/services/update_service.dart';
 import 'package:co.injazathr.injazathr/view/workspace/workspace_screen.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,16 @@ class SplashController extends GetxController {
 
     // Check for update before navigating (Android official Play Store API)
     await UpdateService.checkForUpdate();
+
+    // If we have a token but it's expired, proactively refresh before navigating.
+    // This prevents all HomeScreen API calls from hitting 401 simultaneously.
+    if (token.isNotEmpty && await perferences.isTokenExpired()) {
+      final refreshed = await AuthInterceptor.refreshTokenOnce(perferences);
+      if (!refreshed) {
+        await perferences.clearLoginSession();
+        token = '';
+      }
+    }
 
     Timer(
         const Duration(seconds: 1),

@@ -5,6 +5,50 @@ import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/view/login_screen/login_screen.dart';
 import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 
+/// Standalone refresh used at startup (before any Dio instance is available).
+/// Returns true if a new token was saved, false otherwise.
+Future<bool> _doRefresh(Preferences preferences) async {
+  final refreshToken = await preferences.getRefreshToken();
+  if (refreshToken.isEmpty) return false;
+
+  final workspaceUrl = await preferences.getWorkspaceUrl();
+  if (workspaceUrl.isEmpty) return false;
+
+  final locale = ApiHelper.instance.getCurrentLocale();
+  final refreshUrl = '$workspaceUrl/api/refresh-token?locale=$locale';
+
+  final refreshDio = Dio(BaseOptions(
+    validateStatus: (status) => status != null && status < 500,
+    contentType: 'application/json',
+  ));
+
+  try {
+    final response = await refreshDio.post(
+      refreshUrl,
+      data: {'refresh_token': refreshToken},
+      options: Options(headers: {'Accept': 'application/json', 'Accept-Language': locale}),
+    );
+
+    final data = response.data;
+    if (data != null && data['error'] == false && data['code'] == 100) {
+      final newToken = data['token'] as String?;
+      final newRefreshToken = data['refresh_token'] as String?;
+      final expiresAt = data['expires_at'] as String?;
+      if (newToken != null && newToken.isNotEmpty) {
+        await preferences.saveToken(newToken);
+        if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+          await preferences.saveRefreshToken(newRefreshToken);
+        }
+        if (expiresAt != null && expiresAt.isNotEmpty) {
+          await preferences.saveTokenExpiresAt(expiresAt);
+        }
+        return true;
+      }
+    }
+  } catch (_) {}
+  return false;
+}
+
 /// Interceptor that handles automatic token refresh on 401 errors.
 ///
 /// When a request fails with 401 Unauthorized, this interceptor will:
@@ -19,6 +63,11 @@ class AuthInterceptor extends Interceptor {
   final List<_RetryRequest> _pendingRequests = [];
 
   AuthInterceptor(this.dio);
+
+  /// Callable from outside the interceptor (e.g. splash) to refresh a token
+  /// without needing an active Dio instance.
+  static Future<bool> refreshTokenOnce(Preferences preferences) =>
+      _doRefresh(preferences);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -86,85 +135,24 @@ class AuthInterceptor extends Interceptor {
     _isRefreshing = true;
 
     try {
-      final refreshToken = await _preferences.getRefreshToken();
+      final refreshed = await _doRefresh(_preferences);
 
-      if (refreshToken.isEmpty) {
+      if (!refreshed) {
         _navigateToLogin();
         return false;
       }
 
-      final workspaceUrl = await _preferences.getWorkspaceUrl();
-      final refreshUrl = '$workspaceUrl/api/refresh-token';
+      final newToken = await _preferences.getToken();
+      options.headers['Authorization'] = 'Bearer $newToken';
 
-      // Create a new Dio instance for refresh to avoid interceptor loop
-      final refreshDio = Dio(BaseOptions(
-        validateStatus: (status) => status != null && status < 500,
-        contentType: 'application/json',
-      ));
-
-      // Add locale to query params
-      final locale = ApiHelper.instance.getCurrentLocale();
-
-      final requestBody = {
-        'refresh_token': refreshToken,
-      };
-
-      Response response;
       try {
-        response = await refreshDio.post(
-          '$refreshUrl?locale=$locale',
-          data: requestBody,
-          options: Options(
-            headers: {
-              'Accept': 'application/json',
-              'Accept-Language': locale,
-            },
-          ),
-        );
-      } on DioException {
-        _navigateToLogin();
+        final retryResponse = await dio.fetch(options);
+        handler.resolve(retryResponse);
+        await _retryPendingRequests(newToken);
+        return true;
+      } catch (e) {
         return false;
       }
-
-      final data = response.data;
-
-      // Check if refresh was successful
-      if (data != null && data['error'] == false && data['code'] == 100) {
-        final newToken = data['token'] as String?;
-        final newRefreshToken = data['refresh_token'] as String?;
-        final expiresAt = data['expires_at'] as String?;
-
-        if (newToken != null && newToken.isNotEmpty) {
-          // Save new tokens
-          await _preferences.saveToken(newToken);
-          if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
-            await _preferences.saveRefreshToken(newRefreshToken);
-          }
-          if (expiresAt != null && expiresAt.isNotEmpty) {
-            await _preferences.saveTokenExpiresAt(expiresAt);
-          }
-
-          // Retry the original request with new token
-          options.headers['Authorization'] = 'Bearer $newToken';
-
-          try {
-            final retryResponse = await dio.fetch(options);
-            handler.resolve(retryResponse);
-
-            // Retry all pending requests
-            _retryPendingRequests(newToken);
-
-            return true;
-          } catch (e) {
-            return false;
-          }
-        }
-      }
-
-      // Refresh failed, navigate to login
-      _navigateToLogin();
-      return false;
-
     } catch (e) {
       _navigateToLogin();
       return false;
@@ -173,8 +161,10 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  void _retryPendingRequests(String newToken) async {
-    for (final request in _pendingRequests) {
+  Future<void> _retryPendingRequests(String newToken) async {
+    final requests = List<_RetryRequest>.from(_pendingRequests);
+    _pendingRequests.clear();
+    for (final request in requests) {
       request.options.headers['Authorization'] = 'Bearer $newToken';
       try {
         final response = await dio.fetch(request.options);
@@ -183,7 +173,6 @@ class AuthInterceptor extends Interceptor {
         request.completer.completeError(e);
       }
     }
-    _pendingRequests.clear();
   }
 
   void _navigateToLogin() async {

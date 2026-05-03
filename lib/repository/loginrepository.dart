@@ -13,21 +13,21 @@ class LoginRepository {
   final DioClient dioClient = DioClient();
   final Preferences preferences = Preferences();
 
-  void saveLoginDetails(
+  Future<void> saveLoginDetails(
     String token,
     login_response.Data? userData, {
     String? refreshToken,
     String? expiresAt,
-  }) {
-    preferences.saveToken(token);
+  }) async {
+    await preferences.saveToken(token);
     if (refreshToken != null && refreshToken.isNotEmpty) {
-      preferences.saveRefreshToken(refreshToken);
+      await preferences.saveRefreshToken(refreshToken);
     }
     if (expiresAt != null && expiresAt.isNotEmpty) {
-      preferences.saveTokenExpiresAt(expiresAt);
+      await preferences.saveTokenExpiresAt(expiresAt);
     }
     if (userData != null) {
-      preferences.saveUserData(userData);
+      await preferences.saveUserData(userData);
     }
   }
 
@@ -187,10 +187,8 @@ class LoginRepository {
           }
           break;
         default:
-          // Default to mobile_no
           loginData['mobile_no'] = loginValue;
       }
-       loginData['mobile_no'] = loginValue;
       // Add FCM token if available
       if (fcmToken != null) {
         loginData['fcm_id'] = fcmToken;

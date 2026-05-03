@@ -5,6 +5,8 @@ import 'package:co.injazathr.injazathr/view/holidayscreen/holiday_screen.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/widget/homescreenwidget.dart';
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
 import 'package:co.injazathr.injazathr/view/settings/settings_screen.dart';
+import 'package:co.injazathr.injazathr/data/remote/dio_client/auth_interceptor.dart';
+import 'package:co.injazathr.injazathr/view/login_screen/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -166,20 +168,19 @@ class HomeScreenController extends SuperController {
   }
 
   DateTime? lastDashboardCall;
-  
+
   @override
   void onResumed() {
-    // Check if any file picker is active
-    // bool isFilePickerActive = false;
-    // try {
-    //   final uploadController = Get.find<DocumentUploadController>();
-    //   isFilePickerActive = uploadController.isPickingFile.value;
-    // } catch (e) {
-    //   // DocumentUploadController not found, continue normally
-    // }
-    //
-    //
-    // // Also refresh user data when app is resumed
-    // loadUserData();
+    _checkTokenOnResume();
+  }
+
+  void _checkTokenOnResume() async {
+    if (await preferences.isTokenExpired()) {
+      final refreshed = await AuthInterceptor.refreshTokenOnce(preferences);
+      if (!refreshed) {
+        await preferences.clearLoginSession();
+        Get.offAll(() => LoginScreen());
+      }
+    }
   }
 }

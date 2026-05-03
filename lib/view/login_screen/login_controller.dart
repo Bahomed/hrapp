@@ -178,7 +178,7 @@ class LoginController extends GetxController {
 
        
         // Save login details including user data, refresh token and expiration
-        repository.saveLoginDetails(
+        await repository.saveLoginDetails(
           token,
           response.data,
           refreshToken: response.refreshToken,
