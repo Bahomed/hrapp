@@ -196,9 +196,13 @@ class LoginController extends GetxController {
         if (response?.errors != null) {
           List<String> errorMessages = [];
           response!.errors!.forEach((field, messages) {
-            errorMessages.addAll(messages.cast<String>());
+            if (messages is List) {
+              errorMessages.addAll(messages.cast<String>());
+            } else if (messages is String) {
+              errorMessages.add(messages);
+            }
           });
-          errorMessage = errorMessages.join('\n');
+          if (errorMessages.isNotEmpty) errorMessage = errorMessages.join('\n');
         }
 
         _showErrorSnackbar(errorMessage);
@@ -210,31 +214,45 @@ class LoginController extends GetxController {
   }
 
   void _showSuccessSnackbar(String message) {
-    Get.snackbar(
-      "Success",
-      message,
-      backgroundColor: AppTheme.successColor,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      duration: const Duration(seconds: 3),
-      icon: const Icon(Icons.check_circle, color: Colors.white),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = Get.context ?? Get.overlayContext;
+      if (ctx == null || !ctx.mounted) return;
+      ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(
+        SnackBar(
+          content: Row(children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message, style: const TextStyle(color: Colors.white))),
+          ]),
+          backgroundColor: AppTheme.successColor,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    });
   }
 
   void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      "Error",
-      message,
-      backgroundColor: AppTheme.errorColor,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      duration: const Duration(seconds: 4),
-      icon: const Icon(Icons.error, color: Colors.white),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = Get.context ?? Get.overlayContext;
+      if (ctx == null || !ctx.mounted) return;
+      ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(
+        SnackBar(
+          content: Row(children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message, style: const TextStyle(color: Colors.white))),
+          ]),
+          backgroundColor: AppTheme.errorColor,
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    });
   }
 
   void changeWorkspace() {
