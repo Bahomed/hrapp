@@ -1185,4 +1185,8 @@ const Map<String, String> enTranslations = {
   'error_loading_shift_schedule': 'Failed to load shift schedule',
   'staff': 'Staff',
   'manager_shift_schedule': 'Employees Shift Schedule',
+  'day_view': 'Day',
+  'week_view': 'Week',
+  'month_view': 'Month',
+  'ot': 'OT',
 };

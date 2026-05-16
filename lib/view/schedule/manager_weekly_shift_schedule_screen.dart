@@ -52,7 +52,9 @@ class _ManagerWeeklyShiftScheduleScreenState
 
   void _scrollToToday() {
     if (controller.viewMode.value != 'weekly') return;
-    final dates = controller.weekDates;
+    final dates = isRTL()
+        ? controller.weekDates.reversed.toList()
+        : controller.weekDates;
     final idx = dates.indexWhere((d) => controller.isToday(d));
     if (idx > 0 && _hScroll.hasClients) {
       _hScroll.animateTo(
@@ -157,11 +159,11 @@ class _ManagerWeeklyShiftScheduleScreenState
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
-            _viewTab('today', tr('Day'), current, theme),
+            _viewTab('today', tr('day_view'), current, theme),
             const SizedBox(width: 8),
-            _viewTab('weekly', tr('Week'), current, theme),
+            _viewTab('weekly', tr('week_view'), current, theme),
             const SizedBox(width: 8),
-            _viewTab('monthly', tr('Month'), current, theme),
+            _viewTab('monthly', tr('month_view'), current, theme),
           ],
         ),
       );
@@ -316,7 +318,7 @@ class _ManagerWeeklyShiftScheduleScreenState
   Widget _buildGrid(ThemeService theme) {
     return Obx(() {
       final employees = controller.filteredEmployees;
-      final dates = controller.viewMode.value == 'monthly'
+      final rawDates = controller.viewMode.value == 'monthly'
           ? controller.monthDates
           : controller.weekDates;
 
@@ -324,68 +326,85 @@ class _ManagerWeeklyShiftScheduleScreenState
         return _buildEmptyState(theme);
       }
 
-      return Directionality(
+      final rtl = isRTL();
+      // In RTL: reverse dates so latest day (Sat) is leftmost / immediately visible.
+      // In LTR: keep natural Sun→Sat order.
+      final dates = rtl ? rawDates.reversed.toList() : rawDates;
+
+      final staffColumn = SizedBox(
+        width: _nameColW,
+        child: Column(
+          children: [
+            _buildStaffHeaderCell(theme),
+            ...employees.map((emp) => _buildNameCell(emp, theme)),
+          ],
+        ),
+      );
+
+      final dayContent = Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
-          // vertical
-          child: Row(
+          controller: _hScroll,
+          scrollDirection: Axis.horizontal,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Fixed left column: staff header + employee names
-              SizedBox(
-                width: _nameColW,
-                child: Column(
-                  children: [
-                    _buildStaffHeaderCell(theme),
-                    ...employees.map((emp) => _buildNameCell(emp, theme)),
-                  ],
-                ),
-              ),
-              // Horizontally scrollable: day headers + day cells
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _hScroll,
-                  scrollDirection: Axis.horizontal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Day headers row
-                      Row(
-                        children:
-                            dates.map((d) => _buildDayHeader(d, theme)).toList(),
-                      ),
-                      // Employee day rows
-                      ...employees.map((emp) => Row(
-                            children: dates
-                                .map((d) => _buildCell(emp, d, theme))
-                                .toList(),
-                          )),
-                    ],
-                  ),
-                ),
-              ),
+              Row(children: dates.map((d) => _buildDayHeader(d, theme)).toList()),
+              ...employees.map((emp) => Row(
+                    children: dates.map((d) => _buildCell(emp, d, theme)).toList(),
+                  )),
             ],
           ),
         ),
       );
+
+      if (rtl) {
+        // RTL: wrap in RTL Directionality → staff column pins to RIGHT, days scroll LEFT
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: SingleChildScrollView(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                staffColumn,
+                Expanded(child: dayContent),
+              ],
+            ),
+          ),
+        );
+      } else {
+        // LTR: staff column on LEFT, days scroll to the RIGHT
+        return SingleChildScrollView(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              staffColumn,
+              Expanded(child: dayContent),
+            ],
+          ),
+        );
+      }
     });
   }
 
   // ── Staff header cell ──
 
   Widget _buildStaffHeaderCell(ThemeService theme) {
+    final rtl = isRTL();
+    final separatorSide =
+        BorderSide(color: theme.getTextSecondaryColor().withValues(alpha: 0.15));
     return Container(
       height: _headerH,
       width: _nameColW,
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: theme.getCardColor(),
         border: Border(
           bottom: BorderSide(
               color: theme.getTextSecondaryColor().withValues(alpha: 0.15)),
-          right: BorderSide(
-              color: theme.getTextSecondaryColor().withValues(alpha: 0.15)),
+          left: rtl ? separatorSide : BorderSide.none,
+          right: rtl ? BorderSide.none : separatorSide,
         ),
       ),
       child: Text(
@@ -456,6 +475,9 @@ class _ManagerWeeklyShiftScheduleScreenState
   // ── Employee name cell (left column) ──
 
   Widget _buildNameCell(ManagerShiftEmployee emp, ThemeService theme) {
+    final rtl = isRTL();
+    final separatorSide =
+        BorderSide(color: theme.getTextSecondaryColor().withValues(alpha: 0.15));
     return Container(
       height: _rowH,
       width: _nameColW,
@@ -465,8 +487,8 @@ class _ManagerWeeklyShiftScheduleScreenState
         border: Border(
           bottom: BorderSide(
               color: theme.getTextSecondaryColor().withValues(alpha: 0.10)),
-          right: BorderSide(
-              color: theme.getTextSecondaryColor().withValues(alpha: 0.15)),
+          left: rtl ? separatorSide : BorderSide.none,
+          right: rtl ? BorderSide.none : separatorSide,
         ),
       ),
       child: Row(
@@ -586,6 +608,22 @@ class _ManagerWeeklyShiftScheduleScreenState
     final loc = first.location;
     final extra = sessions.length - 1;
 
+    final rtl = isRTL();
+    final accentBar = Container(
+      width: 3,
+      decoration: BoxDecoration(
+        color: accent,
+        borderRadius: rtl
+            ? const BorderRadius.only(
+                topRight: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+              )
+            : const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+              ),
+      ),
+    );
     return Container(
       decoration: BoxDecoration(
         color: isToday
@@ -600,16 +638,7 @@ class _ManagerWeeklyShiftScheduleScreenState
       child: IntrinsicHeight(
         child: Row(
           children: [
-            Container(
-              width: 3,
-              decoration: BoxDecoration(
-                color: accent,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
-                ),
-              ),
-            ),
+            if (!rtl) accentBar,
             Expanded(
               child: Padding(
                 padding:
@@ -689,15 +718,15 @@ class _ManagerWeeklyShiftScheduleScreenState
                               .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.more_time,
+                            const Icon(Icons.more_time,
                                 size: 7, color: Color(0xFF7B68EE)),
-                            SizedBox(width: 1),
+                            const SizedBox(width: 1),
                             Text(
-                              'OT',
-                              style: TextStyle(
+                              tr('ot'),
+                              style: const TextStyle(
                                 fontSize: 7,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF7B68EE),
@@ -730,6 +759,7 @@ class _ManagerWeeklyShiftScheduleScreenState
                 ),
               ),
             ),
+            if (rtl) accentBar,
           ],
         ),
       ),

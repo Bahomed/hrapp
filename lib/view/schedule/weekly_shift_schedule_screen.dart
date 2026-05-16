@@ -125,11 +125,11 @@ class _WeeklyShiftScheduleScreenState
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
-            _viewTab('today', tr('Day'), current, theme),
+            _viewTab('today', tr('day_view'), current, theme),
             const SizedBox(width: 8),
-            _viewTab('weekly', tr('Week'), current, theme),
+            _viewTab('weekly', tr('week_view'), current, theme),
             const SizedBox(width: 8),
-            _viewTab('monthly', tr('Month'), current, theme),
+            _viewTab('monthly', tr('month_view'), current, theme),
           ],
         ),
       );
@@ -637,15 +637,15 @@ class _WeeklyShiftScheduleScreenState
                           color: const Color(0xFF7B68EE).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.more_time,
+                            const Icon(Icons.more_time,
                                 size: 8, color: Color(0xFF7B68EE)),
-                            SizedBox(width: 2),
+                            const SizedBox(width: 2),
                             Text(
-                              'OT',
-                              style: TextStyle(
+                              tr('ot'),
+                              style: const TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF7B68EE),

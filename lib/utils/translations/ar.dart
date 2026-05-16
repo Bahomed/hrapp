@@ -1180,4 +1180,8 @@ const Map<String, String> arTranslations = {
   'error_loading_shift_schedule': 'فشل تحميل جدول المناوبات',
   'staff': 'الموظف',
   'manager_shift_schedule': 'جدول مناوبات الموظفين',
+  'day_view': 'يوم',
+  'week_view': 'أسبوع',
+  'month_view': 'شهر',
+  'ot': 'و.إ',
 };
