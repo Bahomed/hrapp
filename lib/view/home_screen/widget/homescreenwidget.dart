@@ -16,6 +16,7 @@ import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.da
 import 'package:co.injazathr.injazathr/view/approval/approval_screen.dart';
 import 'package:co.injazathr.injazathr/view/unexecuted_requests/unexecuted_requests_screen.dart';
 import '../../schedule/weekly_shift_schedule_screen.dart';
+import '../../schedule/manager_weekly_shift_schedule_screen.dart';
 
 class HomeScreenWidget extends StatelessWidget {
   const HomeScreenWidget({super.key});
@@ -182,6 +183,12 @@ class HomeScreenWidget extends StatelessWidget {
           'key': 'assets',
           'onTap': () => Get.to(const AssetScreen()),
         },
+        {
+          'icon': Icons.calendar_today_outlined,
+          'label': tr('weekly_shift_schedule'),
+          'key': 'schedule',
+          'onTap': () => Get.to(const WeeklyShiftScheduleScreen()),
+        },
       ];
 
       // Add manager-only items if user is a manager
@@ -206,9 +213,9 @@ class HomeScreenWidget extends StatelessWidget {
         });
         actions.add({
           'icon': Icons.calendar_view_week_outlined,
-          'label': tr('weekly_shift_schedule'),
-          'key': 'schedule',
-          'onTap': () => Get.to(const WeeklyShiftScheduleScreen()),
+          'label': tr('manager_shift_schedule'),
+          'key': 'manager_schedule',
+          'onTap': () => Get.to(const ManagerWeeklyShiftScheduleScreen()),
         });
       }
 

@@ -44,6 +44,7 @@ class AppTheme {
     'documents': Color(0xFF7B68EE), // Medium slate blue
     'attendance': Color(0xFFFF6B9D), // Pink
     'schedule': Color(0xFFFFD93D), // Yellow
+    'manager_schedule': Color(0xFFFF8C00), // Orange
     'profile': Color(0xFF9F7AEA), // Purple
   };
 
@@ -545,6 +546,7 @@ class AppTheme {
     'documents': Color(0xFF4ECDC4), // Blue-green
     'attendance': Color(0xFFFF6B9D), // Pink
     'schedule': Color(0xFFFFB800), // Yellow
+    'manager_schedule': Color(0xFFE65100), // Deep orange
     'profile': Color(0xFF9F7AEA), // Light purple
     'assets': Color(0xFF43A047), // Green
   };

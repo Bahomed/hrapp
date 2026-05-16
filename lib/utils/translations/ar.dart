@@ -1179,4 +1179,5 @@ const Map<String, String> arTranslations = {
   'no_shift_schedule_data': 'لا توجد بيانات جدول مناوبات لهذا الأسبوع',
   'error_loading_shift_schedule': 'فشل تحميل جدول المناوبات',
   'staff': 'الموظف',
+  'manager_shift_schedule': 'جدول مناوبات الموظفين',
 };

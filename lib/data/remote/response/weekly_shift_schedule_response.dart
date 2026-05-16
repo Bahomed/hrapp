@@ -79,6 +79,7 @@ class DaySessionInfo {
   final String? gracePeriod;
   final String? kind;
   final String hrsPerDay;
+  final bool overtime;
 
   DaySessionInfo({
     required this.id,
@@ -88,6 +89,7 @@ class DaySessionInfo {
     this.gracePeriod,
     this.kind,
     required this.hrsPerDay,
+    this.overtime = false,
   });
 
   String get timeRange {
@@ -105,6 +107,7 @@ class DaySessionInfo {
       gracePeriod: json['grace_p']?.toString(),
       kind: json['kind']?.toString(),
       hrsPerDay: (json['hrs_per_day'] ?? '0').toString(),
+      overtime: json['ot']?.toString().toUpperCase() == 'Y',
     );
   }
 }
@@ -120,4 +123,63 @@ class DayLocationInfo {
         id: json['id'] ?? 0,
         name: json['name'] ?? '',
       );
+}
+
+// ── Manager view models ──────────────────────────────────────────────────────
+
+class ManagerWeeklyShiftScheduleResponse {
+  final bool success;
+  final String view;
+  final String rangeStart;
+  final String rangeEnd;
+  final List<ManagerShiftEmployee> employees;
+
+  ManagerWeeklyShiftScheduleResponse({
+    required this.success,
+    required this.view,
+    required this.rangeStart,
+    required this.rangeEnd,
+    required this.employees,
+  });
+
+  factory ManagerWeeklyShiftScheduleResponse.fromJson(
+      Map<String, dynamic> json) {
+    return ManagerWeeklyShiftScheduleResponse(
+      success: json['success'] ?? true,
+      view: json['view'] ?? '',
+      rangeStart: json['range_start'] ?? '',
+      rangeEnd: json['range_end'] ?? '',
+      employees: (json['employees'] as List? ?? [])
+          .map((e) => ManagerShiftEmployee.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class ManagerShiftEmployee {
+  final int id;
+  final String employeeNo;
+  final String name;
+  final String? image;
+  final List<DaySchedule> days;
+
+  ManagerShiftEmployee({
+    required this.id,
+    required this.employeeNo,
+    required this.name,
+    this.image,
+    required this.days,
+  });
+
+  factory ManagerShiftEmployee.fromJson(Map<String, dynamic> json) {
+    return ManagerShiftEmployee(
+      id: json['id'] ?? 0,
+      employeeNo: json['employee_no'] ?? '',
+      name: json['name'] ?? '',
+      image: json['image'] as String?,
+      days: (json['days'] as List? ?? [])
+          .map((e) => DaySchedule.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

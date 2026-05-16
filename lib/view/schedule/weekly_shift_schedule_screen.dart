@@ -366,6 +366,48 @@ class _WeeklyShiftScheduleScreenState
                 style: TextStyle(
                     fontSize: 12, color: theme.getTextSecondaryColor())),
           ],
+          if (s.gracePeriod != null && s.gracePeriod!.isNotEmpty && s.gracePeriod != '0') ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.timer_outlined,
+                    size: 14, color: theme.getTextSecondaryColor()),
+                const SizedBox(width: 4),
+                Text(
+                  '${tr('grace_period')}: ${s.gracePeriod} ${tr('minutes')}',
+                  style: TextStyle(
+                      fontSize: 12, color: theme.getTextSecondaryColor()),
+                ),
+              ],
+            ),
+          ],
+          if (s.overtime) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7B68EE).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.more_time,
+                      size: 14, color: Color(0xFF7B68EE)),
+                  const SizedBox(width: 6),
+                  Text(
+                    tr('overtime'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF7B68EE),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -565,6 +607,52 @@ class _WeeklyShiftScheduleScreenState
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                    if (s.gracePeriod != null &&
+                        s.gracePeriod!.isNotEmpty &&
+                        s.gracePeriod != '0') ...[
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Icon(Icons.timer_outlined,
+                              size: 9,
+                              color: theme.getTextSecondaryColor()),
+                          const SizedBox(width: 2),
+                          Text(
+                            '${s.gracePeriod} ${tr('minutes')}',
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: theme.getTextSecondaryColor()),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (s.overtime) ...[
+                      const SizedBox(height: 3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7B68EE).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.more_time,
+                                size: 8, color: Color(0xFF7B68EE)),
+                            SizedBox(width: 2),
+                            Text(
+                              'OT',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF7B68EE),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     const SizedBox(height: 5),
