@@ -1172,4 +1172,11 @@ const Map<String, String> arTranslations = {
   'purchase_date': 'تاريخ الشراء',
   'warranty_start': 'بداية الضمان',
   'warranty_end': 'نهاية الضمان',
+  'weekly_shift_schedule': 'جدول المناوبات الأسبوعي',
+  'show_inactive': 'إظهار غير النشطة',
+  'hide_inactive': 'إخفاء غير النشطة',
+  'day_off': 'يوم إجازة',
+  'no_shift_schedule_data': 'لا توجد بيانات جدول مناوبات لهذا الأسبوع',
+  'error_loading_shift_schedule': 'فشل تحميل جدول المناوبات',
+  'staff': 'الموظف',
 };

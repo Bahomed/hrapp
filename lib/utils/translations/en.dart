@@ -1177,4 +1177,11 @@ const Map<String, String> enTranslations = {
   'purchase_date': 'Purchase Date',
   'warranty_start': 'Warranty Start',
   'warranty_end': 'Warranty End',
+  'weekly_shift_schedule': 'Weekly Shift Schedule',
+  'show_inactive': 'Show Inactive',
+  'hide_inactive': 'Hide Inactive',
+  'day_off': 'Day Off',
+  'no_shift_schedule_data': 'No shift schedule data for this week',
+  'error_loading_shift_schedule': 'Failed to load shift schedule',
+  'staff': 'Staff',
 };
