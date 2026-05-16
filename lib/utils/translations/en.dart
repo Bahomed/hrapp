@@ -133,7 +133,13 @@ const Map<String, String> enTranslations = {
   'break_ended_successfully': 'Break ended successfully!',
   'clocked_out_successfully': 'Clocked out successfully!',
   'face_verification_failed_retry': 'Face verification failed. Please try again.',
-  
+  'no_attendance_action_available': 'No attendance action available at this time.',
+  'attendance_status': 'Attendance Status',
+  'session_timing': 'Session Timing',
+  'clock_in_window': 'Clock-in Window',
+  'clock_out_window': 'Clock-out Window',
+  'view_attendance': 'View Attendance',
+
   // Settings
   'settings': 'Settings',
   'language': 'Language / اللغة',

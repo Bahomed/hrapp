@@ -133,6 +133,12 @@ const Map<String, String> arTranslations = {
   'break_ended_successfully': 'انتهت الاستراحة بنجاح!',
   'clocked_out_successfully': 'تم تسجيل الخروج بنجاح!',
   'face_verification_failed_retry': 'فشل التحقق من الوجه. يرجى المحاولة مرة أخرى.',
+  'no_attendance_action_available': 'لا يوجد إجراء حضور متاح في هذا الوقت.',
+  'attendance_status': 'حالة الحضور',
+  'session_timing': 'توقيت الجلسة',
+  'clock_in_window': 'نافذة تسجيل الدخول',
+  'clock_out_window': 'نافذة تسجيل الخروج',
+  'view_attendance': 'عرض الحضور',
 
   // Settings
   'settings': 'الإعدادات',

@@ -9,7 +9,7 @@ import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 
 import '../../assetscreen/asset_screen.dart';
-import '../../attendance/clocking_screen.dart';
+import '../quick_attendance_controller.dart';
 import '../../document/document_screen.dart';
 import '../homescreen_controller.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/request_home_screen.dart';
@@ -94,7 +94,7 @@ class HomeScreenWidget extends StatelessWidget {
           // Circular Face Recognition Button
           GestureDetector(
             onTap: () {
-              Get.to(const ClockingScreen());
+              Get.find<QuickAttendanceController>().performQuickAttendance();
             },
             child: Container(
               width: ResponsiveUtils.getResponsiveValue<double>(Get.context!, mobile: 110, tablet: 130, desktop: 150),

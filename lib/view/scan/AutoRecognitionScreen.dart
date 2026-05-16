@@ -660,8 +660,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         return tr('ready_to_clock_in');
       case 'clock_out':
         return tr('ready_to_clock_out');
+      case 'break_in':
       case 'break_start':
         return tr('ready_to_start_break');
+      case 'break_out':
       case 'break_end':
         return tr('ready_to_end_break');
       default:
@@ -675,8 +677,10 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
         return tr('clock_in');
       case 'clock_out':
         return tr('clock_out');
+      case 'break_in':
       case 'break_start':
         return tr('break_start');
+      case 'break_out':
       case 'break_end':
         return tr('break_end');
       default:
@@ -994,11 +998,13 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       timestamp = result.data!.clockOut!;
                     }
                     break;
+                  case 'break_in':
                   case 'break_start':
                     if (result.data!.breakIn != null) {
                       timestamp = result.data!.breakIn!;
                     }
                     break;
+                  case 'break_out':
                   case 'break_end':
                     if (result.data!.breakOut != null) {
                       timestamp = result.data!.breakOut!;
@@ -1180,11 +1186,13 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                             timestamp = result.data!.clockOut!;
                           }
                           break;
+                        case 'break_in':
                         case 'break_start':
                           if (result.data!.breakIn != null) {
                             timestamp = result.data!.breakIn!;
                           }
                           break;
+                        case 'break_out':
                         case 'break_end':
                           if (result.data!.breakOut != null) {
                             timestamp = result.data!.breakOut!;
