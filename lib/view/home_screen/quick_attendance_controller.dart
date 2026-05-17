@@ -412,9 +412,8 @@ class QuickAttendanceController extends GetxController {
               ? '12'
               : dt.hour.toString().padLeft(2, '0');
       final minute = dt.minute.toString().padLeft(2, '0');
-      final second = dt.second.toString().padLeft(2, '0');
       final period = dt.hour >= 12 ? tr('pm') : tr('am');
-      return '$hour:$minute:$second $period';
+      return '$hour:$minute $period';
     } catch (_) {
       return timeStr;
     }
