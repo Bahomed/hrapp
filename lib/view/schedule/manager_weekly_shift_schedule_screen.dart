@@ -571,6 +571,8 @@ class _ManagerWeeklyShiftScheduleScreenState
       ManagerShiftEmployee emp, DateTime date, ThemeService theme) {
     final day = controller.getDaySchedule(emp, date);
     final isToday = controller.isToday(date);
+    final hasMultiple =
+        day != null && day.isWorking && day.sessions.length > 1;
 
     Widget content;
     if (day != null && day.isWorking && day.sessions.isNotEmpty) {
@@ -581,7 +583,7 @@ class _ManagerWeeklyShiftScheduleScreenState
       content = _buildEmptyContent(theme);
     }
 
-    return Container(
+    final cell = Container(
       width: _dayColW,
       height: _rowH,
       padding: const EdgeInsets.all(4),
@@ -597,6 +599,178 @@ class _ManagerWeeklyShiftScheduleScreenState
         ),
       ),
       child: content,
+    );
+
+    if (!hasMultiple) return cell;
+    return GestureDetector(
+      onTap: () => _showSessionsPopup(emp, date, day!.sessions, theme),
+      child: cell,
+    );
+  }
+
+  void _showSessionsPopup(ManagerShiftEmployee emp, DateTime date,
+      List<DaySessionEntry> sessions, ThemeService theme) {
+    const abbrevs = [
+      'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+    ];
+    final dayLabel =
+        '${abbrevs[date.weekday % 7]} ${date.day}/${date.month}';
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: theme.getCardColor(),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.getTextSecondaryColor().withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              emp.name,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: theme.getTextPrimaryColor(),
+              ),
+            ),
+            Text(
+              dayLabel,
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.getTextSecondaryColor(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...sessions.map((e) => _buildPopupSessionRow(e, theme)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPopupSessionRow(DaySessionEntry entry, ThemeService theme) {
+    final s = entry.session;
+    final loc = entry.location;
+    final accent = theme.getPrimaryColor();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.getBackgroundColor(),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: theme.getTextSecondaryColor().withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 3,
+            height: 48,
+            decoration: BoxDecoration(
+              color: accent,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  s.timeRange,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: accent,
+                  ),
+                ),
+                if (s.name.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(s.name,
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: theme.getTextPrimaryColor())),
+                ],
+                if (loc != null && loc.name.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Row(children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 12,
+                        color: theme.getTextSecondaryColor()),
+                    const SizedBox(width: 4),
+                    Text(loc.name,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: theme.getTextSecondaryColor())),
+                  ]),
+                ],
+                if (s.gracePeriod != null &&
+                    s.gracePeriod!.isNotEmpty &&
+                    s.gracePeriod != '0') ...[
+                  const SizedBox(height: 3),
+                  Row(children: [
+                    Icon(Icons.timer_outlined,
+                        size: 12,
+                        color: theme.getTextSecondaryColor()),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${s.gracePeriod} ${tr('minutes')}',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: theme.getTextSecondaryColor()),
+                    ),
+                  ]),
+                ],
+                if (s.overtime) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color:
+                          const Color(0xFF7B68EE).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.more_time,
+                            size: 12, color: Color(0xFF7B68EE)),
+                        const SizedBox(width: 4),
+                        Text(
+                          tr('ot'),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF7B68EE),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
