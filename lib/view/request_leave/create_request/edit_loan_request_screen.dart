@@ -237,15 +237,6 @@ class EditLoanRequestScreen extends StatelessWidget {
               _buildTextAreaField(
                 label: tr('purpose'),
                 controller: purposeController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_provide_purpose');
-                  }
-                  if (value.length < 10) {
-                    return tr('purpose_minimum_characters');
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 32),

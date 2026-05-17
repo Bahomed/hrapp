@@ -171,15 +171,6 @@ class EditLetterRequestScreen extends StatelessWidget {
               _buildTextAreaField(
                 label: tr('reason'),
                 controller: reasonController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_provide_reason');
-                  }
-                  if (value.length < 10) {
-                    return tr('reason_minimum_characters');
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 32),
