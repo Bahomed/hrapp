@@ -642,6 +642,7 @@ const Map<String, String> arTranslations = {
   'please_select_start_date': 'يرجى اختيار تاريخ البداية',
   'please_select_end_date': 'يرجى اختيار تاريخ النهاية',
   'end_date_after_start_date': 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية',
+  'max_leave_duration': 'الحد الأقصى لمدة الإجازة هو',
   'invalid_date_format': 'تنسيق التاريخ غير صحيح',
   'please_select_date': 'يرجى اختيار التاريخ',
   'please_select_from_time': 'يرجى اختيار الوقت من',

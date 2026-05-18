@@ -111,6 +111,10 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                   }
                   return null;
                 },
+                onChanged: (_) {
+                  ticketChecked.value = false;
+                  exitPermitChecked.value = false;
+                },
               ),
 
               const SizedBox(height: 20),
@@ -135,6 +139,18 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                 label: tr('end_date'),
                 controller: endDateController,
                 context: context,
+                lastDateBuilder: () {
+                  final leaveType = selectedLeaveType.value;
+                  if (leaveType?.notAllowedToIncreaseFromLeaveDuration == 'Y' &&
+                      (leaveType?.leaveDuration ?? 0) > 0 &&
+                      startDateController.text.isNotEmpty) {
+                    try {
+                      final startDate = DateTime.parse(startDateController.text);
+                      return startDate.add(Duration(days: leaveType!.leaveDuration - 1));
+                    } catch (_) {}
+                  }
+                  return null;
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_end_date');
@@ -145,6 +161,14 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                       final endDate = DateTime.parse(value);
                       if (endDate.isBefore(startDate)) {
                         return tr('end_date_after_start_date');
+                      }
+                      final leaveType = selectedLeaveType.value;
+                      if (leaveType?.notAllowedToIncreaseFromLeaveDuration == 'Y' &&
+                          (leaveType?.leaveDuration ?? 0) > 0) {
+                        final days = endDate.difference(startDate).inDays + 1;
+                        if (days > leaveType!.leaveDuration) {
+                          return '${tr('max_leave_duration')} ${leaveType.leaveDuration} ${tr('days')}';
+                        }
                       }
                     } catch (e) {
                       return tr('invalid_date_format');
@@ -162,55 +186,63 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                 controller: reasonController,
               ),
 
-              const SizedBox(height: 20),
-
-              // Ticket & Exit Permit Checkboxes
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: themeService.getCardColor(),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
+              // Ticket & Exit Permit Checkboxes (only shown when ticket_exit_permit == 'Y')
+              Obx(() {
+                if (selectedLeaveType.value?.ticketExitPermit != 'Y') {
+                  return const SizedBox.shrink();
+                }
+                return Column(
                   children: [
-                    Obx(() => CheckboxListTile(
-                      value: ticketChecked.value,
-                      onChanged: (val) => ticketChecked.value = val ?? false,
-                      title: Text(
-                        tr('ticket'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: themeService.getTextPrimaryColor(),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: themeService.getCardColor(),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
                         ),
                       ),
-                      activeColor: themeService.getActionColor('requests'),
-                      checkColor: Colors.white,
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                    )),
-                    Obx(() => CheckboxListTile(
-                      value: exitPermitChecked.value,
-                      onChanged: (val) => exitPermitChecked.value = val ?? false,
-                      title: Text(
-                        tr('exit_permit'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: themeService.getTextPrimaryColor(),
-                        ),
+                      child: Column(
+                        children: [
+                          Obx(() => CheckboxListTile(
+                            value: ticketChecked.value,
+                            onChanged: (val) => ticketChecked.value = val ?? false,
+                            title: Text(
+                              tr('ticket'),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: themeService.getTextPrimaryColor(),
+                              ),
+                            ),
+                            activeColor: themeService.getActionColor('requests'),
+                            checkColor: Colors.white,
+                            contentPadding: EdgeInsets.zero,
+                            controlAffinity: ListTileControlAffinity.leading,
+                          )),
+                          Obx(() => CheckboxListTile(
+                            value: exitPermitChecked.value,
+                            onChanged: (val) => exitPermitChecked.value = val ?? false,
+                            title: Text(
+                              tr('exit_permit'),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: themeService.getTextPrimaryColor(),
+                              ),
+                            ),
+                            activeColor: themeService.getActionColor('requests'),
+                            checkColor: Colors.white,
+                            contentPadding: EdgeInsets.zero,
+                            controlAffinity: ListTileControlAffinity.leading,
+                          )),
+                        ],
                       ),
-                      activeColor: themeService.getActionColor('requests'),
-                      checkColor: Colors.white,
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                    )),
+                    ),
                   ],
-                ),
-              ),
+                );
+              }),
 
               const SizedBox(height: 20),
 
@@ -383,6 +415,7 @@ Widget _buildApiDropdownField({
   required RxList<RequestTypeOption> options,
   required RxBool isLoading,
   String? Function(RequestTypeOption?)? validator,
+  void Function(RequestTypeOption?)? onChanged,
 }) {
   final themeService = ThemeService.instance;
   
@@ -454,6 +487,7 @@ Widget _buildApiDropdownField({
             ? null
             : (RequestTypeOption? value) {
           selectedValue.value = value;
+          onChanged?.call(value);
         },
       )),
     ],
@@ -518,6 +552,7 @@ Widget _buildDateField({
   required TextEditingController controller,
   required BuildContext context,
   String? Function(String?)? validator,
+  DateTime? Function()? lastDateBuilder,
 }) {
   final themeService = ThemeService.instance;
   
@@ -570,7 +605,7 @@ Widget _buildDateField({
             context: context,
             initialDate: DateTime.now(),
             firstDate: DateTime.now(),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
+            lastDate: lastDateBuilder?.call() ?? DateTime.now().add(const Duration(days: 365)),
             builder: (context, child) {
               return Theme(
                 data: Theme.of(context).copyWith(

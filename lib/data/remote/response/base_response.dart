@@ -68,16 +68,25 @@ class User {
 class RequestTypeOption {
   final int id;
   final String name;
+  final String ticketExitPermit;
+  final int leaveDuration;
+  final String notAllowedToIncreaseFromLeaveDuration;
 
   RequestTypeOption({
     required this.id,
     required this.name,
+    required this.ticketExitPermit,
+    required this.leaveDuration,
+    required this.notAllowedToIncreaseFromLeaveDuration,
   });
 
   factory RequestTypeOption.fromJson(Map<String, dynamic> json) {
     return RequestTypeOption(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
+      ticketExitPermit: json['ticket_exit_permit'] ?? 'N',
+      leaveDuration: json['leave_duration'] ?? 0,
+      notAllowedToIncreaseFromLeaveDuration: json['not_allowed_to_increase_from_leave_duration'] ?? 'N',
     );
   }
 }

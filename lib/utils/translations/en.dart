@@ -611,6 +611,7 @@ const Map<String, String> enTranslations = {
   'please_select_start_date': 'Please select start date',
   'please_select_end_date': 'Please select end date',
   'end_date_after_start_date': 'End date must be after start date',
+  'max_leave_duration': 'Maximum leave duration is',
   'invalid_date_format': 'Invalid date format',
   'please_select_date': 'Please select date',
   'please_select_from_time': 'Please select from time',
