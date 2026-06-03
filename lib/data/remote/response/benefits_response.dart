@@ -66,7 +66,7 @@ class Earning {
   final int id;
   final String benefit;
   final double benefitAmt;
-  final int useFactor;
+  final double useFactor;
   final String paymentScheme;
   final String paymentSchemeLabel;
   final String? effectivityDateG;
@@ -88,7 +88,7 @@ class Earning {
       id: json['id'] ?? 0,
       benefit: json['benefit']?.toString() ?? 'Unknown Benefit',
       benefitAmt: _parseDouble(json['benefit_amt']),
-      useFactor: json['use_factor'] ?? 0,
+      useFactor: _parseDouble(json['use_factor']),
       paymentScheme: json['paymentscheme']?.toString() ?? '',
       paymentSchemeLabel: json['payment_scheme_label']?.toString() ?? '',
       effectivityDateG: json['effectivity_date_g']?.toString(),

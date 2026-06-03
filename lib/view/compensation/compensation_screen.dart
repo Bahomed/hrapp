@@ -242,14 +242,23 @@ class CompensationScreen extends StatelessWidget {
             color: themeService.getTextSecondaryColor(),
           ),
         ),
-        trailing: SaudiRiyalDisplay(
-          amount: earning.benefitAmt.toDouble(),
-          style: TextStyle(
-            fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 16, tablet: 18, desktop: 20),
-            fontWeight: FontWeight.w700,
-            color: themeService.getSuccessColor(),
-          ),
-        ),
+        trailing: earning.useFactor > 0
+            ? Text(
+                '×${earning.useFactor % 1 == 0 ? earning.useFactor.toInt() : earning.useFactor}',
+                style: TextStyle(
+                  fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 16, tablet: 18, desktop: 20),
+                  fontWeight: FontWeight.w700,
+                  color: themeService.getSuccessColor(),
+                ),
+              )
+            : SaudiRiyalDisplay(
+                amount: earning.benefitAmt,
+                style: TextStyle(
+                  fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 16, tablet: 18, desktop: 20),
+                  fontWeight: FontWeight.w700,
+                  color: themeService.getSuccessColor(),
+                ),
+              ),
         children: [
           const Divider(),
           const SizedBox(height: 12),
