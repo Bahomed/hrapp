@@ -8,6 +8,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:co.injazathr.injazathr/utils/background_location_disclosure.dart';
 
 class ClockingScreen extends StatefulWidget {
   const ClockingScreen({super.key});
@@ -105,11 +106,9 @@ class _ClockingScreenState extends State<ClockingScreen> {
 
   Future<void> _requestLocationPermission() async {
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
+      // Show prominent disclosure before requesting background location (Google Play policy)
+      final permission =
+          await requestBackgroundLocationWithDisclosure(context);
 
       if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {

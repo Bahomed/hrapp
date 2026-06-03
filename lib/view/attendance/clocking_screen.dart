@@ -11,6 +11,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
+import 'package:co.injazathr.injazathr/utils/background_location_disclosure.dart';
 import 'clocking_controller.dart';
 import '../../repository/attendancerepository.dart';
 import '../../data/remote/response/attendance_status_response.dart';
@@ -285,11 +286,9 @@ class _ClockingScreenState extends State<ClockingScreen> with WidgetsBindingObse
 
   Future<void> _requestLocationPermission() async {
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
+      // Show prominent disclosure before requesting background location (Google Play policy)
+      final permission =
+          await requestBackgroundLocationWithDisclosure(context);
 
       if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {

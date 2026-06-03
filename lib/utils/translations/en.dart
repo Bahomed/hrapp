@@ -182,6 +182,14 @@ const Map<String, String> enTranslations = {
   'privacy_agreement': 'By using this app, you agree to this privacy policy.',
   
   // Location
+  // Background Location Disclosure (Google Play required)
+  'bg_location_disclosure_title': 'Background Location Access',
+  'bg_location_disclosure_body': 'Injazat HR collects location data even when the app is in the background or closed.\n\nThis data is used to:\n• Verify your work location when clocking in or out\n• Support automatic attendance tracking at authorized work sites\n\nBackground location is NOT used for advertising or shared with third parties.',
+  'bg_location_allow': 'Allow',
+  'bg_location_decline': 'Decline',
+  'bg_location_go_to_settings': 'Go to Settings',
+  'bg_location_settings_instruction': 'To enable background location, open Settings, select "Location", then choose "Allow all the time".',
+
   'getting_location_data': 'Getting location data...',
   'processing_attendance': 'Processing attendance...',
   'location_permission_required': 'Location Permission Required',

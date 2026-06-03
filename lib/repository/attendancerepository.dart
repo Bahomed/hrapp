@@ -1,5 +1,6 @@
 import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/utils/api_helper.dart';
+import 'package:co.injazathr.injazathr/services/true_time_service.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:math';
@@ -115,7 +116,7 @@ class AttendanceRepository {
         'wifi_ssid': wifiSSID ?? '',
         'wifi_bssid': wifiBSSID ?? '',
         'address': address ?? '',
-        'timestamp': DateTime.now().toIso8601String(),
+        'timestamp': TrueTimeService.now().toIso8601String(),
         'locale': ApiHelper.instance.getCurrentLocale(),
       });
       
@@ -168,7 +169,7 @@ class AttendanceRepository {
     final workspaceUrl = await preferences.getWorkspaceUrl();
     
     try {
-      final now = timestamp ?? DateTime.now();
+      final now = timestamp ?? TrueTimeService.now();
       final currentLocale = locale ?? ApiHelper.instance.getCurrentLocale();
       
       final queryParams = {

@@ -182,6 +182,14 @@ const Map<String, String> arTranslations = {
   'privacy_agreement': 'باستخدام هذا التطبيق، فإنك توافق على سياسة الخصوصية هذه.',
 
   // Location
+  // Background Location Disclosure (Google Play required)
+  'bg_location_disclosure_title': 'الوصول إلى الموقع في الخلفية',
+  'bg_location_disclosure_body': 'تقوم إنجازات HR بجمع بيانات الموقع حتى عندما يكون التطبيق في الخلفية أو مغلقاً.\n\nتُستخدم هذه البيانات لـ:\n• التحقق من موقع العمل عند تسجيل الحضور أو الانصراف\n• دعم تتبع الحضور التلقائي في مواقع العمل المعتمدة\n\nلا يُستخدم موقع الخلفية للإعلانات ولا تتم مشاركته مع أطراف ثالثة.',
+  'bg_location_allow': 'السماح',
+  'bg_location_decline': 'رفض',
+  'bg_location_go_to_settings': 'الذهاب إلى الإعدادات',
+  'bg_location_settings_instruction': 'لتفعيل الموقع في الخلفية، افتح الإعدادات، اختر "الموقع"، ثم اختر "السماح طوال الوقت".',
+
   'getting_location_data': 'جاري الحصول على بيانات الموقع...',
   'processing_attendance': 'جاري معالجة الحضور...',
   'location_permission_required': 'مطلوب إذن الموقع',

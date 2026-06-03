@@ -1,5 +1,6 @@
 import 'package:co.injazathr.injazathr/view/splash_screen/splash_screen.dart';
 import 'package:co.injazathr.injazathr/services/update_service.dart';
+import 'package:co.injazathr.injazathr/services/true_time_service.dart';
 import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
@@ -38,10 +39,19 @@ void main() async {
   // Initialize Notification Service
   await NotificationService.initialize();
   
+  // Sync with NTP in the background — never block runApp() waiting for a UDP response.
+  // TrueTimeService.now() is safe to call immediately; it returns corrected time
+  // once sync completes, or device time until then.
+  TrueTimeService.sync();
+
   // Initialize services
   await initLanguageService();
   Get.put(ThemeService());
-  cameras = await availableCameras();
+  try {
+    cameras = await availableCameras();
+  } catch (_) {
+    cameras = [];
+  }
   runApp(const MyApp());
 }
 
