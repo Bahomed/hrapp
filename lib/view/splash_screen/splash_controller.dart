@@ -27,14 +27,10 @@ class SplashController extends GetxController {
     // Check for update before navigating (Android official Play Store API)
     await UpdateService.checkForUpdate();
 
-    // Wait for the first frame so the GetX navigator overlay is fully ready
-    // before calling Get.dialog(). Without this, the dialog call can silently
-    // fail and block navigation forever.
-    final frameReady = Completer<void>();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!frameReady.isCompleted) frameReady.complete();
-    });
-    await frameReady.future;
+    // Ensure the navigator overlay is mounted before calling Get.dialog().
+    // endOfFrame schedules a new frame if none is pending, so this always
+    // resolves — unlike addPostFrameCallback which never fires on a static screen.
+    await SchedulerBinding.instance.endOfFrame;
 
     // Show background location disclosure on first launch (Google Play policy)
     await showBackgroundLocationDisclosureIfNeeded();

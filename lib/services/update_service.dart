@@ -15,7 +15,8 @@ class UpdateService {
 
   static Future<void> _checkAndroid() async {
     try {
-      final info = await InAppUpdate.checkForUpdate();
+      final info = await InAppUpdate.checkForUpdate()
+          .timeout(const Duration(seconds: 5));
 
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         if (info.immediateUpdateAllowed) {
