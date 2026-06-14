@@ -586,6 +586,7 @@ const Map<String, String> enTranslations = {
   'repayment_period_months': 'Repayment Period (Months)',
   'purpose': 'Purpose',
   'reason': 'Reason',
+  'please_enter_reason': 'Please enter reason',
   'date': 'Date',
   'status': 'Status',
   'balance': 'Balance',

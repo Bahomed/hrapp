@@ -1280,14 +1280,6 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         reason: reason,
       );
       if (response.success) {
-        Get.snackbar(
-          tr('success'),
-          tr('overtime_request_created_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: ThemeService.instance.getSuccessColor(),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
         loadOvertimeRequests();
         return true;
       } else {
@@ -1319,14 +1311,6 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         reason: reason,
       );
       if (response.success) {
-        Get.snackbar(
-          tr('success'),
-          tr('overtime_request_updated_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: ThemeService.instance.getSuccessColor(),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
         loadOvertimeRequests();
         return true;
       } else {

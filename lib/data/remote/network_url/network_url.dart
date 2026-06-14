@@ -5,7 +5,7 @@ final Preferences preferences = Preferences();
 // Keep this as Future<String>
 Future<String> get workspaceBaseUrl async => await preferences.getWorkspaceUrl();
 
-const liveurl = 'http://192.168.10.207.nip.io/api';
+const liveurl = 'https://injazathr.co/api';
 const baseurl = liveurl;
 
 

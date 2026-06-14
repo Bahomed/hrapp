@@ -30,7 +30,7 @@ class OvertimeRequest {
   factory OvertimeRequest.fromJson(Map<String, dynamic> json) {
     return OvertimeRequest(
       id: json['id'] ?? 0,
-      requestNumber: json['request_number'] ?? '',
+      requestNumber: json['request_number']?.toString() ?? '',
       fromDate: json['from_date'] ?? '',
       toDate: json['to_date'] ?? '',
       totalOtHours: double.tryParse(json['total_ot_hours']?.toString() ?? '0') ?? 0.0,

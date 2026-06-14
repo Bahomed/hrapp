@@ -90,33 +90,36 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // From Date
+              // From Date *
               _buildDateField(
                 label: tr('from_date'),
                 controller: fromDateController,
                 context: context,
                 accentColor: overtimeColor,
+                required: true,
                 validator: (v) => (v == null || v.isEmpty) ? tr('please_select_from_date') : null,
               ),
               const SizedBox(height: 20),
 
-              // To Date
+              // To Date *
               _buildDateField(
                 label: tr('to_date'),
                 controller: toDateController,
                 context: context,
                 accentColor: overtimeColor,
+                required: true,
                 validator: (v) => (v == null || v.isEmpty) ? tr('please_select_to_date') : null,
               ),
               const SizedBox(height: 20),
 
-              // Total OT Hours
+              // Total OT Hours *
               _buildTextField(
                 label: tr('total_ot_hours'),
                 controller: hoursController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 hintText: tr('eg_3_5'),
                 accentColor: overtimeColor,
+                required: true,
                 validator: (v) {
                   if (v == null || v.isEmpty) return tr('please_enter_ot_hours');
                   final h = double.tryParse(v);
@@ -126,11 +129,12 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Reason
+              // Reason *
               _buildTextAreaField(
                 label: tr('reason'),
                 controller: reasonController,
                 accentColor: overtimeColor,
+                required: true,
                 validator: (v) => (v == null || v.isEmpty) ? tr('please_enter_reason') : null,
               ),
               const SizedBox(height: 32),
@@ -151,6 +155,13 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
                               reason: reasonController.text,
                             );
                             if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(tr('overtime_request_created_successfully')),
+                                  backgroundColor: Colors.green,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
                               await Future.delayed(const Duration(milliseconds: 1500));
                               if (context.mounted) Navigator.of(context).pop();
                             }
@@ -181,6 +192,18 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
   }
 }
 
+Widget _buildRequiredLabel(String label, ThemeService themeService) {
+  return RichText(
+    text: TextSpan(
+      text: label,
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor()),
+      children: const [
+        TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700)),
+      ],
+    ),
+  );
+}
+
 Widget _buildTextField({
   required String label,
   required TextEditingController controller,
@@ -188,12 +211,15 @@ Widget _buildTextField({
   TextInputType? keyboardType,
   String? hintText,
   required Color accentColor,
+  bool required = false,
 }) {
   final themeService = ThemeService.instance;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
+      required
+          ? _buildRequiredLabel(label, themeService)
+          : Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
       const SizedBox(height: 8),
       TextFormField(
         controller: controller,
@@ -221,12 +247,15 @@ Widget _buildTextAreaField({
   required TextEditingController controller,
   String? Function(String?)? validator,
   required Color accentColor,
+  bool required = false,
 }) {
   final themeService = ThemeService.instance;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
+      required
+          ? _buildRequiredLabel(label, themeService)
+          : Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
       const SizedBox(height: 8),
       TextFormField(
         controller: controller,
@@ -254,12 +283,15 @@ Widget _buildDateField({
   required BuildContext context,
   String? Function(String?)? validator,
   required Color accentColor,
+  bool required = false,
 }) {
   final themeService = ThemeService.instance;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
+      required
+          ? _buildRequiredLabel(label, themeService)
+          : Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
       const SizedBox(height: 8),
       TextFormField(
         controller: controller,
