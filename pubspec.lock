@@ -1320,11 +1320,10 @@ packages:
   tflite_flutter:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "85fb92ecea445b1949da35b35b92b0792c29ddba"
-      url: "https://github.com/tensorflow/flutter-tflite.git"
-    source: git
+      name: tflite_flutter
+      sha256: "0bba9040d8decda0960d7abf8eabf32243bf092bc7d0084e8e19681866b0bdbe"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.12.1"
   timezone:
     dependency: transitive
