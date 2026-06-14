@@ -575,6 +575,11 @@ class ApprovalController extends GetxController {
 
                     // Combined Request Information Section
                     _buildCombinedRequestSection(request),
+                    // Previous Approvers Section
+                    if (request.prevApprovers.isNotEmpty) ...[
+                      _buildPrevApproversSection(request.prevApprovers),
+                      const SizedBox(height: 24),
+                    ],
                     // Employee Information Section
                     _buildSection(
                       tr('employee_information'),
@@ -752,6 +757,67 @@ class ApprovalController extends GetxController {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildPrevApproversSection(List<PrevApprover> approvers) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: ThemeService.instance.getCardColor(),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ThemeService.instance.getDividerColor()),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            tr('previous_approvers'),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: ThemeService.instance.getTextPrimaryColor(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...approvers.map((approver) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: ThemeService.instance.getSuccessColor().withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${approver.level}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: ThemeService.instance.getSuccessColor(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(Icons.check_circle, size: 16, color: ThemeService.instance.getSuccessColor()),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        approver.name,
+                        style: TextStyle(
+                          color: ThemeService.instance.getTextPrimaryColor(),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
     );
   }
 
@@ -1097,10 +1163,11 @@ class ApprovalController extends GetxController {
   Future<void> _approveLeaveRequest(ApprovalRequest request, int? replacementEmployeeId, String remarks) async {
     try {
       isLoading.value = true;
-      
+
       final response = await _requestRepository.updateRequestStatus(
         requestId: request.id,
         status: 'approved',
+        stepId: request.stepId,
         replacementEmployeeId: replacementEmployeeId,
         remarks: remarks.isNotEmpty ? remarks : null,
       );
@@ -1132,10 +1199,11 @@ class ApprovalController extends GetxController {
   Future<void> _approveOtherRequest(ApprovalRequest request, String remarks) async {
     try {
       isLoading.value = true;
-      
+
       final response = await _requestRepository.updateRequestStatus(
         requestId: request.id,
         status: 'approved',
+        stepId: request.stepId,
         remarks: remarks.isNotEmpty ? remarks : null,
       );
 
@@ -1166,10 +1234,11 @@ class ApprovalController extends GetxController {
   Future<void> _rejectRequestWithRemarks(ApprovalRequest request, String remarks) async {
     try {
       isLoading.value = true;
-      
+
       final response = await _requestRepository.updateRequestStatus(
         requestId: request.id,
         status: 'rejected',
+        stepId: request.stepId,
         remarks: remarks.isNotEmpty ? remarks : null,
       );
 

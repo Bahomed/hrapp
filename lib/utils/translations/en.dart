@@ -1094,6 +1094,7 @@ const Map<String, String> enTranslations = {
   'unknown_request_type': 'Unknown request type',
   'repayment_months': 'Repayment Months',
   'approver': 'Approver',
+  'previous_approvers': 'Previous Approvers',
 
   // Forgot Password & OTP
   'forgot_password': 'Forgot Password?',

@@ -975,6 +975,7 @@ class RequestRepository {
   Future<BaseResponse> updateRequestStatus({
     required int requestId,
     required String status,
+    int? stepId,
     int? replacementEmployeeId,
     String? remarks,
   }) async {
@@ -982,13 +983,15 @@ class RequestRepository {
       final token = await preferences.getToken();
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl/api/update-request-status';
-      
+
       var data = <String, dynamic>{
         'request_id': requestId,
         'status': status,
       };
-      
-      // Add optional parameters for leave approval
+
+      if (stepId != null) {
+        data['step_id'] = stepId;
+      }
       if (replacementEmployeeId != null) {
         data['replacement_employee_id'] = replacementEmployeeId;
       }

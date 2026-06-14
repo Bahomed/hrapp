@@ -1142,6 +1142,7 @@ const Map<String, String> arTranslations = {
   'unknown_request_type': 'نوع طلب غير معروف',
   'repayment_months': 'أشهر السداد',
   'approver': 'المعتمد',
+  'previous_approvers': 'المعتمدون السابقون',
 
   // Request Detail Screen
   'download_letter': 'تحميل الخطاب',

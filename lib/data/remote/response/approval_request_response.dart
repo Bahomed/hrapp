@@ -26,6 +26,20 @@ class ApprovalRequestResponse {
   }
 }
 
+class PrevApprover {
+  final int level;
+  final String name;
+
+  PrevApprover({required this.level, required this.name});
+
+  factory PrevApprover.fromJson(Map<String, dynamic> json) {
+    return PrevApprover(
+      level: json['level'] ?? 0,
+      name: json['name'] ?? '',
+    );
+  }
+}
+
 class ApprovalRequest {
   final int id;
   final int employmentId;
@@ -52,6 +66,8 @@ class ApprovalRequest {
   final String? addBy;
   final String? requestBcs;
   final int? days;
+  final int? stepId;
+  final List<PrevApprover> prevApprovers;
 
   ApprovalRequest({
     required this.id,
@@ -79,6 +95,8 @@ class ApprovalRequest {
     this.addBy,
     this.requestBcs,
     this.days,
+    this.stepId,
+    this.prevApprovers = const [],
   });
 
   factory ApprovalRequest.fromJson(Map<String, dynamic> json) {
@@ -108,6 +126,11 @@ class ApprovalRequest {
       addBy: json['add_by'],
       requestBcs: json['request_bcs'],
       days: json['days'],
+      stepId: json['step_id'],
+      prevApprovers: (json['prev_approvers'] as List<dynamic>?)
+              ?.map((e) => PrevApprover.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -138,6 +161,8 @@ class ApprovalRequest {
       'add_by': addBy,
       'request_bcs': requestBcs,
       'days': days,
+      'step_id': stepId,
+      'prev_approvers': prevApprovers.map((e) => {'level': e.level, 'name': e.name}).toList(),
     };
   }
 }
