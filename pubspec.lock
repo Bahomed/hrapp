@@ -1193,7 +1193,7 @@ packages:
     source: hosted
     version: "3.4.0"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "6e8bf70b7fef813df4e9a36f658ac46d107db4b4cfe1048b477d4e453a8159f5"
@@ -1320,10 +1320,11 @@ packages:
   tflite_flutter:
     dependency: "direct main"
     description:
-      name: tflite_flutter
-      sha256: "0bba9040d8decda0960d7abf8eabf32243bf092bc7d0084e8e19681866b0bdbe"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: main
+      resolved-ref: "85fb92ecea445b1949da35b35b92b0792c29ddba"
+      url: "https://github.com/tensorflow/flutter-tflite.git"
+    source: git
     version: "0.12.1"
   timezone:
     dependency: transitive

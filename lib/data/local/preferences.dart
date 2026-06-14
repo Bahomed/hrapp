@@ -2,10 +2,18 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/login_response.dart' as login_response;
 
 class Preferences {
   final datacount = GetStorage();
+
+  // Critical keys stored in SharedPreferences for reliable Android persistence
+  static const _spToken = 'SP_TOKEN';
+  static const _spWorkspaceUrl = 'SP_WORKSPACE_URL';
+  static const _spUserData = 'SP_USER_DATA';
+
+  Future<SharedPreferences> get _sp async => SharedPreferences.getInstance();
 
   // Core keys
   final companyName = 'COMPANYNAME';
@@ -26,10 +34,24 @@ class Preferences {
   // ==================== USER DATA ====================
 
   Future<void> saveUserData(login_response.Data userData) async {
+    final json = jsonEncode(userData.toJson());
+    final sp = await _sp;
+    await sp.setString(_spUserData, json);
+    // Also write to GetStorage for non-critical accessors
     await datacount.write(this.userData, userData.toJson());
   }
 
   Future<login_response.Data?> getUserData() async {
+    // Try SharedPreferences first (reliable on Android)
+    final sp = await _sp;
+    final spJson = sp.getString(_spUserData);
+    if (spJson != null && spJson.isNotEmpty) {
+      try {
+        return login_response.Data.fromJson(
+            Map<String, dynamic>.from(jsonDecode(spJson)));
+      } catch (_) {}
+    }
+    // Fallback to GetStorage
     final data = datacount.read(this.userData);
     if (data != null) {
       return login_response.Data.fromJson(Map<String, dynamic>.from(data));
@@ -81,9 +103,18 @@ class Preferences {
 
   // ==================== AUTH ====================
 
-  Future<void> saveToken(String value) async => datacount.write(token, value);
+  Future<void> saveToken(String value) async {
+    final sp = await _sp;
+    await sp.setString(_spToken, value);
+    await datacount.write(token, value);
+  }
 
-  Future<String> getToken() async => datacount.read(token) ?? '';
+  Future<String> getToken() async {
+    final sp = await _sp;
+    final spVal = sp.getString(_spToken);
+    if (spVal != null && spVal.isNotEmpty) return spVal;
+    return datacount.read(token) ?? '';
+  }
 
   Future<void> saveRefreshToken(String value) async => datacount.write(refreshToken, value);
 
@@ -119,13 +150,24 @@ class Preferences {
 
   Future<String> getWorkspaceName() async => datacount.read(workspaceName) ?? '';
 
-  Future<void> saveWorkspaceUrl(String value) async => datacount.write(workspaceUrl, value);
+  Future<void> saveWorkspaceUrl(String value) async {
+    final sp = await _sp;
+    await sp.setString(_spWorkspaceUrl, value);
+    await datacount.write(workspaceUrl, value);
+  }
 
-  Future<String> getWorkspaceUrl() async => datacount.read(workspaceUrl) ?? '';
+  Future<String> getWorkspaceUrl() async {
+    final sp = await _sp;
+    final spVal = sp.getString(_spWorkspaceUrl);
+    if (spVal != null && spVal.isNotEmpty) return spVal;
+    return datacount.read(workspaceUrl) ?? '';
+  }
 
   // ==================== CLEAR ====================
 
   Future<void> clearToken() async {
+    final sp = await _sp;
+    await sp.remove(_spToken);
     await datacount.remove(token);
     await datacount.remove(refreshToken);
     await datacount.remove(tokenExpiresAt);
@@ -133,9 +175,15 @@ class Preferences {
     await datacount.remove(checkPassword);
   }
 
-  Future<void> clearUserData() async => datacount.remove(userData);
+  Future<void> clearUserData() async {
+    final sp = await _sp;
+    await sp.remove(_spUserData);
+    await datacount.remove(userData);
+  }
 
   Future<void> clearWorkspace() async {
+    final sp = await _sp;
+    await sp.remove(_spWorkspaceUrl);
     await datacount.remove(workspaceName);
     await datacount.remove(workspaceUrl);
   }
