@@ -22,6 +22,9 @@ const String loanRequestDetailUrl = '/api/requests/loan';
 // Letter Request URLs
 const String letterRequestsUrl = '/api/requests/letter';
 
+// Overtime Request URLs
+const String overtimeRequestsUrl = '/api/requests/overtime';
+
 // General Request URLs
 const String allRequestsUrl = '/api/requests/all';
 const String requestTypesUrl = '/api/requests/types';

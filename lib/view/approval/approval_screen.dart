@@ -222,6 +222,14 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           color: themeService.getActionColor('documents'),
           themeService: themeService,
         ),
+        _buildSummaryCard(
+          context: context,
+          title: tr('overtime_request'),
+          count: controller.overtimeRequestCount,
+          icon: Icons.access_time_filled,
+          color: const Color(0xFFFF6B35),
+          themeService: themeService,
+        ),
       ],
     );
   }
@@ -339,6 +347,16 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               context),
           const SizedBox(height: 12),
           ...controller.letterRequests.map((request) =>
+              _buildRequestCard(request, controller, themeService, context)),
+          const SizedBox(height: 20),
+        ],
+
+        if (controller.overtimeRequests.isNotEmpty) ...[
+          _buildSectionHeader(
+              tr('overtime_request'), controller.overtimeRequestCount, themeService,
+              context),
+          const SizedBox(height: 12),
+          ...controller.overtimeRequests.map((request) =>
               _buildRequestCard(request, controller, themeService, context)),
         ],
       ],
@@ -884,6 +902,43 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           widgets.add(SizedBox(
               height: ResponsiveUtils.getResponsiveValue<double>(
                   context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        break;
+
+      case 'overtime':
+        if (request.fromDate != null && request.fromDate!.isNotEmpty) {
+          widgets.add(Text(
+            '${tr('from_date')}: ${_formatDate(request.fromDate!)}',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        if (request.toDate != null && request.toDate!.isNotEmpty) {
+          widgets.add(Text(
+            '${tr('to_date')}: ${_formatDate(request.toDate!)}',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        if (request.totalOtHours != null) {
+          final hoursDisplay = request.totalOtHours! % 1 == 0
+              ? '${request.totalOtHours!.toInt()} ${tr('hrs')}'
+              : '${request.totalOtHours!.toStringAsFixed(2)} ${tr('hrs')}';
+          widgets.add(Text(
+            '${tr('total_ot_hours')}: $hoursDisplay',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: const Color(0xFFFF6B35),
+              fontWeight: FontWeight.w600,
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
         }
         break;
     }

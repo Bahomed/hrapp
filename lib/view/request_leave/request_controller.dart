@@ -12,6 +12,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/leave_request_respon
 import 'package:co.injazathr.injazathr/data/remote/response/permission_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/request_summary_response.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_leave_request_screen.dart';
@@ -22,6 +23,8 @@ import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_le
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_loan_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_permission_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_leave_request_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_overtime_request_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_overtime_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/loan_details_screen.dart';
 
 import '../../utils/translation_helper.dart';
@@ -38,12 +41,14 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxList<PermissionRequest> _allPermissionRequests = <PermissionRequest>[].obs;
   final RxList<LoanRequest> _allLoanRequests = <LoanRequest>[].obs;
   final RxList<LetterRequest> _allLetterRequests = <LetterRequest>[].obs;
+  final RxList<OvertimeRequest> _allOvertimeRequests = <OvertimeRequest>[].obs;
 
   // Filtered lists (displayed to user)
   final RxList<LeaveRequest> leaveRequests = <LeaveRequest>[].obs;
   final RxList<PermissionRequest> permissionRequests = <PermissionRequest>[].obs;
   final RxList<LoanRequest> loanRequests = <LoanRequest>[].obs;
   final RxList<LetterRequest> letterRequests = <LetterRequest>[].obs;
+  final RxList<OvertimeRequest> overtimeRequests = <OvertimeRequest>[].obs;
   // Reactive variables for dynamic options
   final RxList<RequestTypeOption> leaveTypes = <RequestTypeOption>[].obs;
   final RxList<RequestTypeOption> loanTypes = <RequestTypeOption>[].obs;
@@ -55,16 +60,19 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxBool isLoadingMorePermission = false.obs;
   final RxBool isLoadingMoreLoan = false.obs;
   final RxBool isLoadingMoreLetter = false.obs;
+  final RxBool isLoadingMoreOvertime = false.obs;
 
   final RxList<int> loadedYearsLeave = <int>[].obs;
   final RxList<int> loadedYearsPermission = <int>[].obs;
   final RxList<int> loadedYearsLoan = <int>[].obs;
   final RxList<int> loadedYearsLetter = <int>[].obs;
+  final RxList<int> loadedYearsOvertime = <int>[].obs;
 
   final RxBool hasMoreDataLeave = true.obs;
   final RxBool hasMoreDataPermission = true.obs;
   final RxBool hasMoreDataLoan = true.obs;
   final RxBool hasMoreDataLetter = true.obs;
+  final RxBool hasMoreDataOvertime = true.obs;
 
   // Tab controller
   late TabController tabController;
@@ -80,7 +88,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 4, vsync: this);
+    tabController = TabController(length: 5, vsync: this);
     initializePagination();
     loadAllRequests();
     loadAllRequestTypes();
@@ -105,6 +113,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     loadedYearsLetter.clear();
     loadedYearsLetter.add(currentYear);
     hasMoreDataLetter.value = true;
+
+    loadedYearsOvertime.clear();
+    loadedYearsOvertime.add(currentYear);
+    hasMoreDataOvertime.value = true;
   }
 
   @override
@@ -119,6 +131,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     loadPermissionRequests();
     loadLoanRequests();
     loadLetterRequests();
+    loadOvertimeRequests();
   }
  // Load all request types from API
   Future<void> loadAllRequestTypes() async {
@@ -261,6 +274,23 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     }
   }
 
+  Future<void> loadOvertimeRequests() async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.getOvertimeRequests(year: DateTime.now().year);
+      if (response.success) {
+        _allOvertimeRequests.value = response.data;
+        _filterOvertimeRequests();
+      } else {
+        _showErrorSnackbar('${tr('failed_to_load_overtime_requests')}: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_loading_overtime_requests')}: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Filter methods - now using client-side filtering
   void changeFilter(String filterKey) {
     selectedFilter.value = filterKey;
@@ -274,6 +304,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     _filterPermissionRequests();
     _filterLoanRequests();
     _filterLetterRequests();
+    _filterOvertimeRequests();
   }
 
   void _filterLeaveRequests() {
@@ -316,6 +347,17 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       final statusToFilter = selectedFilter.value == 'for-approval' ? 'pending' : selectedFilter.value;
       letterRequests.value = _allLetterRequests.where((request) {
         return request.status?.toLowerCase() == statusToFilter.toLowerCase();
+      }).toList();
+    }
+  }
+
+  void _filterOvertimeRequests() {
+    if (selectedFilter.value == 'all') {
+      overtimeRequests.value = List.from(_allOvertimeRequests);
+    } else {
+      final statusToFilter = selectedFilter.value == 'for-approval' ? 'for-approval' : selectedFilter.value;
+      overtimeRequests.value = _allOvertimeRequests.where((request) {
+        return request.status.toLowerCase() == statusToFilter.toLowerCase();
       }).toList();
     }
   }
@@ -411,6 +453,17 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
                 createLetterRequest();
               },
             ),
+            const SizedBox(height: 12),
+            _buildRequestTypeOption(
+              icon: Icons.access_time_filled,
+              title: tr('overtime_request'),
+              subtitle: tr('overtime_request_description'),
+              color: const Color(0xFFFF6B35),
+              onTap: () {
+                Get.back();
+                createOvertimeRequest();
+              },
+            ),
             const SizedBox(height: 20),
             ],
           ),
@@ -492,6 +545,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void createLetterRequest() {
     Get.to(() => const CreateLetterRequestScreen());
+  }
+
+  void createOvertimeRequest() {
+    Get.to(() => const CreateOvertimeRequestScreen());
   }
 
   // Leave request actions with improved error handling
@@ -1155,6 +1212,135 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     }
   }
 
+  // Overtime request actions
+  void editOvertimeRequest(OvertimeRequest request) {
+    Get.to(() => EditOvertimeRequestScreen(request: request));
+  }
+
+  void deleteOvertimeRequest(OvertimeRequest request) {
+    Get.dialog(
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_overtime_request')),
+          content: Text(tr('confirm_delete_overtime_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteOvertimeRequest(request.id);
+              },
+              child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteOvertimeRequest(int id) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.deleteOvertimeRequest(id);
+      if (response.success) {
+        Get.snackbar(
+          tr('deleted'),
+          tr('overtime_request_deleted_successfully'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+        );
+        loadOvertimeRequests();
+      } else {
+        _showErrorSnackbar('${tr('failed_to_delete_overtime_request')}: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_deleting_overtime_request')}: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> createOvertimeRequestWithData({
+    required String fromDate,
+    required String toDate,
+    required double totalOtHours,
+    required String reason,
+  }) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.createOvertimeRequest(
+        fromDate: fromDate,
+        toDate: toDate,
+        totalOtHours: totalOtHours,
+        reason: reason,
+      );
+      if (response.success) {
+        Get.snackbar(
+          tr('success'),
+          tr('overtime_request_created_successfully'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        loadOvertimeRequests();
+        return true;
+      } else {
+        _showErrorSnackbar('${tr('failed_to_create_overtime_request')}: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_creating_overtime_request')}: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateOvertimeRequestWithData({
+    required int id,
+    required String fromDate,
+    required String toDate,
+    required double totalOtHours,
+    required String reason,
+  }) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.updateOvertimeRequest(
+        id: id,
+        fromDate: fromDate,
+        toDate: toDate,
+        totalOtHours: totalOtHours,
+        reason: reason,
+      );
+      if (response.success) {
+        Get.snackbar(
+          tr('success'),
+          tr('overtime_request_updated_successfully'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        loadOvertimeRequests();
+        return true;
+      } else {
+        _showErrorSnackbar('${tr('failed_to_update_overtime_request')}: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_updating_overtime_request')}: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Refresh method
   Future<void> refreshRequests() async {
   //  await loadAllRequests();
@@ -1177,10 +1363,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   int get permissionRequestCount => permissionRequests.length;
   int get loanRequestCount => loanRequests.length;
   int get letterRequestCount => letterRequests.length;
+  int get overtimeRequestCount => overtimeRequests.length;
 
   // Method to get total request count
   int get totalRequestCount =>
-      leaveRequestCount + permissionRequestCount + loanRequestCount + letterRequestCount;
+      leaveRequestCount + permissionRequestCount + loanRequestCount + letterRequestCount + overtimeRequestCount;
 
   // Method to get filter color
   Color getFilterColor(String filter) {
@@ -1350,11 +1537,6 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         final combinedAllData = [...currentAllData, ...newData];
         _allLetterRequests.value = combinedAllData;
         _filterLetterRequests(); // Apply current filter
-
-        // Stop loading more after 3 years or if no more data
-       // if (loadedYearsLetter.length >= 3 || newData.isEmpty) {
-         // hasMoreDataLetter.value = false;
-        //}
       } else {
         _showErrorSnackbar('${tr('failed_to_load_more_letter_requests')}: ${response.message}');
       }
@@ -1362,6 +1544,35 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       _showErrorSnackbar('${tr('error_loading_more_letter_requests')}: $e');
     } finally {
       isLoadingMoreLetter.value = false;
+    }
+  }
+
+  Future<void> loadMoreOvertimeRequests() async {
+    if (isLoadingMoreOvertime.value || !hasMoreDataOvertime.value) return;
+
+    try {
+      isLoadingMoreOvertime.value = true;
+
+      if (loadedYearsOvertime.isEmpty) {
+        loadedYearsOvertime.add(DateTime.now().year);
+      }
+
+      final nextYear = loadedYearsOvertime.last - 1;
+      loadedYearsOvertime.add(nextYear);
+
+      final response = await _requestRepository.getOvertimeRequests(year: nextYear);
+
+      if (response.success) {
+        final combinedAllData = [..._allOvertimeRequests, ...response.data];
+        _allOvertimeRequests.value = combinedAllData;
+        _filterOvertimeRequests();
+      } else {
+        _showErrorSnackbar('${tr('failed_to_load_more_overtime_requests')}: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_loading_more_overtime_requests')}: $e');
+    } finally {
+      isLoadingMoreOvertime.value = false;
     }
   }
 }

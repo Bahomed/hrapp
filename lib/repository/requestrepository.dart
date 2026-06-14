@@ -13,6 +13,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/request_summary_resp
 import 'package:co.injazathr.injazathr/data/remote/response/request_response.dart' show LoanTypesResponse, LetterTypesResponse;
 import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/employee_dropdown_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
 import 'package:co.injazathr.injazathr/repository/logoutrepository.dart';
 import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
@@ -1012,6 +1013,112 @@ class RequestRepository {
       } else {
         throw exceptionHandler(e);
       }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ================ OVERTIME REQUEST METHODS ================
+
+  Future<OvertimeRequestsResponse> getOvertimeRequests({String? status, int? year}) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$overtimeRequestsUrl';
+
+      Map<String, dynamic> queryParams = {'locale': getCurrentLanguage()};
+      if (status != null) queryParams['status'] = status;
+      if (year != null) queryParams['year'] = year;
+
+      var response = await dioClient.get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
+      return OvertimeRequestsResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<OvertimeRequestResponse> createOvertimeRequest({
+    required String fromDate,
+    required String toDate,
+    required double totalOtHours,
+    required String reason,
+  }) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$overtimeRequestsUrl';
+
+      var response = await dioClient.post(
+        apiUrl,
+        {'from_date': fromDate, 'to_date': toDate, 'total_ot_hours': totalOtHours, 'reason': reason},
+        {},
+        {'Authorization': 'Bearer $token'},
+      );
+      return OvertimeRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<OvertimeRequestResponse> updateOvertimeRequest({
+    required int id,
+    required String fromDate,
+    required String toDate,
+    required double totalOtHours,
+    required String reason,
+  }) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$overtimeRequestsUrl/$id';
+
+      var response = await dioClient.put(
+        apiUrl,
+        {'Authorization': 'Bearer $token'},
+        {'from_date': fromDate, 'to_date': toDate, 'total_ot_hours': totalOtHours, 'reason': reason},
+      );
+      return OvertimeRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<BaseResponse> deleteOvertimeRequest(int id) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$overtimeRequestsUrl/$id';
+
+      var response = await dioClient.delete(apiUrl, {'Authorization': 'Bearer $token'}, {});
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<OvertimeRequestResponse> getOvertimeRequestDetail(int id) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$overtimeRequestsUrl/$id';
+
+      var response = await dioClient.get(apiUrl, {'Authorization': 'Bearer $token'}, {'locale': getCurrentLanguage()});
+      return OvertimeRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
     } catch (e) {
       rethrow;
     }

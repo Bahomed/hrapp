@@ -68,6 +68,9 @@ class ApprovalRequest {
   final int? days;
   final int? stepId;
   final List<PrevApprover> prevApprovers;
+  final String? fromDate;
+  final String? toDate;
+  final double? totalOtHours;
 
   ApprovalRequest({
     required this.id,
@@ -97,6 +100,9 @@ class ApprovalRequest {
     this.days,
     this.stepId,
     this.prevApprovers = const [],
+    this.fromDate,
+    this.toDate,
+    this.totalOtHours,
   });
 
   factory ApprovalRequest.fromJson(Map<String, dynamic> json) {
@@ -131,6 +137,9 @@ class ApprovalRequest {
               ?.map((e) => PrevApprover.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      fromDate: json['from_date'],
+      toDate: json['to_date'],
+      totalOtHours: double.tryParse(json['total_ot_hours']?.toString() ?? ''),
     );
   }
 

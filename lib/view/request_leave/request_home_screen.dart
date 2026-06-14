@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/request_controller.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/widgets/request_widgets.dart';
 import '../../services/theme_service.dart';
+import '../../utils/app_theme.dart';
 class RequestHomeScreen extends StatelessWidget {
   const RequestHomeScreen({super.key});
 
@@ -52,6 +53,7 @@ class RequestHomeScreen extends StatelessWidget {
           _buildPermitRequestsTab(context, controller),
           _buildLoanRequestsTab(context, controller),
           _buildLetterRequestsTab(context, controller),
+          _buildOvertimeRequestsTab(context, controller),
         ],
       ),
       floatingActionButton: Builder(
@@ -181,6 +183,7 @@ class RequestHomeScreen extends StatelessWidget {
           Tab(text: '${tr('permission')} (${controller.permissionRequestCount})'),
           Tab(text: '${tr('loan')} (${controller.loanRequestCount})'),
           Tab(text: '${tr('letter')} (${controller.letterRequestCount})'),
+          Tab(text: '${tr('overtime')} (${controller.overtimeRequestCount})'),
         ],
       )),
     );
@@ -408,6 +411,53 @@ class RequestHomeScreen extends StatelessWidget {
 
             final request = controller.letterRequests[index];
             return LetterRequestCard(request: request);
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildOvertimeRequestsTab(BuildContext context, RequestController controller) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.refreshRequests,
+        color: Theme.of(context).primaryColor,
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+          itemCount: controller.overtimeRequests.isEmpty
+              ? 1
+              : controller.overtimeRequests.length + (controller.hasMoreDataOvertime.value ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (controller.overtimeRequests.isEmpty) {
+              return _buildEmptyState(
+                context: context,
+                icon: Icons.access_time_filled,
+                title: tr('no_overtime_requests'),
+                subtitle: tr('no_overtime_requests_subtitle'),
+                buttonText: tr('create_overtime_request'),
+                color: const Color(0xFFFF6B35),
+                onTap: controller.createOvertimeRequest,
+              );
+            }
+
+            if (index == controller.overtimeRequests.length && controller.hasMoreDataOvertime.value) {
+              return LoadMoreButton(
+                onPressed: controller.loadMoreOvertimeRequests,
+                isLoading: controller.isLoadingMoreOvertime.value,
+                loadedYears: controller.loadedYearsOvertime,
+              );
+            }
+
+            final request = controller.overtimeRequests[index];
+            return OvertimeRequestCard(request: request);
           },
         ),
       );

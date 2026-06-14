@@ -28,6 +28,7 @@ class ApprovalController extends GetxController {
   final RxList<ApprovalRequest> permissionRequests = <ApprovalRequest>[].obs;
   final RxList<ApprovalRequest> loanRequests = <ApprovalRequest>[].obs;
   final RxList<ApprovalRequest> letterRequests = <ApprovalRequest>[].obs;
+  final RxList<ApprovalRequest> overtimeRequests = <ApprovalRequest>[].obs;
 
   // Filter configuration
   List<Map<String, dynamic>> get filters => [
@@ -36,6 +37,7 @@ class ApprovalController extends GetxController {
     {'name': tr('permission'), 'key': 'Permit', 'color': getFilterColor('permission')},
     {'name': tr('loan'), 'key': 'Loan', 'color': getFilterColor('loan')},
     {'name': tr('letter'), 'key': 'Letter', 'color': getFilterColor('letter')},
+    {'name': tr('overtime'), 'key': 'Overtime', 'color': getFilterColor('overtime')},
   ];
 
   @override
@@ -78,12 +80,14 @@ class ApprovalController extends GetxController {
       permissionRequests.value = allRequests.where((r) => r.requestType == 'Permit').toList();
       loanRequests.value = allRequests.where((r) => r.requestType == 'Loan').toList();
       letterRequests.value = allRequests.where((r) => r.requestType == 'Letter').toList();
+      overtimeRequests.value = allRequests.where((r) => r.requestType == 'Overtime').toList();
     } else {
       // Filter by specific request type
       leaveRequests.value = filter == 'Leave' ? allRequests.where((r) => r.requestType == 'Leave').toList() : [];
       permissionRequests.value = filter == 'Permit' ? allRequests.where((r) => r.requestType == 'Permit').toList() : [];
       loanRequests.value = filter == 'Loan' ? allRequests.where((r) => r.requestType == 'Loan').toList() : [];
       letterRequests.value = filter == 'Letter' ? allRequests.where((r) => r.requestType == 'Letter').toList() : [];
+      overtimeRequests.value = filter == 'Overtime' ? allRequests.where((r) => r.requestType == 'Overtime').toList() : [];
     }
 
     // Fetch leave balances for all visible leave requests
@@ -747,6 +751,18 @@ class ApprovalController extends GetxController {
         if (request.leaveType != null) allDetails.add(_buildDetailRow(tr('letter_type'), request.leaveType!));
         if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
         break;
+
+      case 'overtime':
+        if (request.fromDate != null && request.fromDate!.isNotEmpty) allDetails.add(_buildDetailRow(tr('from_date'), _formatDateTime(request.fromDate!)));
+        if (request.toDate != null && request.toDate!.isNotEmpty) allDetails.add(_buildDetailRow(tr('to_date'), _formatDateTime(request.toDate!)));
+        if (request.totalOtHours != null) {
+          final hoursDisplay = request.totalOtHours! % 1 == 0
+              ? '${request.totalOtHours!.toInt()} ${tr('hrs')}'
+              : '${request.totalOtHours!.toStringAsFixed(2)} ${tr('hrs')}';
+          allDetails.add(_buildDetailRow(tr('total_ot_hours'), hoursDisplay));
+        }
+        if (request.reason != null && request.reason!.isNotEmpty) allDetails.add(_buildDetailRow(tr('reason'), request.reason!));
+        break;
     }
 
     return Column(
@@ -1095,6 +1111,8 @@ class ApprovalController extends GetxController {
         return themeService.getSuccessColor();
       case 'letter':
         return themeService.getActionColor('documents');
+      case 'overtime':
+        return const Color(0xFFFF6B35);
       default:
         return themeService.getTextSecondaryColor();
     }
@@ -1112,6 +1130,8 @@ class ApprovalController extends GetxController {
         return Icons.account_balance_wallet;
       case 'letter':
         return Icons.description;
+      case 'overtime':
+        return Icons.access_time_filled;
       default:
         return Icons.circle;
     }
@@ -1122,6 +1142,7 @@ class ApprovalController extends GetxController {
   int get permissionRequestCount => permissionRequests.length;
   int get loanRequestCount => loanRequests.length;
   int get letterRequestCount => letterRequests.length;
+  int get overtimeRequestCount => overtimeRequests.length;
 
   int get totalPendingCount => allRequests.length;
   
@@ -1136,6 +1157,8 @@ class ApprovalController extends GetxController {
         return tr('loan_request');
       case 'Letter':
         return tr('letter_request');
+      case 'Overtime':
+        return tr('overtime_request');
       default:
         return requestType;
     }

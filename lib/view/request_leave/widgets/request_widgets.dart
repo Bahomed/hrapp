@@ -6,6 +6,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/leave_request_respon
 import 'package:co.injazathr.injazathr/data/remote/response/permission_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
@@ -1129,6 +1130,148 @@ class LetterRequestCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class OvertimeRequestCard extends StatelessWidget {
+  final OvertimeRequest request;
+
+  const OvertimeRequestCard({super.key, required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<RequestController>();
+    const overtimeColor = Color(0xFFFF6B35);
+
+    return ScreenThemes.buildRequestCard(
+      context: context,
+      status: request.status,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${tr('overtime')} #${request.requestNumber}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+              ),
+              RequestTag(
+                text: '${request.totalOtHours} ${tr('hrs')}',
+                textColor: overtimeColor,
+                backgroundColor: overtimeColor.withValues(alpha: 0.1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${_formatDate(request.fromDate)} ${tr('to')} ${_formatDate(request.toDate)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: ThemeService.instance.getTextSecondaryColor(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${tr('reason')}: ',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+                TextSpan(
+                  text: request.reason,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: ThemeService.instance.getTextSecondaryColor(),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeService.instance.getTextSecondaryColor(),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
+                    Text(
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getSuccessColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: ThemeService.instance.getErrorColor(),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                ],
+              ),
+              Row(
+                children: [
+                  if (request.status.toLowerCase() == 'for-approval') ...[
+                    RequestActionButton(
+                      icon: Icons.edit_outlined,
+                      color: overtimeColor,
+                      onTap: () => controller.editOvertimeRequest(request),
+                    ),
+                    const SizedBox(width: 8),
+                    RequestActionButton(
+                      icon: Icons.delete_outline,
+                      color: ThemeService.instance.getErrorColor(),
+                      onTap: () => controller.deleteOvertimeRequest(request),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      // Try ISO format first (YYYY-MM-DD)
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (_) {
+      // Already in DD-MM-YYYY or other display format — return as-is
+      return dateString;
+    }
   }
 }
 
