@@ -617,6 +617,7 @@ const Map<String, String> arTranslations = {
   'repayment_period_months': 'فترة السداد (بالأشهر)',
   'purpose': 'الغرض',
   'reason': 'السبب',
+  'please_enter_reason': 'الرجاء إدخال السبب',
   'date': 'التاريخ',
   'status': 'الحالة',
   'balance': 'الرصيد',
