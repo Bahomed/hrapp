@@ -104,11 +104,14 @@ class OtpVerificationScreen extends StatelessWidget {
               SizedBox(height: ResponsiveUtils.responsiveHeight(context, 4)),
 
               // OTP Input Fields
-              Row(
+              Builder(
+                builder: (context) {
+                  final boxWidth = (MediaQuery.of(context).size.width - 48 - 30) / 6;
+                  return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(6, (index) {
                   return SizedBox(
-                    width: 45,
+                    width: boxWidth,
                     child: TextFormField(
                       controller: otpControllers[index],
                       focusNode: focusNodes[index],
@@ -116,7 +119,7 @@ class OtpVerificationScreen extends StatelessWidget {
                       keyboardType: TextInputType.number,
                       maxLength: 1,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: boxWidth * 0.4,
                         fontWeight: FontWeight.bold,
                         color: themeService.getTextPrimaryColor(),
                       ),
@@ -124,6 +127,7 @@ class OtpVerificationScreen extends StatelessWidget {
                         counterText: '',
                         filled: true,
                         fillColor: themeService.getCardColor(),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -157,6 +161,8 @@ class OtpVerificationScreen extends StatelessWidget {
                     ),
                   );
                 }),
+                  );
+                },
               ),
 
               SizedBox(height: ResponsiveUtils.responsiveHeight(context, 3)),
