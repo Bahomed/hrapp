@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:co.injazathr.injazathr/view/otp_verification_screen/otp_verification_controller.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
@@ -107,60 +109,81 @@ class OtpVerificationScreen extends StatelessWidget {
               Builder(
                 builder: (context) {
                   final boxWidth = (MediaQuery.of(context).size.width - 48 - 30) / 6;
-                  return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(6, (index) {
-                  return SizedBox(
-                    width: boxWidth,
-                    child: TextFormField(
-                      controller: otpControllers[index],
-                      focusNode: focusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      style: TextStyle(
-                        fontSize: boxWidth * 0.4,
-                        fontWeight: FontWeight.bold,
-                        color: themeService.getTextPrimaryColor(),
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        filled: true,
-                        fillColor: themeService.getCardColor(),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
+
+                  void fillOtp(String digits) {
+                    final cleaned = digits.replaceAll(RegExp(r'\D'), '');
+                    for (int i = 0; i < 6; i++) {
+                      otpControllers[i].text = i < cleaned.length ? cleaned[i] : '';
+                    }
+                    final lastFilled = (cleaned.length - 1).clamp(0, 5);
+                    focusNodes[lastFilled].requestFocus();
+                  }
+
+                  return AutofillGroup(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(6, (index) {
+                        return SizedBox(
+                          width: boxWidth,
+                          child: TextFormField(
+                            controller: otpControllers[index],
+                            focusNode: focusNodes[index],
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            // iOS fills each box individually (maxLength: 1 per box)
+                            // Android paste fills first box with full code (maxLength: 6)
+                            maxLength: (Platform.isAndroid && index == 0) ? 6 : 1,
+                            autofillHints: Platform.isIOS
+                                ? [AutofillHints.oneTimeCode]
+                                : (index == 0 ? [AutofillHints.oneTimeCode] : null),
+                            style: TextStyle(
+                              fontSize: boxWidth * 0.4,
+                              fontWeight: FontWeight.bold,
+                              color: themeService.getTextPrimaryColor(),
+                            ),
+                            decoration: InputDecoration(
+                              counterText: '',
+                              filled: true,
+                              fillColor: themeService.getCardColor(),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: themeService.getActionColor('requests'),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            onChanged: (value) {
+                              if (value.length > 1) {
+                                // Android: paste or SMS autofill fills first box with full code
+                                fillOtp(value);
+                              } else if (value.length == 1 && index < 5) {
+                                // iOS: fills one digit per box, advance focus to next
+                                focusNodes[index + 1].requestFocus();
+                              } else if (value.isEmpty && index > 0) {
+                                focusNodes[index - 1].requestFocus();
+                              }
+                            },
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: themeService.getActionColor('requests'),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      onChanged: (value) {
-                        if (value.length == 1 && index < 5) {
-                          focusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          focusNodes[index - 1].requestFocus();
-                        }
-                      },
+                        );
+                      }),
                     ),
-                  );
-                }),
                   );
                 },
               ),
