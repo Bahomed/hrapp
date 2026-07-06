@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:co.injazathr.injazathr/view/otp_verification_screen/otp_verification_controller.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
@@ -130,12 +128,8 @@ class OtpVerificationScreen extends StatelessWidget {
                             focusNode: focusNodes[index],
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
-                            // iOS fills each box individually (maxLength: 1 per box)
-                            // Android paste fills first box with full code (maxLength: 6)
-                            maxLength: (Platform.isAndroid && index == 0) ? 6 : 1,
-                            autofillHints: Platform.isIOS
-                                ? [AutofillHints.oneTimeCode]
-                                : (index == 0 ? [AutofillHints.oneTimeCode] : null),
+                            maxLength: index == 0 ? 6 : 1,
+                            autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null,
                             style: TextStyle(
                               fontSize: boxWidth * 0.4,
                               fontWeight: FontWeight.bold,
