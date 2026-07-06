@@ -7,6 +7,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/permission_request_r
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
@@ -1563,6 +1564,168 @@ String _formatTimeDisplay(String timeString) {
     return timeString;
   } catch (e) {
     // Return original string if any error occurs
+    return timeString;
+  }
+}
+
+// ================ MISSING PUNCH REQUEST CARD ================
+
+class MissingPunchRequestCard extends StatelessWidget {
+  final MissingPunchRequest request;
+
+  const MissingPunchRequestCard({super.key, required this.request});
+
+  static const _missingPunchColor = Color(0xFF6C5CE7);
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<RequestController>();
+
+    return ScreenThemes.buildRequestCard(
+      context: context,
+      status: request.status,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${tr('missing_punch')} #${request.requestNumber}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ThemeService.instance.getTextPrimaryColor(),
+                  ),
+                ),
+              ),
+              RequestTag(
+                text: _formatDate(request.date),
+                textColor: _missingPunchColor,
+                backgroundColor: _missingPunchColor.withValues(alpha: 0.1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              if (request.checkIn != null && request.checkIn!.isNotEmpty) ...[
+                RequestTag(
+                  text: '${tr('check_in')}: ${_formatTimeDisplay(request.checkIn!)}',
+                  textColor: ThemeService.instance.getSuccessColor(),
+                  backgroundColor: ThemeService.instance.getSuccessColor().withValues(alpha: 0.1),
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (request.checkOut != null && request.checkOut!.isNotEmpty)
+                RequestTag(
+                  text: '${tr('check_out')}: ${_formatTimeDisplay(request.checkOut!)}',
+                  textColor: ThemeService.instance.getWarningColor(),
+                  backgroundColor: ThemeService.instance.getWarningColor().withValues(alpha: 0.1),
+                ),
+            ],
+          ),
+          if (request.reason != null && request.reason!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            RichText(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${tr('reason')}: ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: ThemeService.instance.getTextPrimaryColor(),
+                    ),
+                  ),
+                  TextSpan(
+                    text: request.reason,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeService.instance.getTextSecondaryColor(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${tr('submitted')}: ${_formatDate(request.submittedDate)}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeService.instance.getTextSecondaryColor(),
+                    ),
+                  ),
+                  if (request.status.toLowerCase() == 'approved' && request.approvedDate != null)
+                    Text(
+                      '${tr('approved')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(fontSize: 14, color: ThemeService.instance.getSuccessColor()),
+                    ),
+                  if (request.status.toLowerCase() == 'rejected' && request.approvedDate != null)
+                    Text(
+                      '${tr('rejected')}: ${_formatDate(request.approvedDate!)}',
+                      style: TextStyle(fontSize: 14, color: ThemeService.instance.getErrorColor()),
+                    ),
+                ],
+              ),
+              Row(
+                children: [
+                  if (request.status.toLowerCase() == 'for-approval') ...[
+                    RequestActionButton(
+                      icon: Icons.edit_outlined,
+                      color: _missingPunchColor,
+                      onTap: () => controller.editMissingPunchRequest(request),
+                    ),
+                    const SizedBox(width: 8),
+                    RequestActionButton(
+                      icon: Icons.delete_outline,
+                      color: ThemeService.instance.getErrorColor(),
+                      onTap: () => controller.deleteMissingPunchRequest(request),
+                    ),
+                  ] else ...[
+                    RequestActionButton(
+                      icon: Icons.visibility_outlined,
+                      color: ThemeService.instance.getTextSecondaryColor(),
+                      onTap: () {},
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _formatTimeDisplay(String timeString) {
+    if (timeString.isEmpty) return '';
+    try {
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+      }
+    } catch (_) {}
     return timeString;
   }
 }

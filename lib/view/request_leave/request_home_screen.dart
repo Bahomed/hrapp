@@ -54,6 +54,7 @@ class RequestHomeScreen extends StatelessWidget {
           _buildLoanRequestsTab(context, controller),
           _buildLetterRequestsTab(context, controller),
           _buildOvertimeRequestsTab(context, controller),
+          _buildMissingPunchRequestsTab(context, controller),
         ],
       ),
       floatingActionButton: Builder(
@@ -184,6 +185,7 @@ class RequestHomeScreen extends StatelessWidget {
           Tab(text: '${tr('loan')} (${controller.loanRequestCount})'),
           Tab(text: '${tr('letter')} (${controller.letterRequestCount})'),
           Tab(text: '${tr('overtime')} (${controller.overtimeRequestCount})'),
+          Tab(text: '${tr('missing_punch')} (${controller.missingPunchRequestCount})'),
         ],
       )),
     );
@@ -458,6 +460,63 @@ class RequestHomeScreen extends StatelessWidget {
 
             final request = controller.overtimeRequests[index];
             return OvertimeRequestCard(request: request);
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildMissingPunchRequestsTab(BuildContext context, RequestController controller) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.refreshRequests,
+        color: Theme.of(context).primaryColor,
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+          itemCount: controller.missingPunchRequests.isEmpty
+              ? 1
+              : controller.missingPunchRequests.length + (controller.hasMoreDataMissingPunch.value ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (controller.missingPunchRequests.isEmpty) {
+              return Column(
+                children: [
+                  _buildEmptyState(
+                    context: context,
+                    icon: Icons.fingerprint,
+                    title: tr('no_missing_punch_requests'),
+                    subtitle: tr('no_missing_punch_requests_subtitle'),
+                    buttonText: tr('create_missing_punch_request'),
+                    color: const Color(0xFF6C5CE7),
+                    onTap: controller.createMissingPunchRequest,
+                  ),
+                  if (controller.hasMoreDataMissingPunch.value)
+                    LoadMoreButton(
+                      onPressed: controller.loadMoreMissingPunchRequests,
+                      isLoading: controller.isLoadingMoreMissingPunch.value,
+                      loadedYears: controller.loadedYearsMissingPunch,
+                    ),
+                ],
+              );
+            }
+
+            if (index == controller.missingPunchRequests.length && controller.hasMoreDataMissingPunch.value) {
+              return LoadMoreButton(
+                onPressed: controller.loadMoreMissingPunchRequests,
+                isLoading: controller.isLoadingMoreMissingPunch.value,
+                loadedYears: controller.loadedYearsMissingPunch,
+              );
+            }
+
+            final request = controller.missingPunchRequests[index];
+            return MissingPunchRequestCard(request: request);
           },
         ),
       );

@@ -25,6 +25,9 @@ const String letterRequestsUrl = '/api/requests/letter';
 // Overtime Request URLs
 const String overtimeRequestsUrl = '/api/requests/overtime';
 
+// Missing Punch Request URLs
+const String missingPunchRequestsUrl = '/api/requests/missing-punch';
+
 // General Request URLs
 const String allRequestsUrl = '/api/requests/all';
 const String requestTypesUrl = '/api/requests/types';

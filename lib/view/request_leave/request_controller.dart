@@ -13,6 +13,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/permission_request_r
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/request_summary_response.dart';
 import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
@@ -26,6 +27,8 @@ import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_pe
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_leave_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_overtime_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_overtime_request_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_missing_punch_request_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/create_request/edit_missing_punch_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/loan_details_screen.dart';
 
 import '../../utils/translation_helper.dart';
@@ -43,6 +46,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxList<LoanRequest> _allLoanRequests = <LoanRequest>[].obs;
   final RxList<LetterRequest> _allLetterRequests = <LetterRequest>[].obs;
   final RxList<OvertimeRequest> _allOvertimeRequests = <OvertimeRequest>[].obs;
+  final RxList<MissingPunchRequest> _allMissingPunchRequests = <MissingPunchRequest>[].obs;
 
   // Filtered lists (displayed to user)
   final RxList<LeaveRequest> leaveRequests = <LeaveRequest>[].obs;
@@ -50,6 +54,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxList<LoanRequest> loanRequests = <LoanRequest>[].obs;
   final RxList<LetterRequest> letterRequests = <LetterRequest>[].obs;
   final RxList<OvertimeRequest> overtimeRequests = <OvertimeRequest>[].obs;
+  final RxList<MissingPunchRequest> missingPunchRequests = <MissingPunchRequest>[].obs;
   // Reactive variables for dynamic options
   final RxList<RequestTypeOption> leaveTypes = <RequestTypeOption>[].obs;
   final RxList<RequestTypeOption> loanTypes = <RequestTypeOption>[].obs;
@@ -63,18 +68,21 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxBool isLoadingMoreLoan = false.obs;
   final RxBool isLoadingMoreLetter = false.obs;
   final RxBool isLoadingMoreOvertime = false.obs;
+  final RxBool isLoadingMoreMissingPunch = false.obs;
 
   final RxList<int> loadedYearsLeave = <int>[].obs;
   final RxList<int> loadedYearsPermission = <int>[].obs;
   final RxList<int> loadedYearsLoan = <int>[].obs;
   final RxList<int> loadedYearsLetter = <int>[].obs;
   final RxList<int> loadedYearsOvertime = <int>[].obs;
+  final RxList<int> loadedYearsMissingPunch = <int>[].obs;
 
   final RxBool hasMoreDataLeave = true.obs;
   final RxBool hasMoreDataPermission = true.obs;
   final RxBool hasMoreDataLoan = true.obs;
   final RxBool hasMoreDataLetter = true.obs;
   final RxBool hasMoreDataOvertime = true.obs;
+  final RxBool hasMoreDataMissingPunch = true.obs;
 
   // Tab controller
   late TabController tabController;
@@ -90,7 +98,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 5, vsync: this);
+    tabController = TabController(length: 6, vsync: this);
     initializePagination();
     loadAllRequests();
     loadAllRequestTypes();
@@ -129,6 +137,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     loadedYearsOvertime.clear();
     loadedYearsOvertime.add(currentYear);
     hasMoreDataOvertime.value = true;
+
+    loadedYearsMissingPunch.clear();
+    loadedYearsMissingPunch.add(currentYear);
+    hasMoreDataMissingPunch.value = true;
   }
 
   @override
@@ -144,6 +156,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     loadLoanRequests();
     loadLetterRequests();
     loadOvertimeRequests();
+    loadMissingPunchRequests();
   }
  // Load all request types from API
   Future<void> loadAllRequestTypes() async {
@@ -303,6 +316,23 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     }
   }
 
+  Future<void> loadMissingPunchRequests() async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.getMissingPunchRequests(year: DateTime.now().year);
+      if (response.success) {
+        _allMissingPunchRequests.value = response.data;
+        _filterMissingPunchRequests();
+      } else {
+        _showErrorSnackbar('${tr('failed_to_load_missing_punch_requests')}: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_loading_missing_punch_requests')}: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Filter methods - now using client-side filtering
   void changeFilter(String filterKey) {
     selectedFilter.value = filterKey;
@@ -317,6 +347,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     _filterLoanRequests();
     _filterLetterRequests();
     _filterOvertimeRequests();
+    _filterMissingPunchRequests();
   }
 
   void _filterLeaveRequests() {
@@ -369,6 +400,17 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     } else {
       final statusToFilter = selectedFilter.value == 'for-approval' ? 'for-approval' : selectedFilter.value;
       overtimeRequests.value = _allOvertimeRequests.where((request) {
+        return request.status.toLowerCase() == statusToFilter.toLowerCase();
+      }).toList();
+    }
+  }
+
+  void _filterMissingPunchRequests() {
+    if (selectedFilter.value == 'all') {
+      missingPunchRequests.value = List.from(_allMissingPunchRequests);
+    } else {
+      final statusToFilter = selectedFilter.value;
+      missingPunchRequests.value = _allMissingPunchRequests.where((request) {
         return request.status.toLowerCase() == statusToFilter.toLowerCase();
       }).toList();
     }
@@ -476,6 +518,17 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
                 createOvertimeRequest();
               },
             ),
+            const SizedBox(height: 12),
+            _buildRequestTypeOption(
+              icon: Icons.fingerprint,
+              title: tr('missing_punch_request'),
+              subtitle: tr('missing_punch_request_description'),
+              color: const Color(0xFF6C5CE7),
+              onTap: () {
+                Get.back();
+                createMissingPunchRequest();
+              },
+            ),
             const SizedBox(height: 20),
             ],
           ),
@@ -561,6 +614,10 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   void createOvertimeRequest() {
     Get.to(() => const CreateOvertimeRequestScreen());
+  }
+
+  void createMissingPunchRequest() {
+    Get.to(() => const CreateMissingPunchRequestScreen());
   }
 
   // Leave request actions with improved error handling
@@ -1360,10 +1417,11 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   int get loanRequestCount => loanRequests.length;
   int get letterRequestCount => letterRequests.length;
   int get overtimeRequestCount => overtimeRequests.length;
+  int get missingPunchRequestCount => missingPunchRequests.length;
 
   // Method to get total request count
   int get totalRequestCount =>
-      leaveRequestCount + permissionRequestCount + loanRequestCount + letterRequestCount + overtimeRequestCount;
+      leaveRequestCount + permissionRequestCount + loanRequestCount + letterRequestCount + overtimeRequestCount + missingPunchRequestCount;
 
   // Method to get filter color
   Color getFilterColor(String filter) {
@@ -1569,6 +1627,169 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       _showErrorSnackbar('${tr('error_loading_more_overtime_requests')}: $e');
     } finally {
       isLoadingMoreOvertime.value = false;
+    }
+  }
+
+  Future<void> loadMoreMissingPunchRequests() async {
+    if (isLoadingMoreMissingPunch.value || !hasMoreDataMissingPunch.value) return;
+
+    try {
+      isLoadingMoreMissingPunch.value = true;
+
+      if (loadedYearsMissingPunch.isEmpty) {
+        loadedYearsMissingPunch.add(DateTime.now().year);
+      }
+
+      final nextYear = loadedYearsMissingPunch.last - 1;
+      loadedYearsMissingPunch.add(nextYear);
+
+      final response = await _requestRepository.getMissingPunchRequests(year: nextYear);
+
+      if (response.success) {
+        final combinedAllData = [..._allMissingPunchRequests, ...response.data];
+        _allMissingPunchRequests.value = combinedAllData;
+        _filterMissingPunchRequests();
+      } else {
+        _showErrorSnackbar('${tr('failed_to_load_more_missing_punch_requests')}: ${response.message}');
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_loading_more_missing_punch_requests')}: $e');
+    } finally {
+      isLoadingMoreMissingPunch.value = false;
+    }
+  }
+
+  void editMissingPunchRequest(MissingPunchRequest request) {
+    Get.to(() => EditMissingPunchRequestScreen(request: request));
+  }
+
+  void deleteMissingPunchRequest(MissingPunchRequest request) {
+    Get.dialog(
+      Builder(
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(tr('delete_request')),
+          content: Text(tr('confirm_delete_missing_punch_request')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(tr('cancel'), style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteMissingPunchRequest(request.id);
+              },
+              child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteMissingPunchRequest(int id) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.deleteMissingPunchRequest(id);
+      if (response.success) {
+        _allMissingPunchRequests.removeWhere((r) => r.id == id);
+        _filterMissingPunchRequests();
+        Get.snackbar(
+          tr('success'),
+          tr('missing_punch_request_deleted_successfully'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      } else {
+        _showErrorSnackbar(response.message);
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error')}: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> createMissingPunchRequestWithData({
+    required String date,
+    String? checkIn,
+    String? checkOut,
+    String? reason,
+  }) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.createMissingPunchRequest(
+        date: date,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        reason: reason,
+      );
+      if (response.success) {
+        loadMissingPunchRequests();
+        try {
+          Get.snackbar(
+            tr('success'),
+            tr('missing_punch_request_created_successfully'),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: ThemeService.instance.getSuccessColor(),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } catch (_) {}
+        return true;
+      } else {
+        _showErrorSnackbar('${tr('failed_to_create_missing_punch_request')}: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_creating_missing_punch_request')}: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateMissingPunchRequestWithData({
+    required int id,
+    required String date,
+    String? checkIn,
+    String? checkOut,
+    String? reason,
+  }) async {
+    try {
+      isLoading.value = true;
+      final response = await _requestRepository.updateMissingPunchRequest(
+        id: id,
+        date: date,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        reason: reason,
+      );
+      if (response.success) {
+        loadMissingPunchRequests();
+        try {
+          Get.snackbar(
+            tr('success'),
+            tr('missing_punch_request_updated_successfully'),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: ThemeService.instance.getSuccessColor(),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } catch (_) {}
+        return true;
+      } else {
+        _showErrorSnackbar('${tr('failed_to_update_missing_punch_request')}: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      _showErrorSnackbar('${tr('error_updating_missing_punch_request')}: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 }

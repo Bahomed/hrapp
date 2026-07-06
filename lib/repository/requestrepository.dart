@@ -14,6 +14,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/request_response.dar
 import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/employee_dropdown_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
 import 'package:co.injazathr.injazathr/repository/logoutrepository.dart';
 import 'package:co.injazathr.injazathr/utils/api_helper.dart';
 import 'package:dio/dio.dart';
@@ -1116,6 +1117,109 @@ class RequestRepository {
 
       var response = await dioClient.get(apiUrl, {'Authorization': 'Bearer $token'}, {'locale': getCurrentLanguage()});
       return OvertimeRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ================ MISSING PUNCH REQUEST METHODS ================
+
+  Future<MissingPunchRequestsResponse> getMissingPunchRequests({int? year}) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$missingPunchRequestsUrl';
+      final queryParams = <String, dynamic>{'locale': getCurrentLanguage()};
+      if (year != null) queryParams['year'] = year;
+
+      var response = await dioClient.get(apiUrl, {'Authorization': 'Bearer $token'}, queryParams);
+      return MissingPunchRequestsResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MissingPunchRequestResponse> createMissingPunchRequest({
+    required String date,
+    String? checkIn,
+    String? checkOut,
+    String? reason,
+  }) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$missingPunchRequestsUrl';
+      final data = <String, dynamic>{'date': date};
+      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = checkIn.length > 5 ? checkIn.substring(0, 5) : checkIn;
+      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = checkOut.length > 5 ? checkOut.substring(0, 5) : checkOut;
+      if (reason != null && reason.isNotEmpty) data['reason'] = reason;
+
+      var response = await dioClient.post(apiUrl, data, {}, {'Authorization': 'Bearer $token'});
+      return MissingPunchRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MissingPunchRequestResponse> updateMissingPunchRequest({
+    required int id,
+    required String date,
+    String? checkIn,
+    String? checkOut,
+    String? reason,
+  }) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$missingPunchRequestsUrl/$id';
+      final data = <String, dynamic>{'date': date};
+      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = checkIn.length > 5 ? checkIn.substring(0, 5) : checkIn;
+      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = checkOut.length > 5 ? checkOut.substring(0, 5) : checkOut;
+      if (reason != null) data['reason'] = reason;
+
+      var response = await dioClient.put(apiUrl, {'Authorization': 'Bearer $token'}, data);
+      return MissingPunchRequestResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<BaseResponse> deleteMissingPunchRequest(int id) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$missingPunchRequestsUrl/$id';
+
+      var response = await dioClient.delete(apiUrl, {'Authorization': 'Bearer $token'}, {});
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.error is SocketException) throw 'No Internet Connection';
+      throw exceptionHandler(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MissingPunchRequestResponse> getMissingPunchRequestDetails(int id) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      final apiUrl = '$workspaceUrl$missingPunchRequestsUrl/$id';
+
+      var response = await dioClient.get(apiUrl, {'Authorization': 'Bearer $token'}, {'locale': getCurrentLanguage()});
+      return MissingPunchRequestResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.error is SocketException) throw 'No Internet Connection';
       throw exceptionHandler(e);
