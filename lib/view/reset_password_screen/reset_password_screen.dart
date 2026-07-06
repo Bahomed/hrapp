@@ -142,6 +142,7 @@ class ResetPasswordScreen extends StatelessWidget {
                                   mobileNo,
                                   otp,
                                   newPasswordController.text,
+                                  context,
                                 );
                               },
                         style: ElevatedButton.styleFrom(

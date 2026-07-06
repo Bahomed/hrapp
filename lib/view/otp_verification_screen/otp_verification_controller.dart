@@ -39,52 +39,43 @@ class OtpVerificationController extends GetxController {
     });
   }
 
-  void resendOtp(String mobileNo) async {
+  void resendOtp(String mobileNo, BuildContext context) async {
     try {
       isLoading.value = true;
 
       final response = await repository.sendOtp(mobileNo);
 
+      if (!context.mounted) return;
+
       if (response != null && response.error == false) {
-        Get.snackbar(
-          tr('success'),
-          response.message ?? tr('otp_sent_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response.message ?? tr('otp_sent_successfully')),
           backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        ));
         startResendTimer();
       } else {
-        Get.snackbar(
-          tr('error'),
-          response?.message ?? tr('failed_to_send_otp'),
-          snackPosition: SnackPosition.BOTTOM,
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response?.message ?? tr('failed_to_send_otp')),
           backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        ));
       }
     } catch (e) {
-      Get.snackbar(
-        tr('error'),
-        tr('something_went_wrong'),
-        snackPosition: SnackPosition.BOTTOM,
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('something_went_wrong')),
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      ));
     } finally {
       isLoading.value = false;
     }
   }
 
-  void verifyOtp(String mobileNo, String otp, String from) async {
+  void verifyOtp(String mobileNo, String otp, String from, BuildContext context) async {
     if (otp.length != 6) {
-      Get.snackbar(
-        tr('error'),
-        tr('please_enter_valid_otp'),
-        snackPosition: SnackPosition.BOTTOM,
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('please_enter_valid_otp')),
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      ));
       return;
     }
 
@@ -93,37 +84,30 @@ class OtpVerificationController extends GetxController {
 
       final response = await repository.verifyOtp(mobileNo, otp);
 
-      if (response != null && response.error == false) {
-        Get.snackbar(
-          tr('success'),
-          response.message ?? tr('otp_verified_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+      if (!context.mounted) return;
 
-        // Navigate to reset password screen
+      if (response != null && response.error == false) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response.message ?? tr('otp_verified_successfully')),
+          backgroundColor: Colors.green,
+        ));
+
         Get.to(() => ResetPasswordScreen(), arguments: {
           'mobile_no': mobileNo,
           'otp': otp,
         });
       } else {
-        Get.snackbar(
-          tr('error'),
-          response?.message ?? tr('invalid_otp'),
-          snackPosition: SnackPosition.BOTTOM,
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response?.message ?? tr('invalid_otp')),
           backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        ));
       }
     } catch (e) {
-      Get.snackbar(
-        tr('error'),
-        tr('something_went_wrong'),
-        snackPosition: SnackPosition.BOTTOM,
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('something_went_wrong')),
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      ));
     } finally {
       isLoading.value = false;
     }

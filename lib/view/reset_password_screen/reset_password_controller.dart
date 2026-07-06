@@ -9,7 +9,7 @@ class ResetPasswordController extends GetxController {
 
   var isLoading = false.obs;
 
-  void resetPassword(String mobileNo, String otp, String newPassword) async {
+  void resetPassword(String mobileNo, String otp, String newPassword, BuildContext context) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -19,34 +19,27 @@ class ResetPasswordController extends GetxController {
 
       final response = await repository.resetPassword(mobileNo, otp, newPassword);
 
-      if (response != null && response.error == false) {
-        Get.snackbar(
-          tr('success'),
-          response.message ?? tr('password_reset_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+      if (!context.mounted) return;
 
-        // Navigate back to login
+      if (response != null && response.error == false) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response.message ?? tr('password_reset_successfully')),
+          backgroundColor: Colors.green,
+        ));
+
         Get.until((route) => route.isFirst);
       } else {
-        Get.snackbar(
-          tr('error'),
-          response?.message ?? tr('failed_to_reset_password'),
-          snackPosition: SnackPosition.BOTTOM,
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response?.message ?? tr('failed_to_reset_password')),
           backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        ));
       }
     } catch (e) {
-      Get.snackbar(
-        tr('error'),
-        tr('something_went_wrong'),
-        snackPosition: SnackPosition.BOTTOM,
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('something_went_wrong')),
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      ));
     } finally {
       isLoading.value = false;
     }

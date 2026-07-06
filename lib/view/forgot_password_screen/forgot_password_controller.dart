@@ -10,7 +10,7 @@ class ForgotPasswordController extends GetxController {
 
   var isLoading = false.obs;
 
-  void sendOtp(String mobileNo) async {
+  void sendOtp(String mobileNo, BuildContext context) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -20,37 +20,30 @@ class ForgotPasswordController extends GetxController {
 
       final response = await repository.sendOtp(mobileNo);
 
-      if (response != null && response.error == false) {
-        Get.snackbar(
-          tr('success'),
-          response.message ?? tr('otp_sent_successfully'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+      if (!context.mounted) return;
 
-        // Navigate to OTP verification screen
+      if (response != null && response.error == false) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response.message ?? tr('otp_sent_successfully')),
+          backgroundColor: Colors.green,
+        ));
+
         Get.to(() => OtpVerificationScreen(), arguments: {
           'mobile_no': mobileNo,
           'from': 'forgot_password'
         });
       } else {
-        Get.snackbar(
-          tr('error'),
-          response?.message ?? tr('failed_to_send_otp'),
-          snackPosition: SnackPosition.BOTTOM,
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response?.message ?? tr('failed_to_send_otp')),
           backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        ));
       }
     } catch (e) {
-      Get.snackbar(
-        tr('error'),
-        tr('something_went_wrong'),
-        snackPosition: SnackPosition.BOTTOM,
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('something_went_wrong')),
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      ));
     } finally {
       isLoading.value = false;
     }

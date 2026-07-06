@@ -188,7 +188,7 @@ class OtpVerificationScreen extends StatelessWidget {
               Obx(() => Center(
                     child: controller.canResend.value
                         ? TextButton(
-                            onPressed: () => controller.resendOtp(mobileNo),
+                            onPressed: () => controller.resendOtp(mobileNo, context),
                             child: Text(
                               tr('resend_otp'),
                               style: TextStyle(
@@ -219,7 +219,7 @@ class OtpVerificationScreen extends StatelessWidget {
                               final otp = otpControllers
                                   .map((c) => c.text)
                                   .join();
-                              controller.verifyOtp(mobileNo, otp, from);
+                              controller.verifyOtp(mobileNo, otp, from, context);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: themeService.getActionColor('requests'),

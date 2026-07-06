@@ -117,7 +117,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                         onPressed: controller.isLoading.value
                             ? null
                             : () {
-                                controller.sendOtp(mobileController.text);
+                                controller.sendOtp(mobileController.text, context);
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: themeService.getActionColor('requests'),
