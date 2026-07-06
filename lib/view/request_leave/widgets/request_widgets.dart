@@ -1692,12 +1692,6 @@ class MissingPunchRequestCard extends StatelessWidget {
                       color: ThemeService.instance.getErrorColor(),
                       onTap: () => controller.deleteMissingPunchRequest(request),
                     ),
-                  ] else ...[
-                    RequestActionButton(
-                      icon: Icons.visibility_outlined,
-                      color: ThemeService.instance.getTextSecondaryColor(),
-                      onTap: () {},
-                    ),
                   ],
                 ],
               ),
