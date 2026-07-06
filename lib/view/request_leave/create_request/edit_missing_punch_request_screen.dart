@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
@@ -121,7 +122,15 @@ class EditMissingPunchRequestScreen extends StatelessWidget {
                             checkOut: checkOutController.text.isNotEmpty ? checkOutController.text : null,
                             reason: reasonController.text.isNotEmpty ? reasonController.text : null,
                           );
-                          if (success) navigator.pop();
+                          if (success) {
+                            navigator.pop();
+                            Fluttertoast.showToast(
+                              msg: tr('missing_punch_request_updated_successfully'),
+                              backgroundColor: const Color(0xFF6C5CE7),
+                              textColor: Colors.white,
+                              toastLength: Toast.LENGTH_LONG,
+                            );
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _color,

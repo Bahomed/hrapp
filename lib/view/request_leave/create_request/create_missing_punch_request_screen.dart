@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
@@ -142,7 +143,15 @@ class CreateMissingPunchRequestScreen extends StatelessWidget {
                             checkOut: checkOutController.text.isNotEmpty ? checkOutController.text : null,
                             reason: reasonController.text.isNotEmpty ? reasonController.text : null,
                           );
-                          if (success) navigator.pop();
+                          if (success) {
+                            navigator.pop();
+                            Fluttertoast.showToast(
+                              msg: tr('missing_punch_request_created_successfully'),
+                              backgroundColor: const Color(0xFF6C5CE7),
+                              textColor: Colors.white,
+                              toastLength: Toast.LENGTH_LONG,
+                            );
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _color,
