@@ -96,6 +96,7 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
                 controller: fromDateController,
                 context: context,
                 accentColor: overtimeColor,
+                firstDate: controller.firstAllowedDate,
                 required: true,
                 validator: (v) => (v == null || v.isEmpty) ? tr('please_select_from_date') : null,
               ),
@@ -107,6 +108,7 @@ class CreateOvertimeRequestScreen extends StatelessWidget {
                 controller: toDateController,
                 context: context,
                 accentColor: overtimeColor,
+                firstDate: controller.firstAllowedDate,
                 required: true,
                 validator: (v) => (v == null || v.isEmpty) ? tr('please_select_to_date') : null,
               ),
@@ -284,6 +286,7 @@ Widget _buildDateField({
   String? Function(String?)? validator,
   required Color accentColor,
   bool required = false,
+  DateTime? firstDate,
 }) {
   final themeService = ThemeService.instance;
   return Column(
@@ -314,7 +317,7 @@ Widget _buildDateField({
           final picked = await showDatePicker(
             context: context,
             initialDate: DateTime.now(),
-            firstDate: DateTime(DateTime.now().year - 1),
+            firstDate: firstDate ?? DateTime(DateTime.now().year - 1),
             lastDate: DateTime.now().add(const Duration(days: 365)),
             builder: (ctx, child) => Theme(
               data: Theme.of(ctx).copyWith(

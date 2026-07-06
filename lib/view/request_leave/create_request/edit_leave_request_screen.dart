@@ -175,6 +175,7 @@ class EditLeaveRequestScreen extends StatelessWidget {
                 label: tr('start_date'),
                 controller: startDateController,
                 context: context,
+                firstDate: controller.firstAllowedDate,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_start_date');
@@ -190,6 +191,7 @@ class EditLeaveRequestScreen extends StatelessWidget {
                 label: tr('end_date'),
                 controller: endDateController,
                 context: context,
+                firstDate: controller.firstAllowedDate,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_end_date');
@@ -603,6 +605,7 @@ Widget _buildDateField({
   required TextEditingController controller,
   required BuildContext context,
   String? Function(String?)? validator,
+  DateTime? firstDate,
 }) {
   final themeService = ThemeService.instance;
   
@@ -654,7 +657,7 @@ Widget _buildDateField({
           final DateTime? picked = await showDatePicker(
             context: context,
             initialDate: DateTime.now(),
-            firstDate: DateTime.now(),
+            firstDate: firstDate ?? DateTime.now(),
             lastDate: DateTime.now().add(const Duration(days: 365)),
             builder: (context, child) {
               return Theme(

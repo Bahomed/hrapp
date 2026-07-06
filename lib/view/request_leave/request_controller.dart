@@ -14,6 +14,7 @@ import 'package:co.injazathr.injazathr/data/remote/response/loan_request_respons
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/request_summary_response.dart';
+import 'package:co.injazathr.injazathr/data/local/preferences.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_leave_request_screen.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/create_request/create_permission_request_screen.dart';
@@ -54,6 +55,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
   final RxList<RequestTypeOption> loanTypes = <RequestTypeOption>[].obs;
   final RxList<RequestTypeOption> letterTypes = <RequestTypeOption>[].obs;
   final RxBool isLoadingTypes = false.obs; // Added missing variable
+  final RxString allowBackdateRequest = 'N'.obs;
 
   // Pagination variables for year-based loading - separate for each request type
   final RxBool isLoadingMoreLeave = false.obs;
@@ -92,7 +94,17 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
     initializePagination();
     loadAllRequests();
     loadAllRequestTypes();
+    _loadAllowBackdateRequest();
   }
+
+  Future<void> _loadAllowBackdateRequest() async {
+    allowBackdateRequest.value = await Preferences().getAllowBackdateRequest();
+  }
+
+  bool get canBackdate => allowBackdateRequest.value == 'Y';
+
+  DateTime get firstAllowedDate =>
+      canBackdate ? DateTime(DateTime.now().year - 5) : DateTime.now();
 
   // Initialize pagination with current year - separate for each request type
   void initializePagination() {

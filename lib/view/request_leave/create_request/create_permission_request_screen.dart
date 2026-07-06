@@ -113,6 +113,7 @@ class CreatePermissionRequestScreen extends StatelessWidget {
                 label: tr('permit_date'),
                 controller: dateController,
                 context: context,
+                firstDate: controller.firstAllowedDate,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_date');
@@ -430,6 +431,7 @@ class CreatePermissionRequestScreen extends StatelessWidget {
     required TextEditingController controller,
     required BuildContext context,
     String? Function(String?)? validator,
+    DateTime? firstDate,
   }) {
     final themeService = ThemeService.instance;
 
@@ -482,7 +484,7 @@ class CreatePermissionRequestScreen extends StatelessWidget {
             final DateTime? picked = await showDatePicker(
               context: context,
               initialDate: today,
-              firstDate: today,
+              firstDate: firstDate ?? today,
               lastDate: DateTime(2100),
               builder: (context, child) {
                 return Theme(

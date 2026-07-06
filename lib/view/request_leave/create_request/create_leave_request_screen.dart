@@ -124,6 +124,7 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                 label: tr('start_date'),
                 controller: startDateController,
                 context: context,
+                firstDate: controller.firstAllowedDate,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return tr('please_select_start_date');
@@ -139,6 +140,7 @@ class CreateLeaveRequestScreen extends StatelessWidget {
                 label: tr('end_date'),
                 controller: endDateController,
                 context: context,
+                firstDate: controller.firstAllowedDate,
                 lastDateBuilder: () {
                   final leaveType = selectedLeaveType.value;
                   if (leaveType?.notAllowedToIncreaseFromLeaveDuration == 'Y' &&
@@ -553,6 +555,7 @@ Widget _buildDateField({
   required BuildContext context,
   String? Function(String?)? validator,
   DateTime? Function()? lastDateBuilder,
+  DateTime? firstDate,
 }) {
   final themeService = ThemeService.instance;
   
@@ -604,7 +607,7 @@ Widget _buildDateField({
           final DateTime? picked = await showDatePicker(
             context: context,
             initialDate: DateTime.now(),
-            firstDate: DateTime.now(),
+            firstDate: firstDate ?? DateTime.now(),
             lastDate: lastDateBuilder?.call() ?? DateTime.now().add(const Duration(days: 365)),
             builder: (context, child) {
               return Theme(
