@@ -230,6 +230,14 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           color: const Color(0xFFFF6B35),
           themeService: themeService,
         ),
+        _buildSummaryCard(
+          context: context,
+          title: tr('missing_punch_request'),
+          count: controller.missingPunchRequestCount,
+          icon: Icons.fingerprint,
+          color: const Color(0xFF6C5CE7),
+          themeService: themeService,
+        ),
       ],
     );
   }
@@ -357,6 +365,16 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               context),
           const SizedBox(height: 12),
           ...controller.overtimeRequests.map((request) =>
+              _buildRequestCard(request, controller, themeService, context)),
+          const SizedBox(height: 20),
+        ],
+
+        if (controller.missingPunchRequests.isNotEmpty) ...[
+          _buildSectionHeader(
+              tr('missing_punch_request'), controller.missingPunchRequestCount, themeService,
+              context),
+          const SizedBox(height: 12),
+          ...controller.missingPunchRequests.map((request) =>
               _buildRequestCard(request, controller, themeService, context)),
         ],
       ],
@@ -941,6 +959,39 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
         }
         break;
+
+      case 'missingpunch':
+        if (request.startDateG != null && request.startDateG!.isNotEmpty) {
+          widgets.add(Text(
+            '${tr('date')}: ${_formatDate(request.startDateG!)}',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        if (request.permitFrom != null && request.permitFrom!.isNotEmpty) {
+          widgets.add(Text(
+            '${tr('check_in')}: ${_formatTimeDisplay(request.permitFrom!)}',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        if (request.permitTo != null && request.permitTo!.isNotEmpty) {
+          widgets.add(Text(
+            '${tr('check_out')}: ${_formatTimeDisplay(request.permitTo!)}',
+            style: TextStyle(
+              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
+              color: themeService.getTextSecondaryColor(),
+            ),
+          ));
+          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
+        }
+        break;
     }
 
     return widgets;
@@ -1107,7 +1158,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
   String _formatDate(String dateTimeString) {
     try {
       final dateTime = DateTime.parse(dateTimeString);
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      return '${dateTime.day.toString().padLeft(2, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.year}';
     } catch (e) {
       return dateTimeString;
     }

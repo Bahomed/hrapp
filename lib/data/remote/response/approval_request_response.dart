@@ -45,6 +45,7 @@ class ApprovalRequest {
   final int employmentId;
   final String requestType;
   final String requestDateG;
+  final String? startDateG;
   final String requestNumber;
   final String? leaveStartDate;
   final String? leaveEndDate;
@@ -77,6 +78,7 @@ class ApprovalRequest {
     required this.employmentId,
     required this.requestType,
     required this.requestDateG,
+    this.startDateG,
     required this.requestNumber,
     this.leaveStartDate,
     this.leaveEndDate,
@@ -111,6 +113,7 @@ class ApprovalRequest {
       employmentId: json['employment_id'] ?? 0,
       requestType: json['request_type'] ?? '',
       requestDateG: json['request_date_g'] ?? '',
+      startDateG: json['start_date_g'],
       requestNumber: json['request_number'] ?? '',
       leaveStartDate: json['leave_start_date'],
       leaveEndDate: json['leave_end_date'],
@@ -149,6 +152,7 @@ class ApprovalRequest {
       'employment_id': employmentId,
       'request_type': requestType,
       'request_date_g': requestDateG,
+      'start_date_g': startDateG,
       'request_number': requestNumber,
       'leave_start_date': leaveStartDate,
       'leave_end_date': leaveEndDate,

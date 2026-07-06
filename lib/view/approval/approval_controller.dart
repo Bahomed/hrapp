@@ -29,6 +29,7 @@ class ApprovalController extends GetxController {
   final RxList<ApprovalRequest> loanRequests = <ApprovalRequest>[].obs;
   final RxList<ApprovalRequest> letterRequests = <ApprovalRequest>[].obs;
   final RxList<ApprovalRequest> overtimeRequests = <ApprovalRequest>[].obs;
+  final RxList<ApprovalRequest> missingPunchRequests = <ApprovalRequest>[].obs;
 
   // Filter configuration
   List<Map<String, dynamic>> get filters => [
@@ -38,6 +39,7 @@ class ApprovalController extends GetxController {
     {'name': tr('loan'), 'key': 'Loan', 'color': getFilterColor('loan')},
     {'name': tr('letter'), 'key': 'Letter', 'color': getFilterColor('letter')},
     {'name': tr('overtime'), 'key': 'Overtime', 'color': getFilterColor('overtime')},
+    {'name': tr('missing_punch'), 'key': 'MissingPunch', 'color': getFilterColor('missingpunch')},
   ];
 
   @override
@@ -81,6 +83,7 @@ class ApprovalController extends GetxController {
       loanRequests.value = allRequests.where((r) => r.requestType == 'Loan').toList();
       letterRequests.value = allRequests.where((r) => r.requestType == 'Letter').toList();
       overtimeRequests.value = allRequests.where((r) => r.requestType == 'Overtime').toList();
+      missingPunchRequests.value = allRequests.where((r) => r.requestType == 'MissingPunch').toList();
     } else {
       // Filter by specific request type
       leaveRequests.value = filter == 'Leave' ? allRequests.where((r) => r.requestType == 'Leave').toList() : [];
@@ -88,6 +91,7 @@ class ApprovalController extends GetxController {
       loanRequests.value = filter == 'Loan' ? allRequests.where((r) => r.requestType == 'Loan').toList() : [];
       letterRequests.value = filter == 'Letter' ? allRequests.where((r) => r.requestType == 'Letter').toList() : [];
       overtimeRequests.value = filter == 'Overtime' ? allRequests.where((r) => r.requestType == 'Overtime').toList() : [];
+      missingPunchRequests.value = filter == 'MissingPunch' ? allRequests.where((r) => r.requestType == 'MissingPunch').toList() : [];
     }
 
     // Fetch leave balances for all visible leave requests
@@ -1113,6 +1117,8 @@ class ApprovalController extends GetxController {
         return themeService.getActionColor('documents');
       case 'overtime':
         return const Color(0xFFFF6B35);
+      case 'missingpunch':
+        return const Color(0xFF6C5CE7);
       default:
         return themeService.getTextSecondaryColor();
     }
@@ -1132,6 +1138,8 @@ class ApprovalController extends GetxController {
         return Icons.description;
       case 'overtime':
         return Icons.access_time_filled;
+      case 'missingpunch':
+        return Icons.fingerprint;
       default:
         return Icons.circle;
     }
@@ -1143,9 +1151,10 @@ class ApprovalController extends GetxController {
   int get loanRequestCount => loanRequests.length;
   int get letterRequestCount => letterRequests.length;
   int get overtimeRequestCount => overtimeRequests.length;
+  int get missingPunchRequestCount => missingPunchRequests.length;
 
   int get totalPendingCount => allRequests.length;
-  
+
   // Get request type display name
   String getRequestTypeDisplayName(String requestType) {
     switch (requestType) {
@@ -1159,6 +1168,8 @@ class ApprovalController extends GetxController {
         return tr('letter_request');
       case 'Overtime':
         return tr('overtime_request');
+      case 'MissingPunch':
+        return tr('missing_punch_request');
       default:
         return requestType;
     }
