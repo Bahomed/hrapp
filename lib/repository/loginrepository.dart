@@ -18,6 +18,7 @@ class LoginRepository {
     login_response.Data? userData, {
     String? refreshToken,
     String? expiresAt,
+    String? allowBackdateRequest,
   }) async {
     await preferences.saveToken(token);
     if (refreshToken != null && refreshToken.isNotEmpty) {
@@ -25,6 +26,9 @@ class LoginRepository {
     }
     if (expiresAt != null && expiresAt.isNotEmpty) {
       await preferences.saveTokenExpiresAt(expiresAt);
+    }
+    if (allowBackdateRequest != null) {
+      await preferences.saveAllowBackdateRequest(allowBackdateRequest);
     }
     if (userData != null) {
       await preferences.saveUserData(userData);

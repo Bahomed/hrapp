@@ -183,6 +183,7 @@ class LoginController extends GetxController {
           response.data,
           refreshToken: response.refreshToken,
           expiresAt: response.expiresAt,
+          allowBackdateRequest: response.allowBackdateRequest,
         );
 
         // Navigate to home screen

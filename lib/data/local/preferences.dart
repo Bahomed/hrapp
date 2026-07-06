@@ -22,6 +22,7 @@ class Preferences {
   final token = 'TOKEN';
   final refreshToken = 'REFRESH_TOKEN';
   final tokenExpiresAt = 'TOKEN_EXPIRES_AT';
+  final allowBackdateRequest = 'ALLOW_BACKDATE_REQUEST';
   final apppassword = 'APPPASSWORD';
   final checkPassword = 'CHECKPASSWORD';
   final workspaceName = 'WORKSPACENAME';
@@ -124,6 +125,10 @@ class Preferences {
 
   Future<String> getTokenExpiresAt() async => datacount.read(tokenExpiresAt) ?? '';
 
+  Future<void> saveAllowBackdateRequest(String value) async => datacount.write(allowBackdateRequest, value);
+
+  Future<String> getAllowBackdateRequest() async => datacount.read(allowBackdateRequest) ?? 'N';
+
   Future<bool> isTokenExpired() async {
     final expiresAt = await getTokenExpiresAt();
     if (expiresAt.isEmpty) return false;
@@ -171,6 +176,7 @@ class Preferences {
     await datacount.remove(token);
     await datacount.remove(refreshToken);
     await datacount.remove(tokenExpiresAt);
+    await datacount.remove(allowBackdateRequest);
     await datacount.remove(apppassword);
     await datacount.remove(checkPassword);
   }

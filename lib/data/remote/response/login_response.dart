@@ -15,6 +15,7 @@ class LoginResponse {
   String? token; // For success response format
   String? refreshToken; // Refresh token for token renewal
   String? expiresAt; // Token expiration timestamp
+  String? allowBackdateRequest;
 
   LoginResponse({
     this.status,
@@ -27,6 +28,7 @@ class LoginResponse {
     this.token,
     this.refreshToken,
     this.expiresAt,
+    this.allowBackdateRequest,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
@@ -40,6 +42,7 @@ class LoginResponse {
     token: json["token"], // Direct token field for success response
     refreshToken: json["refresh_token"],
     expiresAt: json["expires_at"],
+    allowBackdateRequest: json["allow_backdate_request"]?.toString(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -53,6 +56,7 @@ class LoginResponse {
     "token": token,
     "refresh_token": refreshToken,
     "expires_at": expiresAt,
+    "allow_backdate_request": allowBackdateRequest,
   };
 
   // Helper methods
