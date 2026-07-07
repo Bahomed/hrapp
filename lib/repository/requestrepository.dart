@@ -1145,6 +1145,23 @@ class RequestRepository {
     }
   }
 
+  String _convertTimeToHHmm(String time) {
+    time = time.trim();
+    if (time.contains('AM') || time.contains('PM')) {
+      final isAM = time.toUpperCase().contains('AM');
+      final timePart = time.replaceAll(RegExp(r'\s*(AM|PM)', caseSensitive: false), '').trim();
+      final parts = timePart.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        if (!isAM && hour != 12) hour += 12;
+        if (isAM && hour == 12) hour = 0;
+        return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+      }
+    }
+    return time.length > 5 ? time.substring(0, 5) : time;
+  }
+
   Future<MissingPunchRequestResponse> createMissingPunchRequest({
     required String date,
     String? checkIn,
@@ -1156,8 +1173,8 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$missingPunchRequestsUrl';
       final data = <String, dynamic>{'date': date};
-      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = checkIn.length > 5 ? checkIn.substring(0, 5) : checkIn;
-      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = checkOut.length > 5 ? checkOut.substring(0, 5) : checkOut;
+      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = _convertTimeToHHmm(checkIn);
+      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = _convertTimeToHHmm(checkOut);
       if (reason != null && reason.isNotEmpty) data['reason'] = reason;
 
       var response = await dioClient.post(apiUrl, data, {}, {'Authorization': 'Bearer $token'});
@@ -1182,8 +1199,8 @@ class RequestRepository {
       final workspaceUrl = await preferences.getWorkspaceUrl();
       final apiUrl = '$workspaceUrl$missingPunchRequestsUrl/$id';
       final data = <String, dynamic>{'date': date};
-      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = checkIn.length > 5 ? checkIn.substring(0, 5) : checkIn;
-      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = checkOut.length > 5 ? checkOut.substring(0, 5) : checkOut;
+      if (checkIn != null && checkIn.isNotEmpty) data['check_in'] = _convertTimeToHHmm(checkIn);
+      if (checkOut != null && checkOut.isNotEmpty) data['check_out'] = _convertTimeToHHmm(checkOut);
       if (reason != null) data['reason'] = reason;
 
       var response = await dioClient.put(apiUrl, {'Authorization': 'Bearer $token'}, data);

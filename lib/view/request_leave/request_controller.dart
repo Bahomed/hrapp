@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:open_file/open_file.dart';
@@ -1729,23 +1730,23 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       );
       if (response.success) {
         loadMissingPunchRequests();
-        try {
-          Get.snackbar(
-            tr('success'),
-            tr('missing_punch_request_created_successfully'),
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: ThemeService.instance.getSuccessColor(),
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-          );
-        } catch (_) {}
         return true;
       } else {
-        _showErrorSnackbar('${tr('failed_to_create_missing_punch_request')}: ${response.message}');
+        Fluttertoast.showToast(
+          msg: response.message,
+          backgroundColor: ThemeService.instance.getErrorColor(),
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_LONG,
+        );
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('${tr('error_creating_missing_punch_request')}: $e');
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        backgroundColor: ThemeService.instance.getErrorColor(),
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -1770,23 +1771,23 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
       );
       if (response.success) {
         loadMissingPunchRequests();
-        try {
-          Get.snackbar(
-            tr('success'),
-            tr('missing_punch_request_updated_successfully'),
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: ThemeService.instance.getSuccessColor(),
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-          );
-        } catch (_) {}
         return true;
       } else {
-        _showErrorSnackbar('${tr('failed_to_update_missing_punch_request')}: ${response.message}');
+        Fluttertoast.showToast(
+          msg: response.message,
+          backgroundColor: ThemeService.instance.getErrorColor(),
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_LONG,
+        );
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('${tr('error_updating_missing_punch_request')}: $e');
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        backgroundColor: ThemeService.instance.getErrorColor(),
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+      );
       return false;
     } finally {
       isLoading.value = false;

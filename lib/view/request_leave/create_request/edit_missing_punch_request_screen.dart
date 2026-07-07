@@ -20,8 +20,8 @@ class EditMissingPunchRequestScreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
 
     final dateController = TextEditingController(text: request.date);
-    final checkInController = TextEditingController(text: request.checkIn ?? '');
-    final checkOutController = TextEditingController(text: request.checkOut ?? '');
+    final checkInController = TextEditingController(text: _hhmmToAmPm(request.checkIn ?? ''));
+    final checkOutController = TextEditingController(text: _hhmmToAmPm(request.checkOut ?? ''));
     final reasonController = TextEditingController(text: request.reason ?? '');
 
     return Scaffold(
@@ -94,6 +94,19 @@ class EditMissingPunchRequestScreen extends StatelessWidget {
                 controller: checkOutController,
                 context: context,
                 accentColor: _color,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return null;
+                  if (checkInController.text.isNotEmpty) {
+                    final inTime = _parseTimeOfDay(checkInController.text);
+                    final outTime = _parseTimeOfDay(value);
+                    if (inTime != null && outTime != null) {
+                      if (outTime.hour * 60 + outTime.minute <= inTime.hour * 60 + inTime.minute) {
+                        return tr('to_time_after_from_time');
+                      }
+                    }
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 20),
@@ -192,7 +205,7 @@ Widget _buildDateField({
             context: context,
             initialDate: initial,
             firstDate: firstDate ?? DateTime.now(),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
+            lastDate: DateTime.now(),
           );
           if (picked != null) {
             controller.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
@@ -208,6 +221,7 @@ Widget _buildTimeField({
   required TextEditingController controller,
   required BuildContext context,
   required Color accentColor,
+  String? Function(String?)? validator,
 }) {
   final themeService = ThemeService.instance;
   return Column(
@@ -217,6 +231,7 @@ Widget _buildTimeField({
       const SizedBox(height: 8),
       TextFormField(
         controller: controller,
+        validator: validator,
         readOnly: true,
         style: TextStyle(color: themeService.getTextPrimaryColor()),
         decoration: InputDecoration(
@@ -225,6 +240,7 @@ Widget _buildTimeField({
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: accentColor)),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: ThemeService.instance.getErrorColor())),
           contentPadding: const EdgeInsets.all(16),
           suffixIcon: Icon(Icons.access_time, color: accentColor),
           hintText: trParams('select_field', {'field': label}),
@@ -233,14 +249,36 @@ Widget _buildTimeField({
         onTap: () async {
           TimeOfDay initial = TimeOfDay.now();
           if (controller.text.isNotEmpty) {
-            try {
-              final parts = controller.text.split(':');
-              initial = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-            } catch (_) {}
+            final parsed = _parseTimeOfDay(controller.text);
+            if (parsed != null) initial = parsed;
           }
-          final picked = await showTimePicker(context: context, initialTime: initial);
+          final themeService = ThemeService.instance;
+          final picked = await showTimePicker(
+            context: context,
+            initialTime: initial,
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: themeService.isDarkMode
+                      ? ColorScheme.dark(
+                          primary: accentColor,
+                          onPrimary: Colors.white,
+                          surface: themeService.getCardColor(),
+                          onSurface: themeService.getTextPrimaryColor(),
+                        )
+                      : ColorScheme.light(
+                          primary: accentColor,
+                          onPrimary: Colors.white,
+                          surface: themeService.getCardColor(),
+                          onSurface: themeService.getTextPrimaryColor(),
+                        ),
+                ),
+                child: child!,
+              );
+            },
+          );
           if (picked != null) {
-            controller.text = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+            controller.text = picked.format(context);
           }
         },
       ),
@@ -275,4 +313,43 @@ Widget _buildTextAreaField({
       ),
     ],
   );
+}
+
+TimeOfDay? _parseTimeOfDay(String timeString) {
+  try {
+    timeString = timeString.trim();
+    if (timeString.contains('AM') || timeString.contains('PM')) {
+      final isAM = timeString.toUpperCase().contains('AM');
+      final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)', caseSensitive: false), '').trim();
+      final parts = timePart.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        if (!isAM && hour != 12) hour += 12;
+        if (isAM && hour == 12) hour = 0;
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    } else {
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+String _hhmmToAmPm(String time) {
+  if (time.isEmpty) return '';
+  try {
+    final parts = time.split(':');
+    if (parts.length >= 2) {
+      int hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+    }
+  } catch (_) {}
+  return time;
 }
