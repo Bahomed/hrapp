@@ -160,7 +160,7 @@ class CreateMissingPunchRequestScreen extends StatelessWidget {
                             navigator.pop();
                             Fluttertoast.showToast(
                               msg: tr('missing_punch_request_created_successfully'),
-                              backgroundColor: const Color(0xFF6C5CE7),
+                              backgroundColor: ThemeService.instance.getSuccessColor(),
                               textColor: Colors.white,
                               toastLength: Toast.LENGTH_LONG,
                             );
