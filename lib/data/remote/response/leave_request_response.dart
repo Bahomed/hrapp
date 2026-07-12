@@ -24,6 +24,8 @@ class LeaveRequest {
   final String updatedAt;
   final bool ticket;
   final bool exitPermit;
+  final int? currentLevel;
+  final String? pendingWith;
 
   LeaveRequest({
     required this.id,
@@ -45,6 +47,8 @@ class LeaveRequest {
     required this.updatedAt,
     this.ticket = false,
     this.exitPermit = false,
+    this.currentLevel,
+    this.pendingWith,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) {
@@ -73,6 +77,8 @@ class LeaveRequest {
       updatedAt: json['updated_at'] ?? '',
       ticket: json['ticket'] == true || json['ticket'] == 1 || json['ticket'] == '1',
       exitPermit: json['exit_permit'] == true || json['exit_permit'] == 1 || json['exit_permit'] == '1',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
     );
   }
 }
@@ -99,6 +105,8 @@ class LeaveRequestDetails extends LeaveRequest {
     required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
+    super.currentLevel,
+    super.pendingWith,
     this.user,
     this.approver,
   });
@@ -127,6 +135,8 @@ class LeaveRequestDetails extends LeaveRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
     );

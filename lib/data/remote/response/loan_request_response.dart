@@ -26,6 +26,8 @@ class LoanRequest {
   final String requestNumber;
   final String createdAt;
   final String updatedAt;
+  final int? currentLevel;
+  final String? pendingWith;
 
   LoanRequest({
     required this.id,
@@ -49,6 +51,8 @@ class LoanRequest {
     required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
+    this.currentLevel,
+    this.pendingWith,
   });
 
   factory LoanRequest.fromJson(Map<String, dynamic> json) {
@@ -77,6 +81,8 @@ class LoanRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
     );
   }
 }
@@ -140,6 +146,8 @@ class LoanRequestDetails extends LoanRequest {
     required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
+    super.currentLevel,
+    super.pendingWith,
     this.user,
     this.approver,
     this.settlements,
@@ -171,6 +179,8 @@ class LoanRequestDetails extends LoanRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
       settlements: (json['settlements'] as List<dynamic>?)

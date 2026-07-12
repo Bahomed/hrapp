@@ -33,6 +33,7 @@ const Map<String, String> enTranslations = {
   'compensation': 'Compensation',
   'approval': 'For Approval',
   'pending': 'Pending',
+  'pending_with': 'Pending with',
   'unexecuted_requests': 'Unexecuted Requests',
   'un_executed': 'Unexecuted',
   'no_unexecuted_requests': 'No unexecuted requests found',

@@ -24,6 +24,9 @@ class PermissionRequest {
   final String? title;
   final String? permitType;
   final String? duration;
+  final int? currentLevel;
+  final String? pendingWith;
+  final List<String> attachments;
 
   PermissionRequest({
     required this.id,
@@ -44,6 +47,9 @@ class PermissionRequest {
     this.title,
     this.permitType,
     this.duration,
+    this.currentLevel,
+    this.pendingWith,
+    this.attachments = const [],
   });
 
   factory PermissionRequest.fromJson(Map<String, dynamic> json) {
@@ -66,6 +72,12 @@ class PermissionRequest {
       title: json['title'],
       permitType: json['permit_type'],
       duration: json['duration'],
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
+      attachments: (json['attachments'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [],
     );
   }
 }
@@ -93,6 +105,9 @@ class PermissionRequestDetails extends PermissionRequest {
     super.title,
     super.permitType,
     super.duration,
+    super.currentLevel,
+    super.pendingWith,
+    super.attachments,
     this.user,
     this.approver,
   });
@@ -117,6 +132,12 @@ class PermissionRequestDetails extends PermissionRequest {
       title: json['title'],
       permitType: json['permit_type'],
       duration: json['duration'],
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
+      attachments: (json['attachments'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
     );

@@ -20,6 +20,8 @@ class LetterRequest {
   final String requestNumber;
   final String createdAt;
   final String updatedAt;
+  final int? currentLevel;
+  final String? pendingWith;
 
   LetterRequest({
     required this.id,
@@ -37,6 +39,8 @@ class LetterRequest {
     required this.requestNumber,
     required this.createdAt,
     required this.updatedAt,
+    this.currentLevel,
+    this.pendingWith,
   });
 
   factory LetterRequest.fromJson(Map<String, dynamic> json) {
@@ -59,6 +63,8 @@ class LetterRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
     );
   }
 }
@@ -83,6 +89,8 @@ class LetterRequestDetails extends LetterRequest {
     required super.requestNumber,
     required super.createdAt,
     required super.updatedAt,
+    super.currentLevel,
+    super.pendingWith,
     this.user,
     this.approver,
   });
@@ -107,6 +115,8 @@ class LetterRequestDetails extends LetterRequest {
       requestNumber: json['request_number'] ?? '',
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
+      currentLevel: json['current_level'] != null ? int.tryParse(json['current_level'].toString()) : null,
+      pendingWith: json['pending_with'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       approver: json['approver'] != null ? User.fromJson(json['approver']) : null,
     );

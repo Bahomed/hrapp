@@ -33,6 +33,7 @@ const Map<String, String> arTranslations = {
   'compensation': 'المستحقات',
   'approval': 'في انتظار الموافقة',
   'pending': 'معلقة',
+  'pending_with': 'بانتظار موافقة',
   'unexecuted_requests': 'الطلبات غير المنفذة',
   'un_executed': 'غير منفذة',
   'no_unexecuted_requests': 'لا توجد طلبات غير منفذة',

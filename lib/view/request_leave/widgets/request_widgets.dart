@@ -1,7 +1,11 @@
 // File: lib/view/request_leave/widgets/request_widgets.dart
 
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/leave_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/permission_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
@@ -290,7 +294,22 @@ class LeaveRequestCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 16), // Changed from 20 to 16 for consistent spacing
+          // Attachments from API
+          if (request.attachments.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildAttachmentChips(
+              request.attachments.map((a) => a.path).where((p) => p.isNotEmpty).toList(),
+            ),
+          ],
+
+          // Pending with info (for-approval only)
+          if (request.status.toLowerCase() == 'for-approval' &&
+              (request.currentLevel != null || request.pendingWith != null)) ...[
+            const SizedBox(height: 8),
+            _buildPendingInfo(request.currentLevel, request.pendingWith),
+          ],
+
+          const SizedBox(height: 12),
 
           // Bottom Row
           Row(
@@ -453,7 +472,20 @@ class PermissionRequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          // Attachments from API
+          if (request.attachments.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildAttachmentChips(request.attachments),
+          ],
+
+          // Pending with info (for-approval only)
+          if (request.status.toLowerCase() == 'for-approval' &&
+              (request.currentLevel != null || request.pendingWith != null)) ...[
+            const SizedBox(height: 8),
+            _buildPendingInfo(request.currentLevel, request.pendingWith),
+          ],
+
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -878,6 +910,13 @@ class LoanRequestCard extends StatelessWidget {
             ],
           ],
 
+          // Pending with info (for-approval only)
+          if (request.status.toLowerCase() == 'for-approval' &&
+              (request.currentLevel != null || request.pendingWith != null)) ...[
+            const SizedBox(height: 10),
+            _buildPendingInfo(request.currentLevel, request.pendingWith),
+          ],
+
           const SizedBox(height: 16),
           Divider(
             height: 1,
@@ -1032,7 +1071,14 @@ class LetterRequestCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20),
+          // Pending with info (for-approval only)
+          if (request.status.toLowerCase() == 'for-approval' &&
+              (request.currentLevel != null || request.pendingWith != null)) ...[
+            const SizedBox(height: 10),
+            _buildPendingInfo(request.currentLevel, request.pendingWith),
+          ],
+
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1566,6 +1612,149 @@ String _formatTimeDisplay(String timeString) {
     // Return original string if any error occurs
     return timeString;
   }
+}
+
+// ================ PENDING INFO WIDGET ================
+
+Widget _buildPendingInfo(int? level, String? pendingWith) {
+  final themeService = ThemeService.instance;
+  final parts = <String>[];
+  if (level != null) parts.add('Level $level');
+  if (pendingWith != null && pendingWith.isNotEmpty) parts.add(pendingWith);
+  final label = parts.join(' • ');
+
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: themeService.getWarningColor().withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: themeService.getWarningColor().withValues(alpha: 0.25)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.person_outline, size: 14, color: themeService.getWarningColor()),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            '${tr('pending_with')}: $label',
+            style: TextStyle(
+              fontSize: 12,
+              color: themeService.getWarningColor(),
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ================ ATTACHMENT CHIPS WIDGET ================
+
+Widget _buildAttachmentChips(List<String> urls) {
+  if (urls.isEmpty) return const SizedBox.shrink();
+  return Wrap(
+    spacing: 8,
+    runSpacing: 6,
+    children: urls.map((url) {
+      final isImage = url.toLowerCase().contains('.jpg') ||
+          url.toLowerCase().contains('.jpeg') ||
+          url.toLowerCase().contains('.png');
+      final label = url.split('/').last;
+      final displayLabel = label.length > 22 ? '${label.substring(0, 22)}...' : label;
+      return GestureDetector(
+        onTap: () => _openAttachmentFile(url),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: ThemeService.instance.getActionColor('requests').withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: ThemeService.instance.getActionColor('requests').withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isImage ? Icons.image_outlined : Icons.attach_file,
+                size: 14,
+                color: ThemeService.instance.getActionColor('requests'),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                displayLabel,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: ThemeService.instance.getActionColor('requests'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList(),
+  );
+}
+
+void _openAttachmentFile(String url) {
+  final lower = url.toLowerCase();
+  final isPdf = lower.contains('.pdf');
+  if (isPdf) {
+    _downloadAndOpenAttachmentPdf(url);
+    return;
+  }
+  final isImage = lower.contains('.jpg') || lower.contains('.jpeg') || lower.contains('.png');
+  final context = Get.context;
+  if (context == null) return;
+  showDialog(
+    context: context,
+    builder: (_) => Dialog(
+      backgroundColor: Colors.black,
+      insetPadding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          Center(
+            child: isImage
+                ? InteractiveViewer(
+                    child: Image.network(
+                      url,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (_, child, progress) => progress == null
+                          ? child
+                          : const Center(child: CircularProgressIndicator(color: Colors.white)),
+                      errorBuilder: (_, __, ___) =>
+                          const Center(child: Icon(Icons.broken_image, color: Colors.white, size: 64)),
+                    ),
+                  )
+                : const Center(child: Icon(Icons.insert_drive_file, color: Colors.white, size: 64)),
+          ),
+          Positioned(
+            top: 40,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<void> _downloadAndOpenAttachmentPdf(String url) async {
+  try {
+    final fileName = url.split('/').last.split('?').first;
+    final dir = await getApplicationDocumentsDirectory();
+    final filePath = '${dir.path}/$fileName';
+    if (!File(filePath).existsSync()) {
+      await Dio().download(url, filePath);
+    }
+    await OpenFile.open(filePath);
+  } catch (_) {}
 }
 
 // ================ MISSING PUNCH REQUEST CARD ================
