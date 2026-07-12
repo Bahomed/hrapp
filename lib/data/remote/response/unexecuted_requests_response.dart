@@ -94,6 +94,10 @@ class UnexecutedRequest {
       nationality: json['nationality'] ?? '',
       departmentName: json['department_name'] ?? '',
       sectionName: json['section_name'] ?? '',
+      attachments: (json['attachments'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [],
     );
   }
 
