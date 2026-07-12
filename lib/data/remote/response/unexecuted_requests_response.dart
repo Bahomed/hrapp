@@ -56,6 +56,7 @@ class UnexecutedRequest {
   final String nationality;
   final String departmentName;
   final String sectionName;
+  final List<String> attachments;
 
   UnexecutedRequest({
     required this.id,
@@ -73,6 +74,7 @@ class UnexecutedRequest {
     required this.nationality,
     required this.departmentName,
     required this.sectionName,
+    this.attachments = const [],
   });
 
   factory UnexecutedRequest.fromJson(Map<String, dynamic> json) {

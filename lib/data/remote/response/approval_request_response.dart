@@ -72,6 +72,7 @@ class ApprovalRequest {
   final String? fromDate;
   final String? toDate;
   final double? totalOtHours;
+  final List<String> attachments;
 
   ApprovalRequest({
     required this.id,
@@ -105,6 +106,7 @@ class ApprovalRequest {
     this.fromDate,
     this.toDate,
     this.totalOtHours,
+    this.attachments = const [],
   });
 
   factory ApprovalRequest.fromJson(Map<String, dynamic> json) {
@@ -143,6 +145,10 @@ class ApprovalRequest {
       fromDate: json['from_date'],
       toDate: json['to_date'],
       totalOtHours: double.tryParse(json['total_ot_hours']?.toString() ?? ''),
+      attachments: (json['attachments'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [],
     );
   }
 

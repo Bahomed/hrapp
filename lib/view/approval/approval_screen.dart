@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
@@ -549,6 +553,54 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+            ),
+          ],
+
+          // Attachments
+          if (request.attachments.isNotEmpty) ...[
+            SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
+                context, mobile: 8, tablet: 10, desktop: 12)),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: request.attachments.map((url) {
+                final isImage = url.toLowerCase().contains('.jpg') ||
+                    url.toLowerCase().contains('.jpeg') ||
+                    url.toLowerCase().contains('.png');
+                return GestureDetector(
+                  onTap: () => _openAttachment(url, context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: themeService.getActionColor('requests').withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: themeService.getActionColor('requests').withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isImage ? Icons.image_outlined : Icons.attach_file,
+                          size: 14,
+                          color: themeService.getActionColor('requests'),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          url.split('/').last.length > 20
+                              ? '${url.split('/').last.substring(0, 20)}...'
+                              : url.split('/').last,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: themeService.getActionColor('requests'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
 
@@ -1153,6 +1205,68 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
         ),
       );
     });
+  }
+
+  void _openAttachment(String url, BuildContext context) {
+    final lower = url.toLowerCase();
+    final isImage = lower.contains('.jpg') || lower.contains('.jpeg') || lower.contains('.png');
+    final isPdf = lower.contains('.pdf');
+
+    if (isPdf) {
+      _downloadAndOpenPdf(url, context);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Center(
+              child: isImage
+                  ? InteractiveViewer(
+                      child: Image.network(
+                        url,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : const Center(child: CircularProgressIndicator(color: Colors.white)),
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(Icons.broken_image, color: Colors.white, size: 64),
+                        ),
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.insert_drive_file, color: Colors.white, size: 64),
+                    ),
+            ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _downloadAndOpenPdf(String url, BuildContext context) async {
+    try {
+      final fileName = url.split('/').last.split('?').first;
+      final dir = await getApplicationDocumentsDirectory();
+      final filePath = '${dir.path}/$fileName';
+
+      if (!File(filePath).existsSync()) {
+        await Dio().download(url, filePath);
+      }
+      await OpenFile.open(filePath);
+    } catch (_) {}
   }
 
   String _formatDate(String dateTimeString) {
