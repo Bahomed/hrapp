@@ -1075,7 +1075,7 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
         return false;
       }
     } catch (e) {
-      _showErrorSnackbar('${tr('error_creating_loan_request')}: $e');
+      _showErrorSnackbar(e.toString());
       return false;
     } finally {
       isLoading.value = false;
@@ -1402,13 +1402,12 @@ class RequestController extends GetxController with GetTickerProviderStateMixin 
 
   // Helper method for error messages
   void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      tr('error'),
-      message,
-      snackPosition: SnackPosition.BOTTOM,
+    Fluttertoast.showToast(
+      msg: message,
       backgroundColor: ThemeService.instance.getErrorColor(),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+      textColor: Colors.white,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.CENTER,
     );
   }
 

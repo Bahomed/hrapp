@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/employee_dropdown_response.dart';
@@ -1092,13 +1093,12 @@ class ApprovalController extends GetxController {
 
   // Helper methods
   void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      tr('error'),
-      message,
-      snackPosition: SnackPosition.BOTTOM,
+    Fluttertoast.showToast(
+      msg: message,
       backgroundColor: ThemeService.instance.getErrorColor(),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+      textColor: Colors.white,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.CENTER,
     );
   }
 
