@@ -35,6 +35,9 @@ class ProfileController extends GetxController {
   // Leave balance
   final isLoadingBalance = false.obs;
   final vacationBalance = 0.0.obs;
+  final phPdEnabled = false.obs;
+  final phBalance = 0.0.obs;
+  final pdBalance = 0.0.obs;
   final balanceError = ''.obs;
 
   // Text controllers for editable fields
@@ -98,6 +101,9 @@ class ProfileController extends GetxController {
     try {
       final response = await _employeesRepository.getLeaveBalance(empId);
       vacationBalance.value = response.vacationBalance;
+      phPdEnabled.value = response.phPdEnabled;
+      phBalance.value = response.phBalance;
+      pdBalance.value = response.pdBalance;
     } catch (e) {
       balanceError.value = e.toString();
     } finally {

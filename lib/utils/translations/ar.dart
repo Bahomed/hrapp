@@ -1051,6 +1051,8 @@ const Map<String, String> arTranslations = {
   'amount_paid': 'المبلغ المدفوع',
   'amount_to_be_paid': 'المبلغ المطلوب دفعه',
   'balance_remaining': 'الرصيد المتبقي',
+  'public_holiday': 'العطلة الرسمية',
+  'pending_off': 'الإجازة المعلقة',
   'earnings_breakdown': 'تفصيل االمستحقات',
   'deductions_breakdown': 'تفصيل الاستقطاعات',
   'no_earnings_found': 'لا توجد أرباح',

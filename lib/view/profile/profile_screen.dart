@@ -428,7 +428,7 @@ class ProfileScreen extends StatelessWidget {
                       color: themeService.getErrorColor(),
                     ),
                   )
-                else
+                else ...[
                   Text(
                     '${controller.vacationBalance.value % 1 == 0 ? controller.vacationBalance.value.toInt() : controller.vacationBalance.value} ${tr('days')}',
                     style: TextStyle(
@@ -437,6 +437,27 @@ class ProfileScreen extends StatelessWidget {
                       color: primaryColor,
                     ),
                   ),
+                  if (controller.phPdEnabled.value) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _buildMiniBalanceChip(
+                          label: tr('public_holiday'),
+                          value: controller.phBalance.value,
+                          color: Colors.orange,
+                          isTablet: isTablet,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildMiniBalanceChip(
+                          label: tr('pending_off'),
+                          value: controller.pdBalance.value,
+                          color: Colors.blue,
+                          isTablet: isTablet,
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ],
             ),
           ),
@@ -462,6 +483,43 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  Widget _buildMiniBalanceChip({
+    required String label,
+    required double value,
+    required Color color,
+    required bool isTablet,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isTablet ? 10 : 9,
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            '${value % 1 == 0 ? value.toInt() : value} ${tr('days')}',
+            style: TextStyle(
+              fontSize: isTablet ? 13 : 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildQuickInfoCard(BuildContext context, String title, String value, IconData icon, Color color) {

@@ -484,36 +484,30 @@ class WeeklyAttendanceTable extends StatelessWidget {
   Widget _buildTotalsFooter() {
     if (attendanceData.isEmpty) return const SizedBox.shrink();
 
-    // Calculate totals
-    double totalHours = 0.0;
+    // Sum hours from API response
+    int totalMinutes = 0;
     double totalPenalty = 0.0;
     double totalOvertime = 0.0;
 
     for (final item in attendanceData) {
-      // Calculate working hours from timeIn and timeOut
-      if (item.timeIn.isNotEmpty && item.timeOut.isNotEmpty) {
-        try {
-          final inTime = _parseTime(item.timeIn);
-          final outTime = _parseTime(item.timeOut);
-          
-          if (inTime != null && outTime != null) {
-            final difference = outTime.difference(inTime);
-            final hours = difference.inMinutes / 60.0;
-            totalHours += hours;
-          }
-        } catch (e) {
-          // Handle parsing errors
+      if (item.hours != null && item.hours!.isNotEmpty) {
+        final parts = item.hours!.split(':');
+        if (parts.length >= 2) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          totalMinutes += h * 60 + m;
         }
       }
 
-      // Sum penalty minutes (will convert to hours for display)
       final penaltyMinutes = double.tryParse(item.penalty.toString()) ?? 0.0;
       totalPenalty += penaltyMinutes;
 
-      // Sum overtime minutes (will convert to hours for display)
       final overtimeMinutes = double.tryParse(item.overtime.toString()) ?? 0.0;
       totalOvertime += overtimeMinutes;
     }
+
+    final totalHoursInt = totalMinutes ~/ 60;
+    final totalMinsInt = totalMinutes % 60;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -548,13 +542,16 @@ class WeeklyAttendanceTable extends StatelessWidget {
           // Time Out Column - Empty
           const Expanded(flex: 1, child: SizedBox()),
           
+          // Break Column - Empty
+          const Expanded(flex: 1, child: SizedBox()),
+
           // Total Hours Column
           Expanded(
             flex: 1,
             child: Container(
               alignment: Alignment.center,
               child: Text(
-                '${totalHours.toStringAsFixed(2)}h',
+                '${totalHoursInt.toString().padLeft(2, '0')}:${totalMinsInt.toString().padLeft(2, '0')}',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
@@ -563,9 +560,6 @@ class WeeklyAttendanceTable extends StatelessWidget {
               ),
             ),
           ),
-
-          // Break Column - Empty
-          const Expanded(flex: 1, child: SizedBox()),
 
           // // Total Penalty Column
           // Expanded(

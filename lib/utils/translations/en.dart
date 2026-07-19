@@ -1037,6 +1037,8 @@ const Map<String, String> enTranslations = {
   'amount_paid': 'Amount Paid',
   'amount_to_be_paid': 'Amount To Be Paid',
   'balance_remaining': 'Balance Remaining',
+  'public_holiday': 'Public Holiday',
+  'pending_off': 'Pending Off',
   'earnings_breakdown': 'Earnings Breakdown',
   'deductions_breakdown': 'Deductions Breakdown',
   'no_earnings_found': 'No earnings found',
