@@ -11,15 +11,22 @@ class NotificationRepository {
   final Preferences preferences = Preferences();
   final dioClient = DioClient();
 
-  Future<List<AppNotification>> getNotifications() async {
+  Future<List<AppNotification>> getNotifications({
+    String? type,
+    String? requestType,
+  }) async {
     try {
       final token = await preferences.getToken();
       final workspaceUrl = await preferences.getWorkspaceUrl();
-      
+
+      final queryParams = <String, dynamic>{'locale': getCurrentLanguage()};
+      if (type != null && type != 'all') queryParams['type'] = type;
+      if (requestType != null && requestType != 'all') queryParams['request_type'] = requestType;
+
       final response = await dioClient.get(
         '$workspaceUrl$notificationsUrl',
         {'Authorization': 'Bearer $token'},
-        {'locale': getCurrentLanguage()},
+        queryParams,
       );
 
       if (response.statusCode == 200) {

@@ -81,6 +81,8 @@ class NotificationScreen extends StatelessWidget {
               ],
             ),
           ),
+          // Request-type sub-filter row
+          _buildRequestTypeFilterRow(controller, theme),
           Divider(height: 1, color: theme.dividerColor.withOpacity(0.4)),
           // Unread toggle + refresh
           Padding(
@@ -98,6 +100,56 @@ class NotificationScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildRequestTypeFilterRow(
+    NotificationController controller,
+    ThemeData theme,
+  ) {
+    const requestTypes = [
+      ('leave',        'Leave',         Icons.beach_access_outlined,   Colors.teal),
+      ('loan',         'Loan',          Icons.account_balance_outlined, Colors.indigo),
+      ('permit',       'Permit',        Icons.badge_outlined,           Colors.deepOrange),
+      ('letter',       'Letter',        Icons.mail_outline_rounded,     Colors.purple),
+      ('overtime',     'Overtime',      Icons.more_time_rounded,        Colors.amber),
+      ('missingpunch', 'Missing Punch', Icons.fingerprint,              Colors.red),
+    ];
+
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        children: [
+          Obx(() => _chip(
+                label: tr('all'),
+                icon: Icons.list_alt_rounded,
+                color: theme.primaryColor,
+                selected: controller.selectedRequestType.value == null,
+                onTap: () => controller.filterByRequestType(null),
+                theme: theme,
+                small: true,
+              )),
+          const SizedBox(width: 6),
+          ...requestTypes.map((t) {
+            final (key, label, icon, color) = t;
+            return Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Obx(() => _chip(
+                    label: tr('notif_req_$key', fallback: label),
+                    icon: icon,
+                    color: color,
+                    selected: controller.selectedRequestType.value == key,
+                    onTap: () => controller.filterByRequestType(
+                        controller.selectedRequestType.value == key ? null : key),
+                    theme: theme,
+                    small: true,
+                  )),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _chip({
     required String label,
     required IconData icon,
@@ -105,12 +157,14 @@ class NotificationScreen extends StatelessWidget {
     required bool selected,
     required VoidCallback onTap,
     required ThemeData theme,
+    bool small = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(
+            horizontal: small ? 10 : 12, vertical: small ? 4 : 6),
         decoration: BoxDecoration(
           color: selected ? color.withOpacity(0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -122,12 +176,13 @@ class NotificationScreen extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: selected ? color : theme.hintColor),
+            Icon(icon, size: small ? 12 : 14,
+                color: selected ? color : theme.hintColor),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: small ? 11.5 : 12.5,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                 color: selected ? color : theme.hintColor,
               ),

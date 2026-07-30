@@ -19,6 +19,7 @@ class NotificationController extends GetxController {
 
   var filteredNotifications = <AppNotification>[].obs;
   var selectedFilter = Rxn<NotificationType>();
+  var selectedRequestType = RxnString();
   var showOnlyUnread = false.obs;
   final unreadCount = 0.obs;
 
@@ -34,10 +35,17 @@ class NotificationController extends GetxController {
     try {
       isLoading.value = true;
       hasError.value = false;
-      
-      final data = await _repository.getNotifications();
+
+      final typeParam = selectedFilter.value != null
+          ? _notificationTypeToParam(selectedFilter.value!)
+          : null;
+
+      final data = await _repository.getNotifications(
+        type: typeParam,
+        requestType: selectedRequestType.value,
+      );
       notifications.value = data;
-      
+
       applyFilters();
     } catch (error) {
       hasError.value = true;
@@ -49,6 +57,21 @@ class NotificationController extends GetxController {
 
   Future<void> refreshNotifications() async {
     await loadNotifications();
+  }
+
+  String _notificationTypeToParam(NotificationType type) {
+    switch (type) {
+      case NotificationType.general:
+        return 'general';
+      case NotificationType.payroll:
+        return 'payroll';
+      case NotificationType.requestStatus:
+        return 'requestStatus';
+      case NotificationType.message:
+        return 'message';
+      case NotificationType.approval:
+        return 'approval';
+    }
   }
 
   void applyFilters() {
@@ -73,7 +96,20 @@ class NotificationController extends GetxController {
 
   void filterByType(NotificationType? type) {
     selectedFilter.value = type;
-    applyFilters();
+    // Clear request type when switching top-level type away from requestStatus
+    if (type != NotificationType.requestStatus) {
+      selectedRequestType.value = null;
+    }
+    loadNotifications();
+  }
+
+  void filterByRequestType(String? requestType) {
+    selectedRequestType.value = requestType;
+    // Ensure type filter is on requestStatus when a request subtype is chosen
+    if (requestType != null) {
+      selectedFilter.value = NotificationType.requestStatus;
+    }
+    loadNotifications();
   }
 
   void toggleUnreadFilter() {
