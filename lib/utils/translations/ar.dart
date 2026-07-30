@@ -291,7 +291,7 @@ const Map<String, String> arTranslations = {
   'schedule_templates': 'قوالب المواعيد',
   'default_schedule': 'افتراضي',
   'grace_period': 'فترة السماح',
-  'overtime': 'وقت إضافي',
+  'overtime': 'عمل إضافي',
   'enabled': 'مفعل',
   'disabled': 'معطل',
   'start_time': 'وقت البداية',

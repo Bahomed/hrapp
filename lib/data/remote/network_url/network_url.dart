@@ -44,5 +44,7 @@ const getEmployeeRequestsUrl = '/api/manager/employee-request/';
 const getLeaveBalanceUrl = '/api/manager/get-leave-balance/';
 
 // Asset URLs
+const updatePreferredLanguageUrl = '/api/update-preferred-language';
+
 const myAssetsUrl = '/api/my-assets';
 const myAssetsSummaryUrl = '/api/my-assets/summary';

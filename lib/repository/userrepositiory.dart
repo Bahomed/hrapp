@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/utils/exceptionhandler.dart';
 import 'package:dio/dio.dart';
 import 'package:image/image.dart' as img;
 import '../data/local/preferences.dart';
+import '../data/remote/network_url/network_url.dart';
 import '../data/remote/response/login_response.dart' as login_response;
 import '../utils/language_service.dart';
 
@@ -12,6 +13,22 @@ class UserRepositiory {
   final DioClient dioClient = DioClient();
   final Preferences preferences = Preferences();
 
+
+  // Notify the server of the user's preferred language for push notifications
+  Future<void> syncPreferredLanguage(String languageCode) async {
+    try {
+      final token = await preferences.getToken();
+      final workspaceUrl = await preferences.getWorkspaceUrl();
+      await dioClient.post(
+        '$workspaceUrl$updatePreferredLanguageUrl',
+        {'locale': languageCode},
+        {},
+        {'Authorization': 'Bearer $token'},
+      );
+    } catch (_) {
+      // Non-blocking — local language change still proceeds
+    }
+  }
 
   // Update user language preference and refresh all user data
   Future<login_response.LoginResponse> updateUserLanguage(String languageCode) async {

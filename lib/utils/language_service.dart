@@ -45,6 +45,9 @@ class LanguageService extends GetxController {
   /// Change language and save to storage
   Future<void> changeLanguage(String languageCode) async {
     if (supportedLanguages.containsKey(languageCode)) {
+      // Sync preferred_lang to server for push notifications (fire-and-forget)
+      _userRepository.syncPreferredLanguage(languageCode);
+
       try {
         // Call API to update user language preference
         var response = await _userRepository.updateUserLanguage(languageCode);

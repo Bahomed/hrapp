@@ -16,10 +16,11 @@ class NotificationController extends GetxController {
   var isLoading = true.obs;
   var hasError = false.obs;
   var errorMessage = ''.obs;
-  
+
   var filteredNotifications = <AppNotification>[].obs;
   var selectedFilter = Rxn<NotificationType>();
   var showOnlyUnread = false.obs;
+  final unreadCount = 0.obs;
 
   @override
   void onInit() {
@@ -54,21 +55,20 @@ class NotificationController extends GetxController {
     var filtered = notifications.where((notification) {
       bool typeMatch = true;
       bool readMatch = true;
-      
-      // If a specific type is selected, filter by that type
-      // If null (All), show all types
+
       if (selectedFilter.value != null) {
         typeMatch = notification.type == selectedFilter.value;
       }
-      
+
       if (showOnlyUnread.value) {
         readMatch = !notification.isRead;
       }
-      
+
       return typeMatch && readMatch;
     }).toList();
-    
+
     filteredNotifications.value = filtered;
+    unreadCount.value = notifications.where((n) => !n.isRead).length;
   }
 
   void filterByType(NotificationType? type) {
@@ -82,24 +82,15 @@ class NotificationController extends GetxController {
   }
 
   Future<void> markAsRead(String notificationId) async {
-    try {
-      final success = await _repository.markNotificationAsRead(notificationId);
-      if (success) {
-        final index = notifications.indexWhere((n) => n.id == notificationId);
-        if (index != -1) {
-          notifications[index] = notifications[index].copyWith(isRead: true);
-          applyFilters();
-        }
-      }
-    } catch (error) {
-      Get.snackbar(
-        'Error',
-        'Failed to mark notification as read',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
+    final index = notifications.indexWhere((n) => n.id == notificationId);
+    if (index == -1 || notifications[index].isRead) return;
+
+    // Update locally immediately so badge reflects at once
+    notifications[index] = notifications[index].copyWith(isRead: true);
+    applyFilters();
+
+    // Sync to server in background — local state already updated
+    _repository.markNotificationAsRead(notificationId).catchError((_) {});
   }
 
   void onNotificationTap(AppNotification notification) {
@@ -198,8 +189,6 @@ class NotificationController extends GetxController {
     }
   }
 
-  int get unreadCount => notifications.where((n) => !n.isRead).length;
-  
   List<NotificationType> get availableTypes => [
     NotificationType.general,
     ...notifications.map((n) => n.type).toSet().toList()
