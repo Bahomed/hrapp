@@ -6,6 +6,7 @@ import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/homescreen_controller.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/quick_attendance_controller.dart';
+import 'package:co.injazathr.injazathr/view/notifications_screen/notification_controller.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final model = Get.put(HomeScreenController());
     Get.put(QuickAttendanceController());
+    final notifController = Get.put(NotificationController());
     final preferences = Preferences();
     final themeService = ThemeService.instance;
 
@@ -172,14 +174,43 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // Notifications Icon
-              Icon(
-                Icons.notifications_active,
-                color: model.bottomNavIndex.value == 2
-                    ? Colors.white  // White when active
-                    : Theme.of(context).iconTheme.color, // Theme color when inactive
-                size: ResponsiveUtils.responsiveIconSize(context, mobile: 22, tablet: 24, desktop: 26),
-              )
+              // Notifications Icon with badge
+              Obx(() {
+                final count = notifController.unreadCount;
+                final iconColor = model.bottomNavIndex.value == 2
+                    ? Colors.white
+                    : Theme.of(context).iconTheme.color;
+                final iconSize = ResponsiveUtils.responsiveIconSize(context, mobile: 22, tablet: 24, desktop: 26);
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(Icons.notifications_active, color: iconColor, size: iconSize),
+                    if (count > 0)
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            count > 99 ? '99+' : '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              height: 1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              })
             ],
             onTap: (value) {
               model.bottomNavIndex.value = value;
