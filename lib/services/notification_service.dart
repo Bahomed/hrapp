@@ -21,6 +21,9 @@ class NotificationService {
   static List<AppNotification> get notifications => _notifications.value;
   static RxList<AppNotification> get notificationsObs => _notifications;
 
+  // Holds a tap that arrived before the navigator was ready
+  static AppNotification? _pendingNavigation;
+
   static Future<void> initialize() async {
     // Initialize local notifications with click handler
     await _initializeLocalNotifications();
@@ -43,43 +46,62 @@ class NotificationService {
   }
 
   static Future<void> _initializeFirebaseMessaging() async {
-    // Handle background message taps
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessageTap);
+    // Background tap (app was suspended): navigator is ready, navigate directly
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      final notification = _createAppNotificationFromFCM(message);
+      _storePending(notification);
+      // Attempt immediate navigation; if the navigator isn't ready yet the
+      // pending flag above ensures handlePendingNavigation() picks it up.
+      _tryNavigate(notification);
+    });
 
-    // Handle initial message when app is opened from terminated state
+    // Terminated state tap: navigator does NOT exist yet — store for later
     RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
-      _handleBackgroundMessageTap(initialMessage);
+      final notification = _createAppNotificationFromFCM(initialMessage);
+      final exists = _notifications.any((n) => n.id == notification.id);
+      if (!exists) await _addNotification(notification);
+      _storePending(notification);
+      // Do NOT call Get.to() here — no navigator exists yet
     }
   }
 
+  static void _storePending(AppNotification notification) {
+    _pendingNavigation = notification;
+  }
 
-  static Future<void> _handleBackgroundMessageTap(RemoteMessage message) async {
-    final appNotification = _createAppNotificationFromFCM(message);
-    // Add to list if not already stored (e.g. iOS terminated state)
-    final exists = _notifications.any((n) => n.id == appNotification.id);
-    if (!exists) {
-      await _addNotification(appNotification);
+  /// Call this from HomeScreenController.onInit() so terminated/background
+  /// taps that arrived before the navigator was ready are handled.
+  static Future<void> handlePendingNavigation() async {
+    final pending = _pendingNavigation;
+    print('[NAV] handlePendingNavigation pending=$pending');
+    if (pending == null) return;
+    _pendingNavigation = null;
+    await _navigateToNotificationScreen(pending);
+  }
+
+  static Future<void> _tryNavigate(AppNotification notification) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    print('[NAV] _tryNavigate context=${Get.context != null} type=${notification.type}');
+    if (Get.context != null) {
+      _pendingNavigation = null;
+      await _navigateToNotificationScreen(notification);
     }
-    await _navigateToNotificationScreen(appNotification);
   }
 
   static AppNotification _createAppNotificationFromFCM(RemoteMessage message) {
-    final notificationType = NotificationType.values.firstWhere(
-      (type) => type.name == (message.data['type'] ?? 'general'),
-      orElse: () => NotificationType.general,
-    );
-
-    return AppNotification(
-      id: message.messageId ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      title: message.notification?.title ?? message.data['title'] ?? '',
-      body: message.notification?.body ?? message.data['body'] ?? '',
-      type: notificationType,
-      data: message.data,
-      timestamp: DateTime.now(),
-      imageUrl: message.notification?.android?.imageUrl ?? message.data['image_url'],
-      actionUrl: message.data['action_url'],
-    );
+    print('[FCM] messageId=${message.messageId} data=${message.data} notification=${message.notification?.title}');
+    return AppNotification.fromJson({
+      'id': message.messageId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'title': message.notification?.title ?? message.data['title'] ?? '',
+      'body': message.notification?.body ?? message.data['body'] ?? '',
+      'type': message.data['type'] ?? 'general',
+      'data': message.data,
+      'timestamp': DateTime.now().toIso8601String(),
+      'is_read': false,
+      'image_url': message.notification?.android?.imageUrl ?? message.data['image_url'],
+      'action_url': message.data['action_url'],
+    });
   }
 
 
@@ -89,6 +111,8 @@ class NotificationService {
   static Future<void> _navigateToNotificationScreen(AppNotification notification) async {
     // Mark as read when opened
     await markAsRead(notification.id);
+
+    print('[NAV] type=${notification.type} data=${notification.data}');
 
     // Navigate based on notification type
     switch (notification.type) {

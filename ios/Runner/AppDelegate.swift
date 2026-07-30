@@ -65,6 +65,8 @@ import FirebaseMessaging
     print("🔔 Title: \(response.notification.request.content.title)")
     print("🔔 Action: \(response.actionIdentifier)")
 
-    completionHandler()
+    // Must call super so FlutterAppDelegate forwards the tap to Firebase Messaging
+    // and flutter_local_notifications — without this, onMessageOpenedApp never fires
+    super.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
   }
 }

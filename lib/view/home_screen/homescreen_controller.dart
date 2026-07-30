@@ -4,6 +4,7 @@ import 'package:co.injazathr.injazathr/view/attendance/attendance_calendar_scree
 import 'package:co.injazathr.injazathr/view/holidayscreen/holiday_screen.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/widget/homescreenwidget.dart';
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
+import 'package:co.injazathr.injazathr/services/notification_service.dart';
 import 'package:co.injazathr.injazathr/view/settings/settings_screen.dart';
 import 'package:co.injazathr.injazathr/data/remote/dio_client/auth_interceptor.dart';
 import 'package:co.injazathr.injazathr/view/login_screen/login_screen.dart';
@@ -52,6 +53,11 @@ class HomeScreenController extends SuperController {
     // Load greeting
     await loadGreeting();
 
+    // Handle any push notification tap that arrived before the navigator was ready
+    // (terminated state or background tap during splash)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.handlePendingNavigation();
+    });
 
     super.onInit();
   }
