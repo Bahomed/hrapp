@@ -8,11 +8,13 @@ import 'package:co.injazathr.injazathr/data/remote/response/leave_request_respon
 import 'package:co.injazathr.injazathr/data/remote/response/permission_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/loan_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
-enum RequestDetailType { leave, permit, loan, letter, unknown }
+enum RequestDetailType { leave, permit, loan, letter, missingPunch, overtime, unknown }
 
 class RequestDetailController extends GetxController {
   final RequestRepository _repository = RequestRepository();
@@ -54,7 +56,7 @@ class RequestDetailController extends GetxController {
   }
 
   RequestDetailType _parseType(String? type) {
-    switch (type?.toLowerCase()) {
+    switch (type?.toLowerCase().replaceAll(RegExp(r'[\s_-]'), '')) {
       case 'leave':
         return RequestDetailType.leave;
       case 'permit':
@@ -64,6 +66,10 @@ class RequestDetailController extends GetxController {
         return RequestDetailType.loan;
       case 'letter':
         return RequestDetailType.letter;
+      case 'missingpunch':
+        return RequestDetailType.missingPunch;
+      case 'overtime':
+        return RequestDetailType.overtime;
       default:
         return RequestDetailType.unknown;
     }
@@ -107,6 +113,24 @@ class RequestDetailController extends GetxController {
           throw res.message;
         }
         break;
+      case RequestDetailType.missingPunch:
+        final res = await _repository.getMissingPunchRequestDetails(requestId);
+        if (res.success && res.data != null) {
+          detail.value = res.data;
+          detectedType.value = RequestDetailType.missingPunch;
+        } else {
+          throw res.message;
+        }
+        break;
+      case RequestDetailType.overtime:
+        final res = await _repository.getOvertimeRequestDetail(requestId);
+        if (res.success && res.data != null) {
+          detail.value = res.data;
+          detectedType.value = RequestDetailType.overtime;
+        } else {
+          throw res.message;
+        }
+        break;
       case RequestDetailType.unknown:
         await _tryAllTypes();
         break;
@@ -137,6 +161,24 @@ class RequestDetailController extends GetxController {
       if (res.success && res.data != null) {
         detail.value = res.data;
         detectedType.value = RequestDetailType.loan;
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      final res = await _repository.getMissingPunchRequestDetails(requestId);
+      if (res.success && res.data != null) {
+        detail.value = res.data;
+        detectedType.value = RequestDetailType.missingPunch;
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      final res = await _repository.getOvertimeRequestDetail(requestId);
+      if (res.success && res.data != null) {
+        detail.value = res.data;
+        detectedType.value = RequestDetailType.overtime;
         return;
       }
     } catch (_) {}
@@ -214,6 +256,14 @@ class RequestDetailController extends GetxController {
     );
   }
 
+  User? get requestUser {
+    final d = detail.value;
+    if (d is LeaveRequestDetails) return d.user;
+    if (d is PermissionRequestDetails) return d.user;
+    if (d is LetterRequestDetails) return d.user;
+    return null;
+  }
+
   // Typed accessors
   LeaveRequest? get leaveDetail =>
       detectedType.value == RequestDetailType.leave ? detail.value as LeaveRequest? : null;
@@ -227,11 +277,19 @@ class RequestDetailController extends GetxController {
   LetterRequest? get letterDetail =>
       detectedType.value == RequestDetailType.letter ? detail.value as LetterRequest? : null;
 
+  MissingPunchRequest? get missingPunchDetail =>
+      detectedType.value == RequestDetailType.missingPunch ? detail.value as MissingPunchRequest? : null;
+
+  OvertimeRequest? get overtimeDetail =>
+      detectedType.value == RequestDetailType.overtime ? detail.value as OvertimeRequest? : null;
+
   String get requestNumber {
     if (leaveDetail != null) return leaveDetail!.requestNumber;
     if (permitDetail != null) return permitDetail!.requestNumber;
     if (loanDetail != null) return loanDetail!.requestNumber;
     if (letterDetail != null) return letterDetail!.requestNumber;
+    if (missingPunchDetail != null) return missingPunchDetail!.requestNumber;
+    if (overtimeDetail != null) return overtimeDetail!.requestNumber;
     return '#$requestId';
   }
 
@@ -240,6 +298,8 @@ class RequestDetailController extends GetxController {
     if (permitDetail != null) return permitDetail!.status;
     if (loanDetail != null) return loanDetail!.status;
     if (letterDetail != null) return letterDetail!.status;
+    if (missingPunchDetail != null) return missingPunchDetail!.status;
+    if (overtimeDetail != null) return overtimeDetail!.status;
     return '';
   }
 
@@ -248,6 +308,8 @@ class RequestDetailController extends GetxController {
     if (permitDetail != null) return permitDetail!.submittedDate;
     if (loanDetail != null) return loanDetail!.submittedDate;
     if (letterDetail != null) return letterDetail!.submittedDate;
+    if (missingPunchDetail != null) return missingPunchDetail!.submittedDate;
+    if (overtimeDetail != null) return overtimeDetail!.submittedDate;
     return '';
   }
 
@@ -256,6 +318,8 @@ class RequestDetailController extends GetxController {
     if (permitDetail != null) return permitDetail!.approvedDate;
     if (loanDetail != null) return loanDetail!.approvedDate;
     if (letterDetail != null) return letterDetail!.approvedDate;
+    if (missingPunchDetail != null) return missingPunchDetail!.approvedDate;
+    if (overtimeDetail != null) return overtimeDetail!.approvedDate;
     return null;
   }
 
@@ -264,6 +328,8 @@ class RequestDetailController extends GetxController {
     if (permitDetail != null) return permitDetail!.rejectedReason;
     if (loanDetail != null) return loanDetail!.rejectedReason;
     if (letterDetail != null) return letterDetail!.rejectedReason;
+    if (missingPunchDetail != null) return missingPunchDetail!.rejectedReason;
+    if (overtimeDetail != null) return overtimeDetail!.rejectedReason;
     return null;
   }
 

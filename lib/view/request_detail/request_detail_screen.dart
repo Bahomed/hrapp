@@ -252,6 +252,10 @@ class RequestDetailScreen extends StatelessWidget {
         return _buildLoanDetails(controller, theme);
       case RequestDetailType.letter:
         return _buildLetterDetails(controller, theme);
+      case RequestDetailType.missingPunch:
+        return _buildMissingPunchDetails(controller, theme);
+      case RequestDetailType.overtime:
+        return _buildOvertimeDetails(controller, theme);
       case RequestDetailType.unknown:
         return const SizedBox.shrink();
     }
@@ -302,6 +306,26 @@ class RequestDetailScreen extends StatelessWidget {
     final req = controller.letterDetail!;
     return _buildInfoCard(theme, tr('letter_details'), Icons.description, [
       _infoRow(theme, tr('letter_type'), req.letterType),
+      if (req.reason.isNotEmpty) _infoRow(theme, tr('reason'), req.reason),
+    ]);
+  }
+
+  Widget _buildMissingPunchDetails(RequestDetailController controller, ThemeService theme) {
+    final req = controller.missingPunchDetail!;
+    return _buildInfoCard(theme, tr('missing_punch'), Icons.fingerprint, [
+      _infoRow(theme, tr('date'), _formatDate(req.date)),
+      if (req.checkIn?.isNotEmpty == true) _infoRow(theme, tr('check_in'), _formatTime(req.checkIn!)),
+      if (req.checkOut?.isNotEmpty == true) _infoRow(theme, tr('check_out'), _formatTime(req.checkOut!)),
+      if (req.reason?.isNotEmpty == true) _infoRow(theme, tr('reason'), req.reason!),
+    ]);
+  }
+
+  Widget _buildOvertimeDetails(RequestDetailController controller, ThemeService theme) {
+    final req = controller.overtimeDetail!;
+    return _buildInfoCard(theme, tr('overtime'), Icons.more_time, [
+      _infoRow(theme, tr('from_date'), _formatDate(req.fromDate)),
+      _infoRow(theme, tr('to_date'), _formatDate(req.toDate)),
+      _infoRow(theme, tr('total_hours'), req.totalOtHours.toString()),
       if (req.reason.isNotEmpty) _infoRow(theme, tr('reason'), req.reason),
     ]);
   }
@@ -496,6 +520,10 @@ class RequestDetailScreen extends StatelessWidget {
         return tr('loan_request');
       case RequestDetailType.letter:
         return tr('letter_request');
+      case RequestDetailType.missingPunch:
+        return tr('missing_punch');
+      case RequestDetailType.overtime:
+        return tr('overtime');
       case RequestDetailType.unknown:
         return tr('request_details');
     }
@@ -511,6 +539,10 @@ class RequestDetailScreen extends StatelessWidget {
         return Icons.account_balance_wallet;
       case RequestDetailType.letter:
         return Icons.description;
+      case RequestDetailType.missingPunch:
+        return Icons.fingerprint;
+      case RequestDetailType.overtime:
+        return Icons.more_time;
       case RequestDetailType.unknown:
         return Icons.assignment_outlined;
     }
@@ -526,6 +558,10 @@ class RequestDetailScreen extends StatelessWidget {
         return theme.getSuccessColor();
       case RequestDetailType.letter:
         return theme.getActionColor('documents');
+      case RequestDetailType.missingPunch:
+        return theme.getActionColor('attendance');
+      case RequestDetailType.overtime:
+        return theme.getActionColor('requests');
       case RequestDetailType.unknown:
         return theme.getPrimaryColor();
     }
