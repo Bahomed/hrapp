@@ -106,6 +106,7 @@ class AppNotification {
       case 'attendance_absent':
       case 'attendance_missing_checkout':
       case 'attendance_flex_under_hours':
+        return NotificationType.attendance;
       case 'session_assigned':
       case 'session_day_off_added':
       case 'session_day_off_reversed':
