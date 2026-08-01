@@ -316,15 +316,15 @@ class ProfileController extends GetxController {
         icon: Icons.person,
         color: const Color(0xFF42A5F5),
         items: [
-          ProfileItem(tr('employee_name'), userName, isEditable: false),
-          ProfileItem(tr('employee_no'), userEmployeeNo),
-          ProfileItem(tr('email'), userEmail, isEditable: true),
-          ProfileItem(tr('mobile'), userMobile, isEditable: true),
-          ProfileItem(tr('gender'), userGender),
-          ProfileItem(tr('age'), userAge),
-          ProfileItem(tr('civil_status'), userCivilStatus),
-          ProfileItem(tr('nationality'), userNationality),
-          ProfileItem(tr('place_of_birth'), userPlaceOfBirth),
+          ProfileItem('employee_name', tr('employee_name'), userName, isEditable: false),
+          ProfileItem('employee_no', tr('employee_no'), userEmployeeNo),
+          ProfileItem('email', tr('email'), userEmail, isEditable: true),
+          ProfileItem('mobile', tr('mobile'), userMobile, isEditable: true),
+          ProfileItem('gender', tr('gender'), userGender),
+          ProfileItem('age', tr('age'), userAge),
+          ProfileItem('civil_status', tr('civil_status'), userCivilStatus),
+          ProfileItem('nationality', tr('nationality'), userNationality),
+          ProfileItem('place_of_birth', tr('place_of_birth'), userPlaceOfBirth),
         ],
       ),
       ProfileSection(
@@ -332,9 +332,9 @@ class ProfileController extends GetxController {
         icon: Icons.work,
         color: const Color(0xFF4CAF50),
         items: [
-          ProfileItem(tr('position'), userPosition),
-          ProfileItem(tr('department'), userDepartment),
-          ProfileItem(tr('section'), userSection),
+          ProfileItem('position', tr('position'), userPosition),
+          ProfileItem('department', tr('department'), userDepartment),
+          ProfileItem('section', tr('section'), userSection),
         ],
       ),
       ProfileSection(
@@ -342,8 +342,8 @@ class ProfileController extends GetxController {
         icon: Icons.badge,
         color: const Color(0xFFFF9800),
         items: [
-          ProfileItem(tr('iqama_no'), userIqamaNo),
-          ProfileItem(tr('passport_no'), userPassportNo),
+          ProfileItem('iqama_no', tr('iqama_no'), userIqamaNo),
+          ProfileItem('passport_no', tr('passport_no'), userPassportNo),
         ],
       ),
       ProfileSection(
@@ -351,12 +351,12 @@ class ProfileController extends GetxController {
         icon: Icons.location_on,
         color: const Color(0xFF9C27B0),
         items: [
-          ProfileItem(tr('current_address'), userCurrentAddress, isEditable: true),
-          ProfileItem(tr('permanent_address'), userPermanentAddress, isEditable: true),
-          ProfileItem(tr('local_country'), userLocalCountry),
-          ProfileItem(tr('local_city'), userLocalCity),
-          ProfileItem(tr('home_country'), userHomeCountry),
-          ProfileItem(tr('home_city'), userHomeCity),
+          ProfileItem('current_address', tr('current_address'), userCurrentAddress, isEditable: true),
+          ProfileItem('permanent_address', tr('permanent_address'), userPermanentAddress, isEditable: true),
+          ProfileItem('local_country', tr('local_country'), userLocalCountry),
+          ProfileItem('local_city', tr('local_city'), userLocalCity),
+          ProfileItem('home_country', tr('home_country'), userHomeCountry),
+          ProfileItem('home_city', tr('home_city'), userHomeCity),
         ],
       ),
       ProfileSection(
@@ -364,7 +364,7 @@ class ProfileController extends GetxController {
         icon: Icons.settings,
         color: const Color(0xFF607D8B),
         items: [
-          ProfileItem(tr('preferred_language'), userPreferredLang),
+          ProfileItem('preferred_language', tr('preferred_language'), userPreferredLang),
         ],
       ),
     ];
@@ -571,9 +571,10 @@ class ProfileSection {
 }
 
 class ProfileItem {
+  final String key;
   final String label;
   final String value;
   final bool isEditable;
 
-  ProfileItem(this.label, this.value, {this.isEditable = false});
+  ProfileItem(this.key, this.label, this.value, {this.isEditable = false});
 }

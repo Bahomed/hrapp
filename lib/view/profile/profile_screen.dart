@@ -702,20 +702,20 @@ class ProfileScreen extends StatelessWidget {
     
     // Get appropriate controller for editable fields
     if (isEditable) {
-      switch (item.label) {
-        case 'Employee Name':
+      switch (item.key) {
+        case 'employee_name':
           textController = controller.nameController;
           break;
-        case 'Email':
+        case 'email':
           textController = controller.emailController;
           break;
-        case 'Mobile':
+        case 'mobile':
           textController = controller.mobileController;
           break;
-        case 'Current Address':
+        case 'current_address':
           textController = controller.currentAddressController;
           break;
-        case 'Permanent Address':
+        case 'permanent_address':
           textController = controller.permanentAddressController;
           break;
       }
