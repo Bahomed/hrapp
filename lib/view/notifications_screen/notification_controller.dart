@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../approval/approval_screen.dart';
+import '../attendance/attendance_detail_screen.dart';
 import '../profile/employee_profile_screen.dart';
 import '../request_leave/request_home_screen.dart';
 import '../request_detail/request_detail_screen.dart';
@@ -71,6 +72,8 @@ class NotificationController extends GetxController {
         return 'message';
       case NotificationType.approval:
         return 'approval';
+      case NotificationType.attendance:
+        return 'attendance';
     }
   }
 
@@ -158,8 +161,10 @@ class NotificationController extends GetxController {
         // Navigate to messages/chat screen
         _navigateToMessageScreen(notification);
         break;
+      case NotificationType.attendance:
+        _navigateToAttendanceScreen(notification);
+        break;
       case NotificationType.general:
-        // Handle general notifications - maybe show details or home screen
         _navigateToGeneralScreen(notification);
         break;
     }
@@ -210,6 +215,10 @@ class NotificationController extends GetxController {
       snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 4),
     );
+  }
+
+  void _navigateToAttendanceScreen(AppNotification notification) {
+    Get.to(() => const AttendanceDetailScreen());
   }
 
   void _navigateToGeneralScreen(AppNotification notification) {

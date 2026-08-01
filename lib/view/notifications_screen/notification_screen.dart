@@ -364,6 +364,8 @@ class NotificationScreen extends StatelessWidget {
         return Colors.purple;
       case NotificationType.approval:
         return Colors.red;
+      case NotificationType.attendance:
+        return Colors.teal;
     }
   }
 
@@ -379,6 +381,8 @@ class NotificationScreen extends StatelessWidget {
         return Icons.chat_bubble_outline_rounded;
       case NotificationType.approval:
         return Icons.how_to_reg_outlined;
+      case NotificationType.attendance:
+        return Icons.access_time_outlined;
     }
   }
 

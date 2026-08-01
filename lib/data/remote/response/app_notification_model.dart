@@ -7,6 +7,7 @@ enum NotificationType {
   requestStatus,
   message,
   approval,
+  attendance,
 }
 
 class AppNotification {
@@ -98,6 +99,13 @@ class AppNotification {
         return NotificationType.message;
       case 'approval':
         return NotificationType.approval;
+      case 'attendance':
+      case 'attendance_delay':
+      case 'attendance_half_day_absent':
+      case 'attendance_absent':
+      case 'attendance_missing_checkout':
+      case 'attendance_flex_under_hours':
+        return NotificationType.attendance;
       default:
         return NotificationType.general;
     }
@@ -115,6 +123,8 @@ class AppNotification {
         return tr('notification_type_message');
       case NotificationType.approval:
         return tr('notification_type_approval');
+      case NotificationType.attendance:
+        return tr('attendance');
     }
   }
 
@@ -130,6 +140,8 @@ class AppNotification {
         return '💬';
       case NotificationType.approval:
         return '✅';
+      case NotificationType.attendance:
+        return '🕐';
     }
   }
 }

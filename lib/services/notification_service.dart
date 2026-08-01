@@ -11,6 +11,7 @@ import 'package:co.injazathr.injazathr/view/notifications_screen/notification_sc
 
 import '../view/approval/approval_screen.dart';
 import '../view/request_detail/request_detail_screen.dart';
+import '../view/attendance/attendance_detail_screen.dart';
 
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -146,6 +147,9 @@ class NotificationService {
         final requestIdRaw = notification.data?['request_id'];
         final requestId = requestIdRaw != null ? int.tryParse(requestIdRaw.toString()) : null;
         Get.to(() => ApprovalScreen(requestId: requestId));
+        break;
+      case NotificationType.attendance:
+        Get.to(() => const AttendanceDetailScreen());
         break;
       case NotificationType.general:
       default:
