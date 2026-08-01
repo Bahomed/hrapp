@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../approval/approval_screen.dart';
 import '../attendance/attendance_detail_screen.dart';
+import '../schedule/weekly_shift_schedule_screen.dart';
 import '../profile/employee_profile_screen.dart';
 import '../request_leave/request_home_screen.dart';
 import '../request_detail/request_detail_screen.dart';
@@ -74,6 +75,8 @@ class NotificationController extends GetxController {
         return 'approval';
       case NotificationType.attendance:
         return 'attendance';
+      case NotificationType.schedule:
+        return 'schedule';
     }
   }
 
@@ -164,6 +167,9 @@ class NotificationController extends GetxController {
       case NotificationType.attendance:
         _navigateToAttendanceScreen(notification);
         break;
+      case NotificationType.schedule:
+        _navigateToScheduleScreen(notification);
+        break;
       case NotificationType.general:
         _navigateToGeneralScreen(notification);
         break;
@@ -219,6 +225,10 @@ class NotificationController extends GetxController {
 
   void _navigateToAttendanceScreen(AppNotification notification) {
     Get.to(() => const AttendanceDetailScreen());
+  }
+
+  void _navigateToScheduleScreen(AppNotification notification) {
+    Get.to(() => const WeeklyShiftScheduleScreen());
   }
 
   void _navigateToGeneralScreen(AppNotification notification) {

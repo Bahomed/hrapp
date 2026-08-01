@@ -1085,6 +1085,8 @@ const Map<String, String> enTranslations = {
   'notification_type_message': 'Message',
   'notification_type_approval': 'For Approval',
   'notification_type_attendance': 'Attendance',
+  'notification_type_schedule': 'Work Schedule',
+  'work_schedule': 'Work Schedule',
   'notif_req_leave': 'Leave',
   'notif_req_loan': 'Loan',
   'notif_req_permit': 'Permit',

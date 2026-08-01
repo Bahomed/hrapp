@@ -1133,6 +1133,8 @@ const Map<String, String> arTranslations = {
   'notification_type_message': 'رسالة',
   'notification_type_approval': 'في انتظار الموافقة',
   'notification_type_attendance': 'الحضور والانصراف',
+  'notification_type_schedule': 'جدول العمل',
+  'work_schedule': 'جدول العمل',
   'notif_req_leave': 'إجازة',
   'notif_req_loan': 'قرض',
   'notif_req_permit': 'إذن',

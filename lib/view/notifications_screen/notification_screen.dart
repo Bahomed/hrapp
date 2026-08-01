@@ -366,6 +366,8 @@ class NotificationScreen extends StatelessWidget {
         return Colors.red;
       case NotificationType.attendance:
         return Colors.teal;
+      case NotificationType.schedule:
+        return Colors.indigo;
     }
   }
 
@@ -383,6 +385,8 @@ class NotificationScreen extends StatelessWidget {
         return Icons.how_to_reg_outlined;
       case NotificationType.attendance:
         return Icons.access_time_outlined;
+      case NotificationType.schedule:
+        return Icons.calendar_month_outlined;
     }
   }
 

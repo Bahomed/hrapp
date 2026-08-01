@@ -12,6 +12,7 @@ import 'package:co.injazathr.injazathr/view/notifications_screen/notification_sc
 import '../view/approval/approval_screen.dart';
 import '../view/request_detail/request_detail_screen.dart';
 import '../view/attendance/attendance_detail_screen.dart';
+import '../view/schedule/weekly_shift_schedule_screen.dart';
 
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -150,6 +151,9 @@ class NotificationService {
         break;
       case NotificationType.attendance:
         Get.to(() => const AttendanceDetailScreen());
+        break;
+      case NotificationType.schedule:
+        Get.to(() => const WeeklyShiftScheduleScreen());
         break;
       case NotificationType.general:
       default:
