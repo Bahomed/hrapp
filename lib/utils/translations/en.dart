@@ -88,6 +88,10 @@ const Map<String, String> enTranslations = {
   'stored_face': 'Stored',
   'confidence': 'Confidence',
   'spoofing_detected': '⚠️ Spoofing detected! Use your real face',
+  'liveness_look_camera': 'Look at the camera',
+  'liveness_blink_now': 'Blink your eyes now',
+  'liveness_open_eyes': 'Open your eyes',
+  'liveness_verified': 'Liveness verified ✓',
 
   // Attendance Type Messages
   'ready_to_clock_in': 'Ready to Clock In',

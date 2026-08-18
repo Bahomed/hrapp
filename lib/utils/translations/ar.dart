@@ -88,6 +88,10 @@ const Map<String, String> arTranslations = {
   'stored_face': 'المحفوظ',
   'confidence': 'الثقة',
   'spoofing_detected': '⚠️ تم اكتشاف محاولة تزوير! يرجى إظهار وجهك الحقيقي',
+  'liveness_look_camera': 'انظر إلى الكاميرا',
+  'liveness_blink_now': 'أغمض عينيك الآن',
+  'liveness_open_eyes': 'افتح عينيك',
+  'liveness_verified': 'تم التحقق من الحضور ✓',
 
   // Attendance Type Messages
   'ready_to_clock_in': 'جاهز لتسجيل الدخول',

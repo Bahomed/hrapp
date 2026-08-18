@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
-import '../../ML/AntiSpoofingDetector.dart';
 import '../../ML/Recognition.dart';
 import '../../ML/Recognizer.dart';
 import '../../main.dart';
@@ -19,6 +18,8 @@ import '../../data/local/preferences.dart';
 import '../../services/theme_service.dart';
 import '../../utils/Util.dart';
 import '../../utils/translation_helper.dart';
+
+enum _LivenessPhase { waitingOpen, waitingClose, waitingReopen }
 
 /// Convert cosine similarity (-1..1) into a 0..100 confidence percentage.
 double similarityToConfidencePercent(double similarity) {
@@ -49,7 +50,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
 
   late FaceDetector faceDetector;
   late Recognizer recognizer;
-  late AntiSpoofingDetector antiSpoofingDetector;
 
   bool isInitialized = false;
   bool isRecognizing = false;
@@ -59,11 +59,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   List<Recognition> recognitions = [];
   Recognition? lastRecognition;
 
-  // Anti-spoofing variables
-  bool isRealFace = true;
-  double spoofingConfidence = 0.0;
-  DateTime lastAntiSpoofingCheck = DateTime.now();
-  static const int antiSpoofingIntervalMs = 1000;
+  // Liveness detection: requires 2 confirmed blinks, each verified over multiple frames
+  bool _livenessVerified = false;
+  _LivenessPhase _livenessPhase = _LivenessPhase.waitingOpen;
+  int _blinkCount = 0;
+  int _livenessConsecutiveFrames = 0;
 
   // Performance optimization
   int frameSkipCounter = 0;
@@ -87,7 +87,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   void initializeComponents() async {
     faceDetector = FaceDetector(
       options: FaceDetectorOptions(
-        enableClassification: false,
+        enableClassification: true,  // needed for eye open probability (liveness)
         enableLandmarks: false,
         enableContours: false,
         enableTracking: true,
@@ -95,7 +95,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     );
 
     recognizer = Recognizer();
-    antiSpoofingDetector = AntiSpoofingDetector();
 
     await initializeCamera();
   }
@@ -149,6 +148,15 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     List<Face> faces = await faceDetector.processImage(inputImage);
 
     if (faces.isNotEmpty) {
+      final face = faces.first;
+
+      // Liveness gate: require a blink before allowing face matching
+      if (!_livenessVerified) {
+        _checkLiveness(face);
+        setState(() { isBusy = false; });
+        return;
+      }
+
       // ✅ Call appropriate method based on platform
       if (Platform.isIOS) {
         await iosPerformFaceRecognition(faces);
@@ -203,35 +211,22 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       print('✂️ iOS DEBUG: Crop coords: left=$left, top=$top, right=$right, bottom=$bottom');
       print('🖼️ iOS DEBUG: Cropped face: ${croppedFace.width}x${croppedFace.height}');
 
-      // Perform anti-spoofing check (throttled to reduce lag)
-      DateTime now = DateTime.now();
-      if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
-        await checkAntiSpoofing(croppedFace);
-        lastAntiSpoofingCheck = now;
-      }
+      Recognition recognition = recognizer.recognize(croppedFace, faceRect);
 
-      if (isRealFace) {
-        Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+      if (recognition.distance > recognitionThreshold) {
+        recognitions.add(recognition);
 
-        print('🎯 iOS Recognition result: ${recognition.name} with similarity: ${recognition.distance}');
-
-        if (recognition.distance > recognitionThreshold) {
-          recognitions.add(recognition);
-
-          if (shouldShowDialog(recognition)) {
-            // ✅ Show debug dialog like Android (same as line 298)
-            await controller.stopImageStream();
-            await showRecognitionDialog(recognition, croppedFace);
-            // Restart image stream after dialog is closed if still recognizing
-            if (isRecognizing && mounted) {
-              controller.startImageStream((image) => {
-                if (!isBusy && isRecognizing) {
-                  isBusy = true,
-                  frame = image,
-                  doFaceRecognitionOnFrame()
-                }
-              });
-            }
+        if (shouldShowDialog(recognition)) {
+          await controller.stopImageStream();
+          await showRecognitionDialog(recognition, croppedFace);
+          if (isRecognizing && mounted) {
+            controller.startImageStream((image) => {
+              if (!isBusy && isRecognizing) {
+                isBusy = true,
+                frame = image,
+                doFaceRecognitionOnFrame()
+              }
+            });
           }
         }
       }
@@ -285,35 +280,22 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
             width: width,
             height: height);
 
-        // Perform anti-spoofing check (throttled to reduce lag)
-        DateTime now = DateTime.now();
-        if (now.difference(lastAntiSpoofingCheck).inMilliseconds >= antiSpoofingIntervalMs) {
-          await checkAntiSpoofing(croppedFace);
-          lastAntiSpoofingCheck = now;
-        }
+        Recognition recognition = recognizer.recognize(croppedFace, faceRect);
 
-        if (isRealFace) {
-          Recognition recognition = recognizer.recognize(croppedFace, faceRect);
+        if (recognition.distance > recognitionThreshold) {
+          recognitions.add(recognition);
 
-          print('🎯 Recognition result: ${recognition.name} with similarity: ${recognition.distance}');
-
-          if (recognition.distance > recognitionThreshold) {
-            recognitions.add(recognition);
-
-            if (shouldShowDialog(recognition)) {
-              // Stop image stream before showing dialog
-              await controller.stopImageStream();
-              await showRecognitionDialog(recognition, croppedFace);
-              // Restart image stream after dialog is closed if still recognizing
-              if (isRecognizing && mounted) {
-                controller.startImageStream((image) => {
-                  if (!isBusy && isRecognizing) {
-                    isBusy = true,
-                    frame = image,
-                    doFaceRecognitionOnFrame()
-                  }
-                });
-              }
+          if (shouldShowDialog(recognition)) {
+            await controller.stopImageStream();
+            await showRecognitionDialog(recognition, croppedFace);
+            if (isRecognizing && mounted) {
+              controller.startImageStream((image) => {
+                if (!isBusy && isRecognizing) {
+                  isBusy = true,
+                  frame = image,
+                  doFaceRecognitionOnFrame()
+                }
+              });
             }
           }
         }
@@ -323,19 +305,62 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     }
   }
 
-  Future<void> checkAntiSpoofing(img.Image croppedFace) async {
-    try {
-      AntiSpoofingResult result = await antiSpoofingDetector.detectSpoofing(croppedFace);
+  /// Multi-blink liveness: requires 2 blinks, each confirmed over multiple consecutive frames.
+  /// Single-frame flicker (photo artifact, camera focus change) cannot trigger a state change.
+  void _checkLiveness(Face face) {
+    final double? leftEye = face.leftEyeOpenProbability;
+    final double? rightEye = face.rightEyeOpenProbability;
+    if (leftEye == null || rightEye == null) return;
 
-      setState(() {
-        isRealFace = result.isReal;
-        spoofingConfidence = result.confidence;
-      });
-    } catch (e) {
-      setState(() {
-        isRealFace = true;
-        spoofingConfidence = 0.5;
-      });
+    final double avg = (leftEye + rightEye) / 2;
+
+    switch (_livenessPhase) {
+      case _LivenessPhase.waitingOpen:
+        // 3 stable frames with eyes open (forgiving threshold)
+        if (avg > 0.65) {
+          _livenessConsecutiveFrames++;
+          if (_livenessConsecutiveFrames >= 3) {
+            setState(() {
+              _livenessPhase = _LivenessPhase.waitingClose;
+              _livenessConsecutiveFrames = 0;
+            });
+          }
+        } else {
+          _livenessConsecutiveFrames = 0;
+        }
+        break;
+
+      case _LivenessPhase.waitingClose:
+        // 2 stable frames with eyes closed to count as a blink
+        if (avg < 0.3) {
+          _livenessConsecutiveFrames++;
+          if (_livenessConsecutiveFrames >= 2) {
+            setState(() {
+              _blinkCount++;
+              _livenessPhase = _LivenessPhase.waitingReopen;
+              _livenessConsecutiveFrames = 0;
+            });
+          }
+        } else if (avg > 0.65) {
+          _livenessConsecutiveFrames = 0;
+        }
+        break;
+
+      case _LivenessPhase.waitingReopen:
+        // 2 stable frames with eyes open again — liveness confirmed (1 blink is enough)
+        if (avg > 0.65) {
+          _livenessConsecutiveFrames++;
+          if (_livenessConsecutiveFrames >= 2) {
+            setState(() {
+              _livenessConsecutiveFrames = 0;
+              _livenessVerified = true;
+              HapticFeedback.mediumImpact();
+            });
+          }
+        } else {
+          _livenessConsecutiveFrames = 0;
+        }
+        break;
     }
   }
 
@@ -1303,7 +1328,6 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     controller?.dispose();
     faceDetector.close();
     recognizer.close();
-    antiSpoofingDetector.close();
     super.dispose();
   }
 
@@ -1366,54 +1390,54 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       ),
                     ),
 
-                  if (isRecognizing && !isRealFace)
+                  // Liveness instruction banner
+                  if (isRecognizing)
                     Positioned(
                       top: 60,
                       left: 20,
                       right: 20,
                       child: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.red.withAlpha(200),
-                          borderRadius: BorderRadius.circular(8),
+                          color: _livenessVerified
+                              ? Colors.green.withAlpha(220)
+                              : Colors.orange.withAlpha(220),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          tr('spoofing_detected'),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _livenessVerified
+                                  ? Icons.check_circle_outline
+                                  : _livenessPhase == _LivenessPhase.waitingReopen
+                                      ? Icons.visibility
+                                      : _livenessPhase == _LivenessPhase.waitingClose
+                                          ? Icons.visibility_off
+                                          : Icons.remove_red_eye_outlined,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              _livenessVerified
+                                  ? tr('liveness_verified')
+                                  : _livenessPhase == _LivenessPhase.waitingReopen
+                                      ? tr('liveness_open_eyes')
+                                      : _livenessPhase == _LivenessPhase.waitingClose
+                                          ? tr('liveness_blink_now')
+                                          : tr('liveness_look_camera'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-
-                  Positioned(
-                    top: 100,
-                    left: 20,
-                    right: 20,
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isRecognizing
-                            ? Colors.green.withAlpha(200)
-                            : Colors.grey.withAlpha(200),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        isRecognizing
-                            ? (recognitions.isEmpty
-                            ? tr('looking_for_faces')
-                            : trParams('recognizing_faces', {'count': recognitions.length.toString()}))
-                            : tr('recognition_paused'),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
