@@ -642,9 +642,8 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         return;
       }
     } else {
-      // Android: Take picture for high quality
-      final XFile? picture = await controller.takePicture();
-      if (picture == null) {
+      // Android: Use stream frame directly so bounding box coordinates match
+      if (frame == null) {
         setState(() {
           angleStatus = tr('face_not_captured_properly_retrying');
         });
@@ -653,13 +652,10 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
         HapticFeedback.lightImpact();
         return;
       }
-
-      final Uint8List imageBytes = await picture.readAsBytes();
-      capturedImage = img.decodeImage(imageBytes);
-      if (capturedImage == null) {
-        isBusy = false;
-        return;
-      }
+      final img.Image rawFrame = Util.convertNV21(frame!);
+      // Rotate to match the orientation ML Kit uses for face bounding boxes
+      final int rotation = _computeMlKitRotation();
+      capturedImage = rotation == 0 ? rawFrame : img.copyRotate(rawFrame, angle: rotation);
     }
 
     // -----------------------------
@@ -706,6 +702,22 @@ class _AutoRegisterScreenState extends State<AutoRegisterScreen>
     setState(() {
       isBusy = false;
     });
+  }
+
+  /// Returns the CW rotation angle (degrees) that ML Kit applies to the NV21 stream frame.
+  /// Rotating the raw frame by this angle puts it in the same coordinate space as the
+  /// face bounding boxes returned by ML Kit.
+  int _computeMlKitRotation() {
+    if (description == null || controller == null) return 0;
+    const orientations = {
+      DeviceOrientation.portraitUp: 0,
+      DeviceOrientation.landscapeLeft: 90,
+      DeviceOrientation.portraitDown: 180,
+      DeviceOrientation.landscapeRight: 270,
+    };
+    final deviceDeg = orientations[controller!.value.deviceOrientation] ?? 0;
+    // Front camera formula: sensor + device
+    return (description!.sensorOrientation + deviceDeg) % 360;
   }
 
   void _nextStep() {

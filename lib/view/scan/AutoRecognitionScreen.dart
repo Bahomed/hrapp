@@ -249,18 +249,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       }
     }
 
-    // ✅ Take a picture for consistent quality with registration
+    // Use stream frame directly so bounding box coordinates match face detection
     try {
-      final XFile? picture = await controller.takePicture();
-      if (picture == null) {
-        setState(() {
-          isBusy = false;
-        });
-        return;
-      }
-
-      final Uint8List imageBytes = await picture.readAsBytes();
-      img.Image? image = img.decodeImage(imageBytes);
+      final img.Image rawFrame = Util.convertNV21(frame!);
+      // Rotate to match the orientation ML Kit uses for face bounding boxes
+      final int sensorRot = description.sensorOrientation;
+      img.Image? image = sensorRot == 0 ? rawFrame : img.copyRotate(rawFrame, angle: sensorRot);
 
       if (image == null) {
         setState(() {
