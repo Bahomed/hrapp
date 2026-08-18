@@ -19,8 +19,6 @@ import '../../services/theme_service.dart';
 import '../../utils/Util.dart';
 import '../../utils/translation_helper.dart';
 
-enum _LivenessPhase { waitingOpen, waitingClose, waitingReopen }
-
 /// Convert cosine similarity (-1..1) into a 0..100 confidence percentage.
 double similarityToConfidencePercent(double similarity) {
   final normalized = ((similarity + 1) / 2).clamp(0.0, 1.0);
@@ -59,11 +57,11 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   List<Recognition> recognitions = [];
   Recognition? lastRecognition;
 
-  // Liveness detection: requires 2 confirmed blinks, each verified over multiple frames
+  // Passive liveness: detects natural face movement across frames (no user action needed)
   bool _livenessVerified = false;
-  _LivenessPhase _livenessPhase = _LivenessPhase.waitingOpen;
-  int _blinkCount = 0;
-  int _livenessConsecutiveFrames = 0;
+  final List<Offset> _facePositions = [];
+  static const int _kLivenessFrames = 12;      // collect over ~12 processed frames
+  static const double _kMinMovementPixels = 3.0; // minimum variance to confirm live face
 
   // Performance optimization
   int frameSkipCounter = 0;
@@ -87,7 +85,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   void initializeComponents() async {
     faceDetector = FaceDetector(
       options: FaceDetectorOptions(
-        enableClassification: true,  // needed for eye open probability (liveness)
+        enableClassification: false,
         enableLandmarks: false,
         enableContours: false,
         enableTracking: true,
@@ -305,62 +303,37 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     }
   }
 
-  /// Multi-blink liveness: requires 2 blinks, each confirmed over multiple consecutive frames.
-  /// Single-frame flicker (photo artifact, camera focus change) cannot trigger a state change.
+  /// Passive liveness: tracks face center across frames.
+  /// A live person naturally shifts slightly; a held photo stays nearly perfectly still.
+  /// No user action required — completely silent.
   void _checkLiveness(Face face) {
-    final double? leftEye = face.leftEyeOpenProbability;
-    final double? rightEye = face.rightEyeOpenProbability;
-    if (leftEye == null || rightEye == null) return;
+    final Rect box = face.boundingBox;
+    final Offset center = Offset(box.left + box.width / 2, box.top + box.height / 2);
 
-    final double avg = (leftEye + rightEye) / 2;
+    _facePositions.add(center);
+    if (_facePositions.length > _kLivenessFrames) {
+      _facePositions.removeAt(0);
+    }
 
-    switch (_livenessPhase) {
-      case _LivenessPhase.waitingOpen:
-        // 3 stable frames with eyes open (forgiving threshold)
-        if (avg > 0.65) {
-          _livenessConsecutiveFrames++;
-          if (_livenessConsecutiveFrames >= 3) {
-            setState(() {
-              _livenessPhase = _LivenessPhase.waitingClose;
-              _livenessConsecutiveFrames = 0;
-            });
-          }
-        } else {
-          _livenessConsecutiveFrames = 0;
-        }
-        break;
+    if (_facePositions.length < _kLivenessFrames) return; // still collecting
 
-      case _LivenessPhase.waitingClose:
-        // 2 stable frames with eyes closed to count as a blink
-        if (avg < 0.3) {
-          _livenessConsecutiveFrames++;
-          if (_livenessConsecutiveFrames >= 2) {
-            setState(() {
-              _blinkCount++;
-              _livenessPhase = _LivenessPhase.waitingReopen;
-              _livenessConsecutiveFrames = 0;
-            });
-          }
-        } else if (avg > 0.65) {
-          _livenessConsecutiveFrames = 0;
-        }
-        break;
+    // Compute variance of x and y positions
+    final double meanX = _facePositions.map((p) => p.dx).reduce((a, b) => a + b) / _facePositions.length;
+    final double meanY = _facePositions.map((p) => p.dy).reduce((a, b) => a + b) / _facePositions.length;
 
-      case _LivenessPhase.waitingReopen:
-        // 2 stable frames with eyes open again — liveness confirmed (1 blink is enough)
-        if (avg > 0.65) {
-          _livenessConsecutiveFrames++;
-          if (_livenessConsecutiveFrames >= 2) {
-            setState(() {
-              _livenessConsecutiveFrames = 0;
-              _livenessVerified = true;
-              HapticFeedback.mediumImpact();
-            });
-          }
-        } else {
-          _livenessConsecutiveFrames = 0;
-        }
-        break;
+    double varX = 0, varY = 0;
+    for (final p in _facePositions) {
+      varX += (p.dx - meanX) * (p.dx - meanX);
+      varY += (p.dy - meanY) * (p.dy - meanY);
+    }
+    varX /= _facePositions.length;
+    varY /= _facePositions.length;
+
+    final double movement = varX + varY; // combined movement score
+
+    if (movement >= _kMinMovementPixels) {
+      setState(() { _livenessVerified = true; });
+      HapticFeedback.mediumImpact();
     }
   }
 
@@ -1410,11 +1383,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                             Icon(
                               _livenessVerified
                                   ? Icons.check_circle_outline
-                                  : _livenessPhase == _LivenessPhase.waitingReopen
-                                      ? Icons.visibility
-                                      : _livenessPhase == _LivenessPhase.waitingClose
-                                          ? Icons.visibility_off
-                                          : Icons.remove_red_eye_outlined,
+                                  : Icons.face_retouching_natural,
                               color: Colors.white,
                               size: 28,
                             ),
@@ -1422,11 +1391,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                             Text(
                               _livenessVerified
                                   ? tr('liveness_verified')
-                                  : _livenessPhase == _LivenessPhase.waitingReopen
-                                      ? tr('liveness_open_eyes')
-                                      : _livenessPhase == _LivenessPhase.waitingClose
-                                          ? tr('liveness_blink_now')
-                                          : tr('liveness_look_camera'),
+                                  : tr('liveness_look_camera'),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
