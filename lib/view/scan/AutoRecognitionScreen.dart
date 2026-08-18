@@ -57,11 +57,15 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
   List<Recognition> recognitions = [];
   Recognition? lastRecognition;
 
-  // Passive liveness: detects natural face movement across frames (no user action needed)
+  // Passive liveness: requires BOTH position variance AND head-angle variance.
+  // Shaking a phone with a photo creates position variance but NOT angle variance
+  // (flat photo stays frontal). A live face naturally varies in both.
   bool _livenessVerified = false;
   final List<Offset> _facePositions = [];
-  static const int _kLivenessFrames = 12;      // collect over ~12 processed frames
-  static const double _kMinMovementPixels = 3.0; // minimum variance to confirm live face
+  final List<Offset> _faceAngles = []; // (eulerY horizontal, eulerX vertical) in degrees
+  static const int _kLivenessFrames = 18;
+  static const double _kMinPositionVariance = 1.5; // px²
+  static const double _kMinAngleVariance = 0.4;    // degrees²
 
   // Performance optimization
   int frameSkipCounter = 0;
@@ -303,35 +307,52 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
     }
   }
 
-  /// Passive liveness: tracks face center across frames.
-  /// A live person naturally shifts slightly; a held photo stays nearly perfectly still.
-  /// No user action required — completely silent.
+  /// Passive liveness: requires BOTH position variance AND head-angle variance.
+  /// Shaking the phone creates position variance but keeps euler angles flat (photo stays frontal).
+  /// A real person breathing/existing naturally varies both simultaneously.
   void _checkLiveness(Face face) {
     final Rect box = face.boundingBox;
     final Offset center = Offset(box.left + box.width / 2, box.top + box.height / 2);
+    final double? angleY = face.headEulerAngleY; // left-right pan
+    final double? angleX = face.headEulerAngleX; // up-down tilt
 
     _facePositions.add(center);
-    if (_facePositions.length > _kLivenessFrames) {
-      _facePositions.removeAt(0);
+    if (_facePositions.length > _kLivenessFrames) _facePositions.removeAt(0);
+
+    if (angleX != null && angleY != null) {
+      _faceAngles.add(Offset(angleY, angleX));
+      if (_faceAngles.length > _kLivenessFrames) _faceAngles.removeAt(0);
     }
 
-    if (_facePositions.length < _kLivenessFrames) return; // still collecting
+    if (_facePositions.length < _kLivenessFrames) return;
 
-    // Compute variance of x and y positions
+    // Position variance
     final double meanX = _facePositions.map((p) => p.dx).reduce((a, b) => a + b) / _facePositions.length;
     final double meanY = _facePositions.map((p) => p.dy).reduce((a, b) => a + b) / _facePositions.length;
-
-    double varX = 0, varY = 0;
+    double posVar = 0;
     for (final p in _facePositions) {
-      varX += (p.dx - meanX) * (p.dx - meanX);
-      varY += (p.dy - meanY) * (p.dy - meanY);
+      posVar += (p.dx - meanX) * (p.dx - meanX) + (p.dy - meanY) * (p.dy - meanY);
     }
-    varX /= _facePositions.length;
-    varY /= _facePositions.length;
+    posVar /= _facePositions.length;
 
-    final double movement = varX + varY; // combined movement score
+    // Angle variance — key check that phone-shaking cannot fake
+    double angleVar = 0;
+    if (_faceAngles.length >= _kLivenessFrames) {
+      final double meanAY = _faceAngles.map((a) => a.dx).reduce((a, b) => a + b) / _faceAngles.length;
+      final double meanAX = _faceAngles.map((a) => a.dy).reduce((a, b) => a + b) / _faceAngles.length;
+      for (final a in _faceAngles) {
+        angleVar += (a.dx - meanAY) * (a.dx - meanAY) + (a.dy - meanAX) * (a.dy - meanAX);
+      }
+      angleVar /= _faceAngles.length;
+    }
 
-    if (movement >= _kMinMovementPixels) {
+    // Both must pass: position moves naturally AND head angle varies independently
+    final bool angleAvailable = _faceAngles.length >= _kLivenessFrames;
+    final bool passes = angleAvailable
+        ? (posVar >= _kMinPositionVariance && angleVar >= _kMinAngleVariance)
+        : (posVar >= _kMinPositionVariance * 5); // stricter fallback if angles unavailable
+
+    if (passes) {
       setState(() { _livenessVerified = true; });
       HapticFeedback.mediumImpact();
     }
