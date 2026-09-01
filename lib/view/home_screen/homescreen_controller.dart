@@ -4,6 +4,7 @@ import 'package:co.injazathr.injazathr/view/attendance/attendance_calendar_scree
 import 'package:co.injazathr.injazathr/view/holidayscreen/holiday_screen.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/widget/homescreenwidget.dart';
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_screen.dart';
+import 'package:co.injazathr.injazathr/view/chat/conversations_screen.dart';
 import 'package:co.injazathr.injazathr/services/notification_service.dart';
 import 'package:co.injazathr.injazathr/view/settings/settings_screen.dart';
 import 'package:co.injazathr.injazathr/data/remote/dio_client/auth_interceptor.dart';
@@ -120,7 +121,8 @@ class HomeScreenController extends SuperController {
   final pages = [
     const HolidayScreen(),
     const HomeScreenWidget(),
-    const NotificationScreen()
+    const ConversationsScreen(embedded: true),
+    const NotificationScreen(),
   ];
 
 

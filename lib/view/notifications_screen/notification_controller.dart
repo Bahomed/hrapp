@@ -2,14 +2,14 @@ import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
 import 'package:co.injazathr.injazathr/repository/notification_repository.dart';
 import 'package:co.injazathr.injazathr/view/payroll/payroll_screen.dart';
-import 'package:flutter/material.dart';
 
 import '../approval/approval_screen.dart';
 import '../attendance/attendance_detail_screen.dart';
 import '../schedule/weekly_shift_schedule_screen.dart';
-import '../profile/employee_profile_screen.dart';
 import '../request_leave/request_home_screen.dart';
 import '../request_detail/request_detail_screen.dart';
+import '../chat/chat_screen.dart';
+import '../chat/conversations_screen.dart';
 
 class NotificationController extends GetxController {
   final NotificationRepository _repository = NotificationRepository();
@@ -206,21 +206,13 @@ class NotificationController extends GetxController {
   }
 
   void _navigateToMessageScreen(AppNotification notification) {
-    final employeeId = notification.data?['employee_id'];
-    if (employeeId != null) {
-      final id = int.tryParse(employeeId.toString());
-      if (id != null) {
-        Get.to(() => EmployeeProfileScreen(employeeId: id));
-        return;
-      }
+    final cid = int.tryParse(
+        '${notification.data?['conversation_id'] ?? ''}');
+    if (cid != null) {
+      Get.to(() => ChatScreen(conversationId: cid));
+    } else {
+      Get.to(() => const ConversationsScreen());
     }
-    // Fallback: show notification info if no employee_id
-    Get.snackbar(
-      notification.title,
-      notification.body,
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 4),
-    );
   }
 
   void _navigateToAttendanceScreen(AppNotification notification) {

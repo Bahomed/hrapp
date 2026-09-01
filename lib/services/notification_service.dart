@@ -13,6 +13,8 @@ import '../view/approval/approval_screen.dart';
 import '../view/request_detail/request_detail_screen.dart';
 import '../view/attendance/attendance_detail_screen.dart';
 import '../view/schedule/weekly_shift_schedule_screen.dart';
+import '../view/chat/chat_screen.dart';
+import '../view/chat/conversations_screen.dart';
 
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -141,8 +143,13 @@ class NotificationService {
         Get.to(() => const RequestHomeScreen());
         break;
       case NotificationType.message:
-        // For now navigate to notifications screen, can be extended for chat later
-        Get.to(() => const NotificationScreen());
+        final cid = int.tryParse(
+            '${notification.data?['conversation_id'] ?? ''}');
+        if (cid != null) {
+          Get.to(() => ChatScreen(conversationId: cid));
+        } else {
+          Get.to(() => const ConversationsScreen());
+        }
         break;
       case NotificationType.approval:
         final requestIdRaw = notification.data?['request_id'];

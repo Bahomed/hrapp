@@ -48,3 +48,33 @@ const updatePreferredLanguageUrl = '/api/update-preferred-language';
 
 const myAssetsUrl = '/api/my-assets';
 const myAssetsSummaryUrl = '/api/my-assets/summary';
+
+// ==================== CHAT ====================
+// Mirrors App\Http\Controllers\Api\ChatController — routes are registered under
+// Route::prefix('chat') inside routes/api.php, i.e. everything sits at /api/chat.
+// This is the single place to adjust if the backend prefix changes.
+const String chatBaseUrl = '/api/chat';
+const String chatConversationsUrl = '$chatBaseUrl/conversations';
+const String chatUnreadCountUrl = '$chatBaseUrl/unread-count';
+const String chatHeartbeatUrl = '$chatBaseUrl/heartbeat';
+const String chatSearchUsersUrl = '$chatBaseUrl/search-users';
+const String chatMyTeamUrl = '$chatBaseUrl/my-team';
+const String chatStartDirectUrl = '$chatBaseUrl/start-direct';
+const String chatStartGroupUrl = '$chatBaseUrl/start-group';
+const String chatMyDepartmentSectionsUrl = '$chatBaseUrl/my-department-sections';
+
+String chatMessagesUrl(int id) => '$chatBaseUrl/$id/messages';
+String chatSendMessageUrl(int id) => '$chatBaseUrl/$id/send';
+String chatPinUrl(int id) => '$chatBaseUrl/$id/pin';
+String chatMuteUrl(int id) => '$chatBaseUrl/$id/mute';
+String chatRenameUrl(int id) => '$chatBaseUrl/$id/rename';
+String chatParticipantsUrl(int id) => '$chatBaseUrl/$id/participants';
+String chatLeaveUrl(int id) => '$chatBaseUrl/$id/leave';
+String chatRemoveParticipantUrl(int id, int userId) =>
+    '$chatBaseUrl/$id/participants/$userId';
+String chatReactUrl(int messageId) => '$chatBaseUrl/message/$messageId/react';
+String chatDeleteMessageUrl(int messageId) => '$chatBaseUrl/message/$messageId';
+String chatDepartmentGroupUrl(int departmentId) =>
+    '$chatBaseUrl/open-department-group/$departmentId';
+String chatSectionGroupUrl(int deptSectionId) =>
+    '$chatBaseUrl/open-section-group/$deptSectionId';

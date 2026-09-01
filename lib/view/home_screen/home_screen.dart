@@ -7,6 +7,7 @@ import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/homescreen_controller.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/quick_attendance_controller.dart';
 import 'package:co.injazathr.injazathr/view/notifications_screen/notification_controller.dart';
+import 'package:co.injazathr.injazathr/view/chat/chat_unread_controller.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatelessWidget {
     final model = Get.put(HomeScreenController());
     Get.put(QuickAttendanceController());
     final notifController = Get.put(NotificationController());
+    final chatUnread = Get.put(ChatUnreadController());
     final preferences = Preferences();
     final themeService = ThemeService.instance;
 
@@ -154,41 +156,48 @@ class HomeScreen extends StatelessWidget {
             buttonBackgroundColor: Theme.of(context).primaryColor,
             items: <Widget>[
               // Calendar Icon
-              Icon(
-                Icons.calendar_month,
-                color: model.bottomNavIndex.value == 0
-                    ? Colors.white  // White when active (selected)
-                    : Theme.of(context).iconTheme.color, // Theme color when inactive
-                size: ResponsiveUtils.responsiveIconSize(context, mobile: 22, tablet: 24, desktop: 26),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Icon(
+                  Icons.calendar_month,
+                  color: model.bottomNavIndex.value == 0
+                      ? Colors.white
+                      : Theme.of(context).iconTheme.color,
+                  size: 30,
+                ),
               ),
 
-              // Home Icon - Always visible
+              // Home Icon
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Icon(
                     Icons.home,
                     color: model.bottomNavIndex.value == 1
-                        ? Colors.white  // White when active
-                        : Theme.of(context).primaryColor, // Primary color when inactive (still visible!)
+                        ? Colors.white
+                        : Theme.of(context).primaryColor,
                     size: 30
                 ),
               ),
 
-              // Notifications Icon with badge
+              // Chat Icon with unread badge
               Obx(() {
-                final count = notifController.unreadCount;
+                final count = chatUnread.unread.value;
                 final iconColor = model.bottomNavIndex.value == 2
                     ? Colors.white
                     : Theme.of(context).iconTheme.color;
-                final iconSize = ResponsiveUtils.responsiveIconSize(context, mobile: 22, tablet: 24, desktop: 26);
                 return Stack(
                   clipBehavior: Clip.none,
+                  alignment: Alignment.center,
                   children: [
-                    Icon(Icons.notifications_active, color: iconColor, size: iconSize),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Icon(Icons.chat_bubble_outline,
+                          color: iconColor, size: 30),
+                    ),
                     if (count > 0)
                       Positioned(
-                        top: -6,
-                        right: -6,
+                        top: 2,
+                        right: 2,
                         child: Container(
                           padding: const EdgeInsets.all(3),
                           constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
@@ -210,10 +219,53 @@ class HomeScreen extends StatelessWidget {
                       ),
                   ],
                 );
-              })
+              }),
+
+              // Notifications Icon with badge
+              Obx(() {
+                final count = notifController.unreadCount;
+                final iconColor = model.bottomNavIndex.value == 3
+                    ? Colors.white
+                    : Theme.of(context).iconTheme.color;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Icon(Icons.notifications_active,
+                          color: iconColor, size: 30),
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            count > 99 ? '99+' : '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              height: 1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
             ],
             onTap: (value) {
               model.bottomNavIndex.value = value;
+              if (value == 2) chatUnread.reload();
             },
           ),
 
