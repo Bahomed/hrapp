@@ -10,6 +10,7 @@ import '../request_leave/request_home_screen.dart';
 import '../request_detail/request_detail_screen.dart';
 import '../chat/chat_screen.dart';
 import '../chat/conversations_screen.dart';
+import '../tasks/tasks_screen.dart';
 
 class NotificationController extends GetxController {
   final NotificationRepository _repository = NotificationRepository();
@@ -77,6 +78,8 @@ class NotificationController extends GetxController {
         return 'attendance';
       case NotificationType.schedule:
         return 'schedule';
+      case NotificationType.task:
+        return 'task';
     }
   }
 
@@ -170,6 +173,9 @@ class NotificationController extends GetxController {
       case NotificationType.schedule:
         _navigateToScheduleScreen(notification);
         break;
+      case NotificationType.task:
+        _navigateToTaskScreen(notification);
+        break;
       case NotificationType.general:
         _navigateToGeneralScreen(notification);
         break;
@@ -217,6 +223,11 @@ class NotificationController extends GetxController {
 
   void _navigateToAttendanceScreen(AppNotification notification) {
     Get.to(() => const AttendanceDetailScreen());
+  }
+
+  void _navigateToTaskScreen(AppNotification notification) {
+    // Task notifications deep-link to My Tasks (the default board).
+    Get.to(() => const TasksScreen());
   }
 
   void _navigateToScheduleScreen(AppNotification notification) {

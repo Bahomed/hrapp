@@ -15,6 +15,7 @@ import '../view/attendance/attendance_detail_screen.dart';
 import '../view/schedule/weekly_shift_schedule_screen.dart';
 import '../view/chat/chat_screen.dart';
 import '../view/chat/conversations_screen.dart';
+import '../view/tasks/tasks_screen.dart';
 
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -155,6 +156,10 @@ class NotificationService {
         final requestIdRaw = notification.data?['request_id'];
         final requestId = requestIdRaw != null ? int.tryParse(requestIdRaw.toString()) : null;
         Get.to(() => ApprovalScreen(requestId: requestId));
+        break;
+      case NotificationType.task:
+        // Deep-link to My Tasks (the default board).
+        Get.to(() => const TasksScreen());
         break;
       case NotificationType.attendance:
         Get.to(() => const AttendanceDetailScreen());

@@ -78,3 +78,19 @@ String chatDepartmentGroupUrl(int departmentId) =>
     '$chatBaseUrl/open-department-group/$departmentId';
 String chatSectionGroupUrl(int deptSectionId) =>
     '$chatBaseUrl/open-section-group/$deptSectionId';
+
+// ==================== TASK MANAGEMENT ====================
+// Mirrors App\Http\Controllers\Api\TaskController — routes registered under
+// Route::prefix('tasks') in routes/api.php, i.e. everything sits at /api/tasks.
+// Single place to adjust if the backend prefix changes.
+const String tasksBaseUrl = '/api/tasks';
+const String tasksMyBoardUrl = '$tasksBaseUrl/my-board';
+const String tasksAllBoardUrl = '$tasksBaseUrl/all-board';
+const String tasksTeamBoardUrl = '$tasksBaseUrl/team-board';
+const String taskStatusesUrl = '$tasksBaseUrl/statuses';
+const String taskTypesUrl = '$tasksBaseUrl/types';
+const String taskEmployeesSearchUrl = '$tasksBaseUrl/employees/search';
+const String taskCountUrl = '$tasksBaseUrl/count';
+const String createTaskUrl = tasksBaseUrl;
+
+String taskStatusUpdateUrl(int id) => '$tasksBaseUrl/$id/status';

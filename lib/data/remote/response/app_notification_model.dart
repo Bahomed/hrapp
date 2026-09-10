@@ -9,6 +9,7 @@ enum NotificationType {
   approval,
   attendance,
   schedule,
+  task,
 }
 
 class AppNotification {
@@ -112,6 +113,8 @@ class AppNotification {
       case 'session_day_off_added':
       case 'session_day_off_reversed':
         return NotificationType.schedule;
+      case 'task':
+        return NotificationType.task;
       default:
         return NotificationType.general;
     }
@@ -133,6 +136,8 @@ class AppNotification {
         return tr('attendance');
       case NotificationType.schedule:
         return tr('work_schedule');
+      case NotificationType.task:
+        return tr('tasks');
     }
   }
 
@@ -152,6 +157,8 @@ class AppNotification {
         return '🕐';
       case NotificationType.schedule:
         return '📅';
+      case NotificationType.task:
+        return '📌';
     }
   }
 }

@@ -17,6 +17,7 @@ import 'package:co.injazathr.injazathr/view/approval/approval_screen.dart';
 import 'package:co.injazathr.injazathr/view/unexecuted_requests/unexecuted_requests_screen.dart';
 import '../../schedule/weekly_shift_schedule_screen.dart';
 import '../../schedule/manager_weekly_shift_schedule_screen.dart';
+import '../../tasks/tasks_screen.dart';
 
 class HomeScreenWidget extends StatelessWidget {
   const HomeScreenWidget({super.key});
@@ -188,6 +189,12 @@ class HomeScreenWidget extends StatelessWidget {
           'label': tr('weekly_shift_schedule'),
           'key': 'schedule',
           'onTap': () => Get.to(const WeeklyShiftScheduleScreen()),
+        },
+        {
+          'icon': Icons.task_alt_outlined,
+          'label': tr('tasks'),
+          'key': 'tasks',
+          'onTap': () => Get.to(const TasksScreen()),
         },
       ];
 
