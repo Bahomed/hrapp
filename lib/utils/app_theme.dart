@@ -1,19 +1,49 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Light theme colors - HRM-focused color palette
-  static const Color primaryColor = Color(0xFF6C63FF); // Modern purple
-  static const Color secondaryColor = Color(0xFF4ECDC4); // Teal green
-  static const Color accentColor = Color(0xFFFF6B9D); // Soft pink
-  static const Color backgroundColor = Color(0xFFF7F8FC); // Light blue-grey
-  static const Color surfaceColor = Colors.white;
-  static const Color pageBackgroundColor = Color(0xFFFFFFFF); // Pure white
-  static const Color errorColor = Color(0xFFFF5A5A); // Softer red
-  static const Color successColor = Color(0xFF26D0CE); // Bright teal
-  static const Color warningColor = Color(0xFFFFB800); // Warm yellow
+  // ── Light theme palette (Deep Navy #0E3F66) ─────────────────────────────
+
+  // Background colors
+  static const Color bgCanvas = Color(0xFFF2F6F9);
+  static const Color bgSurface = Color(0xFFF2F6F9);
+  static const Color bgCard = Color(0xFFF6F9FB);
+  static const Color bgWhite = Color(0xFFFFFFFF);
+  static const Color bgInfo = Color(0xFFE8EFF5);
+  static const Color bgSuccess = Color(0xFFF0F5EB);
+  static const Color bgWarning = Color(0xFFFDF0E6);
+  static const Color bgError = Color(0xFFFBECE8);
+
+  // Brand / action
+  static const Color primaryHover = Color(0xFF0A2E4B);
+  static const Color primaryLight = Color(0xFFEBF3F9);
+  static const Color primaryBorder = Color(0xFFBCD4E6);
+  static const Color brandColor = Color(0xFF0E3F66);
+  static const Color bgHoverPrimary = Color(0xFFEEF4FF);
+
+  // Semantic states
+  static const Color successLight = Color(0xFFF0F5EB);
+  static const Color successBorder = Color(0xFFD0E1C1);
+  static const Color earlyWarningColor = Color(0xFFF9A825);
+  static const Color earlyWarningLight = Color(0xFFFEF6E9);
+  static const Color earlyWarningBorder = Color(0xFFFDE4BB);
+  static const Color warningLight = Color(0xFFFDF0E6);
+  static const Color warningBorder = Color(0xFFFAD1B0);
+  static const Color errorLight = Color(0xFFFBECE8);
+  static const Color errorBorder = Color(0xFFF3C5B6);
+
+  // Core light theme colors (mapped onto the palette above)
+  static const Color primaryColor = Color(0xFF0E3F66); // Deep Navy
+  static const Color secondaryColor = Color(0xFF0A2E4B); // Navy hover
+  static const Color accentColor = Color(0xFFF9A825); // Early-warning amber
+  static const Color backgroundColor = bgCanvas;
+  static const Color surfaceColor = bgWhite;
+  static const Color pageBackgroundColor = bgCanvas;
+  static const Color errorColor = Color(0xFFD84315);
+  static const Color successColor = Color(0xFF689F38);
+  static const Color warningColor = Color(0xFFEF6C00);
   static const Color textPrimary = Color(0xFF2D3748); // Dark blue-grey
   static const Color textSecondary = Color(0xFF718096); // Medium grey
-  static const Color dividerColor = Color(0xFFE2E8F0);
+  static const Color dividerColor = primaryBorder;
 
   // IMPROVED Dark theme colors - Harmonized with your main color #011754
   static const Color mainDarkBlue = Color(0xFF011754); // Your main color
@@ -59,7 +89,7 @@ class AppTheme {
 
   // Gradients - Updated for better harmony
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryColor, Color(0xFF8B7EFF)],
+    colors: [primaryColor, primaryHover],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -228,7 +258,7 @@ class AppTheme {
 
       // Card Theme
       cardTheme: CardThemeData(
-        color: surfaceColor,
+        color: bgWhite,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadiusLarge),
@@ -541,7 +571,7 @@ class AppTheme {
 
   // HRM Action Button Colors - Light theme
   static const Map<String, Color> actionColors = {
-    'requests': primaryColor, // Purple
+    'requests': primaryColor, // Deep Navy
     'payroll': Color(0xFF26D0CE), // Teal
     'documents': Color(0xFF4ECDC4), // Blue-green
     'attendance': Color(0xFFFF6B9D), // Pink
@@ -579,15 +609,15 @@ class AppTheme {
 
   // Status Background Colors
   static const Map<String, Color> statusBackgroundColors = {
-    'approved': Color(0xFFE8F5E8),
-    'pending': Color(0xFFFFF8E1),
-    'rejected': Color(0xFFFFEBEE),
+    'approved': bgSuccess,
+    'pending': bgWarning,
+    'rejected': bgError,
     'draft': Color(0xFFEEEEEE),
-    'active': Color(0xFFE8F5E8),
-    'expired': Color(0xFFFFEBEE),
-    'failed': Color(0xFFFFEBEE),
-    'processed': Color(0xFFE8F5E8),
-    'all': Color(0xFFE0F7FA),
+    'active': bgSuccess,
+    'expired': bgError,
+    'failed': bgError,
+    'processed': bgSuccess,
+    'all': bgInfo,
   };
 
   // Dark Status Background Colors - Improved with your main color harmony

@@ -3,6 +3,14 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:co.injazathr.injazathr/utils/translations/en.dart';
 import 'package:co.injazathr.injazathr/utils/translations/ar.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/home_en.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/home_ar.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/requests_en.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/requests_ar.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/approvals_en.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/approvals_ar.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/portal_en.dart';
+import 'package:co.injazathr.injazathr/utils/translations/modules/portal_ar.dart';
 import 'package:co.injazathr.injazathr/repository/userrepositiory.dart';
 import 'package:co.injazathr.injazathr/view/home_screen/homescreen_controller.dart';
 
@@ -25,8 +33,20 @@ class LanguageService extends GetxController {
 
   // Translation maps
   final Map<String, Map<String, String>> _translations = {
-    'en': enTranslations,
-    'ar': arTranslations,
+    'en': {
+      ...enTranslations,
+      ...homeEnTranslations,
+      ...requestsEnTranslations,
+      ...approvalsEnTranslations,
+      ...portalEnTranslations,
+    },
+    'ar': {
+      ...arTranslations,
+      ...homeArTranslations,
+      ...requestsArTranslations,
+      ...approvalsArTranslations,
+      ...portalArTranslations,
+    },
   };
 
   @override

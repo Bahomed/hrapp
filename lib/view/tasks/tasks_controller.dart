@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../data/local/preferences.dart';
+import '../../data/remote/dio_client/dio_client.dart';
+import '../../data/remote/network_url/network_url.dart';
 import '../../data/remote/response/task_models.dart';
+import '../../utils/api_result.dart';
 import '../../repository/task_repository.dart';
 import '../../services/theme_service.dart';
 import '../../utils/translation_helper.dart';
@@ -52,12 +56,35 @@ class TasksController extends GetxController {
 
   final RxInt openCount = 0.obs;
 
+  /// Boards this user may open (Settings › Permissions › Tasks):
+  /// My always; Team (`tasks.t_team`) / All (`tasks.t_all`) only when their
+  /// board answers 200.
+  final RxList<TaskBoardType> availableBoards =
+      <TaskBoardType>[TaskBoardType.my].obs;
+
   @override
   void onInit() {
     super.onInit();
     _loadLookups();
     loadBoard(TaskBoardType.my);
     refreshCount();
+    _probeBoards();
+  }
+
+  Future<void> _probeBoards() async {
+    final base = await Preferences().getWorkspaceUrl();
+    Future<bool> ok(String path) async {
+      final r = await ApiResult.guard(() => DioClient().dio.get('$base$path',
+          queryParameters: {'locale': getCurrentLanguage(), 'per_page': 1}));
+      return r.statusCode == 200;
+    }
+
+    final results = await Future.wait([ok(tasksAllBoardUrl), ok(tasksTeamBoardUrl)]);
+    availableBoards.assignAll([
+      TaskBoardType.my,
+      if (results[0]) TaskBoardType.all,
+      if (results[1]) TaskBoardType.team,
+    ]);
   }
 
   Future<void> _loadLookups() async {

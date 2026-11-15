@@ -17,6 +17,9 @@ import '../view/chat/chat_screen.dart';
 import '../view/chat/conversations_screen.dart';
 import '../view/tasks/tasks_screen.dart';
 
+import 'package:co.injazathr.injazathr/view/overtime/assigned_overtime_screen.dart';
+import 'package:co.injazathr.injazathr/view/schedule/manager_weekly_shift_schedule_screen.dart';
+
 class NotificationService {
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static final Preferences _preferences = Preferences();
@@ -160,6 +163,12 @@ class NotificationService {
       case NotificationType.task:
         // Deep-link to My Tasks (the default board).
         Get.to(() => const TasksScreen());
+        break;
+      case NotificationType.overtime:
+        Get.to(() => const AssignedOvertimeScreen());
+        break;
+      case NotificationType.overtimeAnswer:
+        Get.to(() => const ManagerWeeklyShiftScheduleScreen());
         break;
       case NotificationType.attendance:
         Get.to(() => const AttendanceDetailScreen());

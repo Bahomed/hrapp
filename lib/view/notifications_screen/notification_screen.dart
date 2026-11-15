@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import '../../utils/translation_helper.dart';
 import 'notification_controller.dart';
+
+import 'package:co.injazathr.injazathr/repository/my_repository.dart';
+import 'package:co.injazathr.injazathr/view/approval/approval_ui.dart';
+import 'package:co.injazathr.injazathr/data/remote/response/app_notification_model.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
@@ -29,7 +32,7 @@ class NotificationScreen extends StatelessWidget {
                 return _buildErrorState(context, controller, theme);
               }
               if (controller.filteredNotifications.isEmpty) {
-                return _buildEmptyState(context, theme);
+                return _buildEmptyState(context, theme, controller);
               }
               return _buildList(context, controller, theme, themeService);
             }),
@@ -67,7 +70,9 @@ class NotificationScreen extends StatelessWidget {
                       theme: theme,
                     )),
                 const SizedBox(width: 8),
-                ...NotificationType.values.map((type) => Padding(
+                ...NotificationType.values
+                    .where((t) => t != NotificationType.overtime && t != NotificationType.overtimeAnswer)
+                    .map((type) => Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: Obx(() => _chip(
                             label: _typeName(type),
@@ -297,26 +302,52 @@ class NotificationScreen extends StatelessWidget {
 
   // ── Empty / Error states ──────────────────────────────────────────────────
 
-  Widget _buildEmptyState(BuildContext context, ThemeData theme) {
+  Widget _buildEmptyState(
+      BuildContext context, ThemeData theme, NotificationController controller) {
+    // A filter can hide everything: say so, and offer to show all.
+    final filtered = controller.hasActiveFilter;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.notifications_none_rounded,
-              size: 56, color: theme.hintColor.withOpacity(0.5)),
-          const SizedBox(height: 16),
-          Text(tr('no_notifications'),
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(color: theme.hintColor.withOpacity(0.8))),
-          const SizedBox(height: 6),
-          Text(tr('no_notifications_description'),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.hintColor.withOpacity(0.55))),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+                filtered
+                    ? Icons.filter_alt_off_outlined
+                    : Icons.notifications_none_rounded,
+                size: 56,
+                color: theme.hintColor.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Text(
+                filtered
+                    ? tr('no_notifications_for_filter')
+                    : tr('no_notifications'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(color: theme.hintColor.withOpacity(0.8))),
+            const SizedBox(height: 6),
+            Text(
+                filtered
+                    ? tr('no_notifications_for_filter_hint')
+                    : tr('no_notifications_description'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.hintColor.withOpacity(0.55))),
+            if (filtered) ...[
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: controller.clearFilters,
+                icon: const Icon(Icons.clear_all_rounded),
+                label: Text(tr('show_all_notifications')),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildErrorState(
     BuildContext context,
@@ -370,6 +401,9 @@ class NotificationScreen extends StatelessWidget {
         return Colors.indigo;
       case NotificationType.task:
         return Colors.brown;
+      case NotificationType.overtime:
+      case NotificationType.overtimeAnswer:
+        return Colors.deepOrange;
     }
   }
 
@@ -391,6 +425,9 @@ class NotificationScreen extends StatelessWidget {
         return Icons.calendar_month_outlined;
       case NotificationType.task:
         return Icons.task_alt_outlined;
+      case NotificationType.overtime:
+      case NotificationType.overtimeAnswer:
+        return Icons.more_time_outlined;
     }
   }
 
@@ -540,6 +577,27 @@ class _NotificationCard extends StatelessWidget {
                               ?.withOpacity(isUnread ? 0.85 : 0.65),
                         ),
                       ),
+                      // Files of a broadcast sent to me.
+                      if (notification.attachments.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final f in notification.attachments)
+                              ActionChip(
+                                avatar: Icon(Icons.attach_file_rounded,
+                                    size: 16, color: typeColor),
+                                label: Text(f.name,
+                                    overflow: TextOverflow.ellipsis),
+                                labelStyle: TextStyle(
+                                    fontSize: 11.5, color: typeColor),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => _openAttachment(f),
+                              ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -571,4 +629,24 @@ class _NotificationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Downloads a broadcast file (GET my/notifications/attachments/{id}) and
+/// opens it with the device viewer.
+Future<void> _openAttachment(NotificationFile f) async {
+  Get.snackbar(tr('attachment'), f.name,
+      snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 1));
+  final r = await MyRepository().notificationAttachment(f.id);
+  if (!r.ok || r.data is! List<int>) {
+    Get.snackbar(tr('error'), r.displayMessage(tr('ap_could_not_open')),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade700,
+        colorText: Colors.white);
+    return;
+  }
+  final name = (f.ext != null && !f.name.toLowerCase().endsWith('.${f.ext!.toLowerCase()}'))
+      ? '${f.name}.${f.ext}'
+      : f.name;
+  await ApUi.openBytes(r.data as List<int>, name);
 }

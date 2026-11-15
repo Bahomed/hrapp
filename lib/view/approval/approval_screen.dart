@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:co.injazathr.injazathr/data/remote/response/approval_request_response.dart';
+
+import 'package:co.injazathr.injazathr/data/remote/response/my_approvals_models.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import 'package:co.injazathr.injazathr/view/approval/approval_controller.dart';
-import 'package:co.injazathr.injazathr/widgets/saudi_riyal_display.dart';
+import 'package:co.injazathr.injazathr/view/approval/approval_ui.dart';
 
+/// My Approvals (home key `awaiting_approval`). [requestId] opens one request
+/// directly (from a push notification).
 class ApprovalScreen extends StatefulWidget {
   final int? requestId;
   const ApprovalScreen({super.key, this.requestId});
@@ -21,6 +20,7 @@ class ApprovalScreen extends StatefulWidget {
 
 class _ApprovalScreenState extends State<ApprovalScreen> {
   late final ApprovalController controller;
+  ThemeService get theme => ThemeService.instance;
 
   @override
   void initState() {
@@ -28,45 +28,38 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
     controller = Get.put(ApprovalController());
     if (widget.requestId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _openRequestById(controller, widget.requestId!);
+        final item = controller.allRequests.firstWhereOrNull((r) => r.id == widget.requestId);
+        _openDetails(widget.requestId!, item);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeService = Get.find<ThemeService>();
-
     return Scaffold(
-      backgroundColor: themeService.getBackgroundColor(),
+      backgroundColor: theme.getBackgroundColor(),
       appBar: AppBar(
         title: Text(
-          tr('approval'),
-          style: TextStyle(
-            color: themeService.getTextPrimaryColor(),
-            fontWeight: FontWeight.w600,
-          ),
+          tr('ap_approvals'),
+          style: TextStyle(color: theme.getTextPrimaryColor(), fontWeight: FontWeight.w600),
         ),
-        backgroundColor: themeService.getSurfaceColor(),
+        backgroundColor: theme.getSurfaceColor(),
         elevation: 0,
-        iconTheme: IconThemeData(color: themeService.getTextPrimaryColor()),
+        iconTheme: IconThemeData(color: theme.getTextPrimaryColor()),
         actions: [
-          Obx(() =>
-              Badge(
+          Obx(() => Badge(
                 label: Text('${controller.totalPendingCount}'),
                 isLabelVisible: controller.totalPendingCount > 0,
                 child: IconButton(
-                  onPressed: controller.refreshRequests,
+                  onPressed: controller.isLoading.value ? null : controller.refreshRequests,
                   icon: controller.isLoading.value
                       ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: themeService.getTextPrimaryColor(),
-                    ),
-                  )
-                      : Icon(Icons.refresh),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: theme.getTextPrimaryColor()),
+                        )
+                      : const Icon(Icons.refresh),
                 ),
               )),
           const SizedBox(width: 8),
@@ -74,46 +67,59 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       ),
       body: Column(
         children: [
-          // Filter Pills
-          _buildFilterSection(controller, themeService),
-
-          // Content
+          _buildFilterSection(context),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value &&
-                  controller.allRequests.isEmpty) {
+                  controller.allRequests.isEmpty &&
+                  controller.payrolls.isEmpty) {
                 return Center(
-                  child: CircularProgressIndicator(
-                    color: themeService.getActionColor('requests'),
+                  child: CircularProgressIndicator(color: theme.getActionColor('requests')),
+                );
+              }
+              final visible = controller.visibleRequests;
+              final showPayrolls =
+                  controller.selectedFilter.value == 'all' && controller.payrolls.isNotEmpty;
+
+              if (visible.isEmpty && !showPayrolls) {
+                return RefreshIndicator(
+                  onRefresh: controller.refreshRequests,
+                  child: ApUi.emptyState(
+                    icon: controller.errorMessage.value.isNotEmpty
+                        ? Icons.info_outline
+                        : Icons.check_circle_outline,
+                    title: controller.errorMessage.value.isNotEmpty
+                        ? controller.errorMessage.value
+                        : tr('ap_no_pending'),
+                    subtitle: controller.errorMessage.value.isNotEmpty
+                        ? null
+                        : tr('ap_all_processed'),
+                    onRefresh: controller.refreshRequests,
                   ),
                 );
               }
 
-              if (controller.allRequests.isEmpty) {
-                return _buildEmptyState(themeService, context);
-              }
-
               return RefreshIndicator(
                 onRefresh: controller.refreshRequests,
-                child: SingleChildScrollView(
+                child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: ResponsiveUtils.responsiveHorizontalPadding(
-                      context, mobile: 16, tablet: 20, desktop: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Summary Cards
-                      _buildSummaryCards(controller, themeService),
-
-                      SizedBox(height: ResponsiveUtils.getResponsiveValue<
-                          double>(context, mobile: 24,
-                          tablet: 28,
-                          desktop: 32)),
-
-                      // Request Lists
-                      _buildRequestSections(controller, themeService, context),
+                          context, mobile: 16, tablet: 20, desktop: 24)
+                      .add(const EdgeInsets.only(top: 16, bottom: 32)),
+                  children: [
+                    if (controller.selectedFilter.value == 'all') ...[
+                      _buildSummaryCards(),
+                      const SizedBox(height: 20),
                     ],
-                  ),
+                    ...visible.map(_buildRequestCard),
+                    if (showPayrolls) ...[
+                      const SizedBox(height: 8),
+                      _sectionHeader(tr('ap_payrolls'), controller.payrolls.length,
+                          ApUi.typeColor('payroll')),
+                      _payrollNote(),
+                      ...controller.payrolls.map(_buildPayrollCard),
+                    ],
+                  ],
                 ),
               );
             }),
@@ -123,20 +129,16 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
     );
   }
 
-  Widget _buildFilterSection(ApprovalController controller,
-      ThemeService themeService) {
-    final context = Get.context!;
+  // ── Filters / summary ───────────────────────────────────────────────
+
+  Widget _buildFilterSection(BuildContext context) {
     return Container(
-      padding: ResponsiveUtils.responsiveHorizontalPadding(
-          context, mobile: 16, tablet: 20, desktop: 24).add(
-          ResponsiveUtils.responsiveVerticalPadding(
-              context, mobile: 12, tablet: 14, desktop: 16)
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: themeService.getSurfaceColor(),
+        color: theme.getSurfaceColor(),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -144,32 +146,31 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Obx(() =>
-            Row(
-              children: controller.filters.map((filter) {
-                final isSelected = controller.selectedFilter.value ==
-                    filter['key'];
-                final color = filter['color'] as Color;
-
+        child: Obx(() => Row(
+              children: controller.filters.map((key) {
+                final selected = controller.selectedFilter.value == key;
+                final color = ApUi.typeColor(key);
+                final count = controller.countFor(key);
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(filter['name'] as String),
-                    selected: isSelected,
-                    onSelected: (_) =>
-                        controller.changeFilter(filter['key'] as String),
-                    backgroundColor: themeService.getSurfaceColor(),
-                    selectedColor: color.withOpacity(0.2),
-                    checkmarkColor: color,
-                    labelStyle: TextStyle(
-                      color: isSelected ? color : themeService
-                          .getTextSecondaryColor(),
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight
-                          .normal,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? color : themeService
-                          .getTextSecondaryColor().withOpacity(0.3),
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: GestureDetector(
+                    onTap: () => controller.changeFilter(key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: selected ? color : color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: color.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        count > 0 ? '${controller.filterLabel(key)} ($count)' : controller.filterLabel(key),
+                        style: TextStyle(
+                          color: selected ? Colors.white : color,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -179,497 +180,194 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
     );
   }
 
-  Widget _buildSummaryCards(ApprovalController controller,
-      ThemeService themeService) {
-    final context = Get.context!;
+  Widget _buildSummaryCards() {
+    final keys = ApprovalController.filterKeys.where((k) => k != 'all').toList();
     return GridView.count(
+      crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: ResponsiveUtils.responsiveCrossAxisCount(
-          context, mobile: 2, tablet: 3, desktop: 4),
-      childAspectRatio: ResponsiveUtils.getResponsiveValue<double>(
-          context, mobile: 2.2, tablet: 2.0, desktop: 1.8),
-      mainAxisSpacing: ResponsiveUtils.getResponsiveValue<double>(
-          context, mobile: 12, tablet: 16, desktop: 20),
-      crossAxisSpacing: ResponsiveUtils.getResponsiveValue<double>(
-          context, mobile: 12, tablet: 16, desktop: 20),
-      children: [
-        _buildSummaryCard(
-          context: context,
-          title: tr('leave_request'),
-          count: controller.leaveRequestCount,
-          icon: Icons.calendar_today,
-          color: themeService.getActionColor('schedule'),
-          themeService: themeService,
-        ),
-        _buildSummaryCard(
-          context: context,
-          title: tr('permission_request'),
-          count: controller.permissionRequestCount,
-          icon: Icons.badge_outlined,
-          color: themeService.getActionColor('profile'),
-          themeService: themeService,
-        ),
-        _buildSummaryCard(
-          context: context,
-          title: tr('loan_request'),
-          count: controller.loanRequestCount,
-          icon: Icons.account_balance_wallet,
-          color: themeService.getSuccessColor(),
-          themeService: themeService,
-        ),
-        _buildSummaryCard(
-          context: context,
-          title: tr('letter_request'),
-          count: controller.letterRequestCount,
-          icon: Icons.description,
-          color: themeService.getActionColor('documents'),
-          themeService: themeService,
-        ),
-        _buildSummaryCard(
-          context: context,
-          title: tr('overtime_request'),
-          count: controller.overtimeRequestCount,
-          icon: Icons.access_time_filled,
-          color: const Color(0xFFFF6B35),
-          themeService: themeService,
-        ),
-        _buildSummaryCard(
-          context: context,
-          title: tr('missing_punch_request'),
-          count: controller.missingPunchRequestCount,
-          icon: Icons.fingerprint,
-          color: const Color(0xFF6C5CE7),
-          themeService: themeService,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCard({
-    required BuildContext context,
-    required String title,
-    required int count,
-    required IconData icon,
-    required Color color,
-    required ThemeService themeService,
-  }) {
-    return Container(
-      padding: ResponsiveUtils.responsiveHorizontalPadding(
-          context, mobile: 12, tablet: 14, desktop: 16),
-      decoration: BoxDecoration(
-        color: themeService.getSurfaceColor(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            child: Row(
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childAspectRatio: 1.25,
+      children: keys.map((k) {
+        final color = ApUi.typeColor(k);
+        return GestureDetector(
+          onTap: () => controller.changeFilter(k),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: ApUi.card(color),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(icon, color: color,
-                      size: ResponsiveUtils.responsiveIconSize(
-                          context, mobile: 16, tablet: 18, desktop: 20)),
-                ),
-                const Spacer(),
-                Text(
-                  count.toString(),
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.responsiveFontSize(
-                        context, mobile: 20, tablet: 22, desktop: 24),
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
+                Icon(ApUi.typeIcon(k), color: color, size: 22),
+                const SizedBox(height: 4),
+                Text('${controller.countFor(k)}',
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w700, color: color)),
+                Text(ApUi.typeLabel(k),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: theme.getTextSecondaryColor())),
               ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(
-                  context, mobile: 11, tablet: 12, desktop: 13),
-              color: themeService.getTextSecondaryColor(),
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildRequestSections(ApprovalController controller,
-      ThemeService themeService, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (controller.leaveRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('leave_request'), controller.leaveRequestCount, themeService,
-              context),
-          const SizedBox(height: 12),
-          ...controller.leaveRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-          const SizedBox(height: 20),
-        ],
-
-        if (controller.permissionRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('permission_request'), controller.permissionRequestCount,
-              themeService, context),
-          const SizedBox(height: 12),
-          ...controller.permissionRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-          const SizedBox(height: 20),
-        ],
-
-        if (controller.loanRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('loan_request'), controller.loanRequestCount, themeService,
-              context),
-          const SizedBox(height: 12),
-          ...controller.loanRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-          const SizedBox(height: 20),
-        ],
-
-        if (controller.letterRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('letter_request'), controller.letterRequestCount, themeService,
-              context),
-          const SizedBox(height: 12),
-          ...controller.letterRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-          const SizedBox(height: 20),
-        ],
-
-        if (controller.overtimeRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('overtime_request'), controller.overtimeRequestCount, themeService,
-              context),
-          const SizedBox(height: 12),
-          ...controller.overtimeRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-          const SizedBox(height: 20),
-        ],
-
-        if (controller.missingPunchRequests.isNotEmpty) ...[
-          _buildSectionHeader(
-              tr('missing_punch_request'), controller.missingPunchRequestCount, themeService,
-              context),
-          const SizedBox(height: 12),
-          ...controller.missingPunchRequests.map((request) =>
-              _buildRequestCard(request, controller, themeService, context)),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildSectionHeader(String title, int count, ThemeService themeService,
-      BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: ResponsiveUtils.responsiveFontSize(
-                context, mobile: 18, tablet: 20, desktop: 22),
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
+  Widget _sectionHeader(String title, int count, Color color) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            Text(title,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.getTextPrimaryColor())),
+            const SizedBox(width: 8),
+            ApUi.chip('$count', color),
+          ],
         ),
-        const SizedBox(width: 8),
-        Container(
-          padding: ResponsiveUtils.responsiveHorizontalPadding(
-              context, mobile: 8, tablet: 10, desktop: 12).add(
-              ResponsiveUtils.responsiveVerticalPadding(
-                  context, mobile: 4, tablet: 5, desktop: 6)
-          ),
-          decoration: BoxDecoration(
-            color: themeService.getActionColor('requests').withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(
-                  context, mobile: 12, tablet: 13, desktop: 14),
-              fontWeight: FontWeight.w600,
-              color: themeService.getActionColor('requests'),
-            ),
-          ),
+      );
+
+  Widget _payrollNote() => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.getWarningColor().withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: theme.getWarningColor().withValues(alpha: 0.3)),
         ),
-      ],
-    );
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, color: theme.getWarningColor(), size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(tr('ap_payroll_web_note'),
+                  style: TextStyle(fontSize: 13, color: theme.getTextPrimaryColor())),
+            ),
+          ],
+        ),
+      );
+
+  // ── Cards ───────────────────────────────────────────────────────────
+
+  List<Widget> _typeInfo(MyApprovalItem r) {
+    final w = <Widget>[];
+    if (r.subType != null) w.add(ApUi.infoRow(tr('ap_type'), r.subType));
+    switch (r.typeKey) {
+      case 'leave':
+        w.add(ApUi.infoRow(tr('ap_from'), ApUi.date(r.startDate)));
+        w.add(ApUi.infoRow(tr('ap_to'), ApUi.date(r.endDate)));
+        w.add(ApUi.infoRow(tr('ap_days'), r.noOfDays == null ? null : ApUi.fmtNum(r.noOfDays)));
+        break;
+      case 'loan':
+        w.add(ApUi.amountRow(tr('ap_amount'), r.amount));
+        w.add(ApUi.infoRow(tr('ap_installments'), r.installments?.toString()));
+        w.add(ApUi.infoRow(tr('ap_start_date'), ApUi.date(r.startDate)));
+        break;
+      case 'permit':
+        w.add(ApUi.infoRow(tr('ap_date'), ApUi.date(r.startDate)));
+        if (r.fromTime != null) {
+          w.add(ApUi.infoRow(
+              tr('ap_time'), '${ApUi.time(r.fromTime)} - ${ApUi.time(r.toTime)}'));
+        }
+        break;
+      case 'overtime':
+        w.add(ApUi.infoRow(tr('ap_from'), ApUi.date(r.startDate)));
+        w.add(ApUi.infoRow(tr('ap_to'), ApUi.date(r.endDate)));
+        w.add(ApUi.infoRow(tr('ap_hours'), r.hours == null ? null : ApUi.fmtNum(r.hours),
+            valueColor: ApUi.typeColor('overtime')));
+        break;
+      case 'missingpunch':
+        w.add(ApUi.infoRow(tr('ap_date'), ApUi.date(r.startDate)));
+        w.add(ApUi.infoRow(tr('ap_check_in'), ApUi.time(r.fromTime)));
+        w.add(ApUi.infoRow(tr('ap_check_out'), ApUi.time(r.toTime)));
+        break;
+      default:
+        if (r.startDate != null) w.add(ApUi.infoRow(tr('ap_date'), ApUi.date(r.startDate)));
+        w.add(ApUi.amountRow(tr('ap_amount'), r.amount));
+    }
+    return w;
   }
 
-  Widget _buildRequestCard(ApprovalRequest request,
-      ApprovalController controller, ThemeService themeService,
-      BuildContext context) {
-    final requestTypeColor = controller.getFilterColor(
-        request.requestType.toLowerCase());
-
+  Widget _buildRequestCard(MyApprovalItem r) {
+    final color = ApUi.typeColor(r.typeKey);
     return Container(
-      margin: EdgeInsets.only(
-          bottom: ResponsiveUtils.getResponsiveValue<double>(
-              context, mobile: 12, tablet: 14, desktop: 16)),
-      padding: ResponsiveUtils.responsiveHorizontalPadding(
-          context, mobile: 16, tablet: 18, desktop: 20),
-      decoration: BoxDecoration(
-        color: themeService.getSurfaceColor(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: requestTypeColor.withOpacity(0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: ApUi.card(color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: ResponsiveUtils.responsiveHorizontalPadding(
-                    context, mobile: 8, tablet: 10, desktop: 12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: requestTypeColor.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  controller.getFilterIcon(request.requestType),
-                  color: requestTypeColor,
-                  size: ResponsiveUtils.responsiveIconSize(
-                      context, mobile: 20, tablet: 22, desktop: 24),
-                ),
+                child: Icon(ApUi.typeIcon(r.typeKey), color: color, size: 20),
               ),
-              SizedBox(width: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 12, tablet: 14, desktop: 16)),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request.employeeName,
+                      r.employee.name.isNotEmpty ? r.employee.name : ApUi.typeLabel(r.type),
                       style: TextStyle(
-                        fontSize: ResponsiveUtils.responsiveFontSize(
-                            context, mobile: 16, tablet: 17, desktop: 18),
-                        fontWeight: FontWeight.w600,
-                        color: themeService.getTextPrimaryColor(),
-                      ),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: theme.getTextPrimaryColor()),
                     ),
-                    if (request.requestNumber.isNotEmpty) ...[
-                      SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-                          context, mobile: 2, tablet: 3, desktop: 4)),
-                      Text(
-                        '${tr('request_number')}: #${request.requestNumber}',
-                        style: TextStyle(
-                          fontSize: ResponsiveUtils.responsiveFontSize(
-                              context, mobile: 12, tablet: 13, desktop: 14),
-                          color: themeService.getTextSecondaryColor(),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    if (request.requestType == 'Leave') ...[
-                      const SizedBox(height: 6),
-                      _buildLeaveBalanceChip(request.employmentId, themeService, context),
-                    ],
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        ApUi.typeLabel(r.type),
+                        if (r.requestNumber != null) '#${r.requestNumber}',
+                        if (r.employee.no != null) r.employee.no!,
+                      ].join(' · '),
+                      style: TextStyle(fontSize: 12, color: theme.getTextSecondaryColor()),
+                    ),
                   ],
                 ),
               ),
-              Container(
-                padding: ResponsiveUtils.responsiveHorizontalPadding(
-                    context, mobile: 8, tablet: 10, desktop: 12).add(
-                    ResponsiveUtils.responsiveVerticalPadding(
-                        context, mobile: 4, tablet: 5, desktop: 6)
-                ),
-                decoration: BoxDecoration(
-                  color: themeService.getWarningColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  tr('for_approval'),
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.responsiveFontSize(
-                        context, mobile: 11, tablet: 12, desktop: 13),
-                    fontWeight: FontWeight.w600,
-                    color: themeService.getWarningColor(),
-                  ),
-                ),
-              ),
+              ApUi.chip(r.level ?? tr('ap_for_approval'), theme.getWarningColor()),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Request-specific information based on type
-          ..._buildRequestSpecificInfo(request, themeService, context),
-
-          Text(
-            '${tr('submitted')}: ${_formatDate(request.requestDateG)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(
-                  context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ),
-
-          // Show remarks for all request types
-          if (request.reason != null && request.reason!.isNotEmpty) ...[
-            SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-                context, mobile: 4, tablet: 5, desktop: 6)),
-            Text(
-              '${tr('reason')}: ${request.reason}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+          ..._typeInfo(r),
+          ApUi.infoRow(tr('ap_request_date'), ApUi.date(r.requestDate)),
+          if (r.remarks != null)
+            Text('${tr('ap_remarks')}: ${r.remarks}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: theme.getTextSecondaryColor())),
+          if (r.attachments.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _attachments(r.attachments),
           ],
-
-          // Attachments
-          if (request.attachments.isNotEmpty) ...[
-            SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-                context, mobile: 8, tablet: 10, desktop: 12)),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: request.attachments.map((url) {
-                final isImage = url.toLowerCase().contains('.jpg') ||
-                    url.toLowerCase().contains('.jpeg') ||
-                    url.toLowerCase().contains('.png');
-                return GestureDetector(
-                  onTap: () => _openAttachment(url, context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: themeService.getActionColor('requests').withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: themeService.getActionColor('requests').withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isImage ? Icons.image_outlined : Icons.attach_file,
-                          size: 14,
-                          color: themeService.getActionColor('requests'),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          url.split('/').last.length > 20
-                              ? '${url.split('/').last.substring(0, 20)}...'
-                              : url.split('/').last,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: themeService.getActionColor('requests'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-
           const SizedBox(height: 16),
-
           Row(
             children: [
-              Flexible(
-                child: OutlinedButton(
-                  onPressed: () => controller.viewRequestDetails(request),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                        color: themeService.getTextSecondaryColor().withOpacity(
-                            0.3)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    tr('view_details'),
-                    style: TextStyle(
-                      color: themeService.getTextSecondaryColor(),
-                      fontSize: ResponsiveUtils.responsiveFontSize(
-                          context, mobile: 11, tablet: 12, desktop: 13),
-                    ),
-                  ),
-                ),
+              Expanded(
+                child: ApUi.actionButton(tr('ap_view_details'), theme.getTextSecondaryColor(),
+                    () => _openDetails(r.id, r)),
               ),
-              SizedBox(width: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 8, tablet: 10, desktop: 12)),
-              Flexible(
-                child: OutlinedButton(
-                  onPressed: () => controller.showRejectionDialog(request),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: themeService.getErrorColor()),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    tr('reject'),
-                    style: TextStyle(
-                      color: themeService.getErrorColor(),
-                      fontSize: ResponsiveUtils.responsiveFontSize(
-                          context, mobile: 11, tablet: 12, desktop: 13),
-                    ),
-                  ),
-                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ApUi.actionButton(
+                    tr('ap_reject'), theme.getErrorColor(), () => _reject(r)),
               ),
-              SizedBox(width: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 8, tablet: 10, desktop: 12)),
-              Flexible(
-                child: OutlinedButton(
-                  onPressed: () => controller.showApprovalDialog(request),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: themeService.getSuccessColor()),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    tr('approved'),
-                    style: TextStyle(
-                      color: themeService.getSuccessColor(),
-                      fontSize: ResponsiveUtils.responsiveFontSize(
-                          context, mobile: 10, tablet: 12, desktop: 13),
-                    ),
-                  ),
-                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ApUi.actionButton(
+                    tr('ap_approve'), theme.getSuccessColor(), () => _approve(r),
+                    filled: true),
               ),
             ],
           ),
@@ -678,645 +376,269 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
     );
   }
 
-  Widget _buildEmptyState(ThemeService themeService, BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: ResponsiveUtils.responsiveHorizontalPadding(
-                context, mobile: 24, tablet: 28, desktop: 32),
-            decoration: BoxDecoration(
-              color: themeService.getActionColor('requests').withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.check_circle_outline,
-              size: ResponsiveUtils.responsiveIconSize(
-                  context, mobile: 64, tablet: 72, desktop: 80),
-              color: themeService.getActionColor('requests'),
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-              context, mobile: 24, tablet: 28, desktop: 32)),
-          Text(
-            'No Pending Requests',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(
-                  context, mobile: 20, tablet: 22, desktop: 24),
-              fontWeight: FontWeight.w600,
-              color: themeService.getTextPrimaryColor(),
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-              context, mobile: 8, tablet: 10, desktop: 12)),
-          Text(
-            'All requests have been processed',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(
-                  context, mobile: 14, tablet: 15, desktop: 16),
-              color: themeService.getTextSecondaryColor(),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(
-              context, mobile: 24, tablet: 28, desktop: 32)),
-          ElevatedButton.icon(
-            onPressed: () => Get.find<ApprovalController>().refreshRequests(),
-            icon: const Icon(Icons.refresh),
-            label: Text(tr('refresh')),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: themeService.getActionColor('requests'),
-              foregroundColor: Colors.white,
-              padding: ResponsiveUtils.responsiveHorizontalPadding(
-                  context, mobile: 24, tablet: 28, desktop: 32).add(
-                  ResponsiveUtils.responsiveVerticalPadding(
-                      context, mobile: 12, tablet: 14, desktop: 16)
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+  Widget _buildPayrollCard(MyPayrollItem p) {
+    final color = ApUi.typeColor('payroll');
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: ApUi.card(color),
+      child: InkWell(
+        onTap: () => ApUi.showDataSheet(tr('ap_payrolls'), p.raw),
+        child: Row(
+          children: [
+            Icon(ApUi.typeIcon('payroll'), color: color),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(p.title.isNotEmpty ? p.title : '${tr('ap_payrolls')} #${p.id ?? ''}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, color: theme.getTextPrimaryColor())),
+                  const SizedBox(height: 4),
+                  ApUi.infoRow(tr('ap_employees_count'), p.employeesCount?.toString()),
+                  ApUi.amountRow(tr('ap_total'), p.total),
+                ],
               ),
             ),
-          ),
-        ],
+            ApUi.chip(p.level ?? tr('ap_read_only'), color),
+          ],
+        ),
       ),
     );
   }
 
-  List<Widget> _buildRequestSpecificInfo(ApprovalRequest request,
-      ThemeService themeService, BuildContext context) {
-    List<Widget> widgets = [];
-
-    switch (request.requestType.toLowerCase()) {
-      case 'leave':
-      // Show leave type
-        if (request.leaveType != null) {
-          widgets.add(
-            Text(
-              '${tr('type')}: ${request.leaveType}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show leave start and end dates
-        if (request.leaveStartDate != null) {
-          widgets.add(
-            Text(
-              '${tr('start_date')}: ${_formatDate(request.leaveStartDate!)}',
-
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        if (request.leaveEndDate != null) {
-          widgets.add(
-            Text(
-              '${tr('end_date')}: ${_formatDate(request.leaveEndDate!)}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show days
-        if (request.days != null && request.days! > 0) {
-          widgets.add(
-            Text(
-              '${tr('days')}: ${request.days}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-
-      case 'loan':
-      // Show loan type
-        if (request.leaveType != null) {
-          widgets.add(
-            Text(
-              '${tr('type')}: ${request.leaveType}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show loan amount
-        if (request.loanAmount != null && request.loanAmount != '0' &&
-            request.loanAmount != '0.00') {
-          widgets.add(
-            Row(
-              children: [
-                Text(
-                  '${tr('amount')}: ',
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.responsiveFontSize(
-                        context, mobile: 13, tablet: 14, desktop: 15),
-                    color: themeService.getTextSecondaryColor(),
-                  ),
-                ),
-                SaudiRiyalDisplay(
-                  amount: double.tryParse(request.loanAmount!) ?? 0.0,
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.responsiveFontSize(
-                        context, mobile: 13, tablet: 14, desktop: 15),
-                    color: themeService.getTextSecondaryColor(),
-                  ),
-                ),
-              ],
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show repayment months
-        if (request.loanRepaymentMonths != null &&
-            request.loanRepaymentMonths! > 0) {
-          widgets.add(
-            Text(
-              '${tr('instalment')}: ${request.loanRepaymentMonths} ${tr(
-                  'months')}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        if (request.leaveStartDate != null) {
-          widgets.add(
-            Text(
-              '${tr('start_date')}: ${_formatDate(request.leaveStartDate!)}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-
-      case 'permission':
-      case 'permit':
-      // Show permission type
-        if (request.leaveType != null) {
-          widgets.add(
-            Text(
-              '${tr('permission_type')}: ${request.leaveType}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show permit date
-        if (request.permitDate != null) {
-          widgets.add(
-            Text(
-              '${tr('date')}: ${_formatDate(request.permitDate!)}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-
-        // Show permit time
-        if (request.permitFrom != null && request.permitFrom!.isNotEmpty) {
-          widgets.add(
-            Text(
-              '${tr('time')}: ${ _formatTimeDisplay(request.permitFrom!)} ${tr(
-                  'to')} ${ _formatTimeDisplay(request.permitTo ?? "")}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-
-      case 'letter':
-      // Show letter type
-        if (request.leaveType != null) {
-          widgets.add(
-            Text(
-              '${tr('type')}: ${request.leaveType}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 13, tablet: 14, desktop: 15),
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          );
-          widgets.add(SizedBox(
-              height: ResponsiveUtils.getResponsiveValue<double>(
-                  context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-
-      case 'overtime':
-        if (request.fromDate != null && request.fromDate!.isNotEmpty) {
-          widgets.add(Text(
-            '${tr('from_date')}: ${_formatDate(request.fromDate!)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        if (request.toDate != null && request.toDate!.isNotEmpty) {
-          widgets.add(Text(
-            '${tr('to_date')}: ${_formatDate(request.toDate!)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        if (request.totalOtHours != null) {
-          final hoursDisplay = request.totalOtHours! % 1 == 0
-              ? '${request.totalOtHours!.toInt()} ${tr('hrs')}'
-              : '${request.totalOtHours!.toStringAsFixed(2)} ${tr('hrs')}';
-          widgets.add(Text(
-            '${tr('total_ot_hours')}: $hoursDisplay',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: const Color(0xFFFF6B35),
-              fontWeight: FontWeight.w600,
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-
-      case 'missingpunch':
-        if (request.startDateG != null && request.startDateG!.isNotEmpty) {
-          widgets.add(Text(
-            '${tr('date')}: ${_formatDate(request.startDateG!)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        if (request.permitFrom != null && request.permitFrom!.isNotEmpty) {
-          widgets.add(Text(
-            '${tr('check_in')}: ${_formatTimeDisplay(request.permitFrom!)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        if (request.permitTo != null && request.permitTo!.isNotEmpty) {
-          widgets.add(Text(
-            '${tr('check_out')}: ${_formatTimeDisplay(request.permitTo!)}',
-            style: TextStyle(
-              fontSize: ResponsiveUtils.responsiveFontSize(context, mobile: 13, tablet: 14, desktop: 15),
-              color: themeService.getTextSecondaryColor(),
-            ),
-          ));
-          widgets.add(SizedBox(height: ResponsiveUtils.getResponsiveValue<double>(context, mobile: 4, tablet: 5, desktop: 6)));
-        }
-        break;
-    }
-
-    return widgets;
-  }
-
-  void _openRequestById(ApprovalController controller, int targetId) async {
-    // Wait for loading to finish (max 5 seconds)
-    int attempts = 0;
-    while (controller.isLoading.value && attempts < 50) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      attempts++;
-    }
-    // Small extra buffer for UI to settle
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    final request = controller.allRequests
-        .firstWhereOrNull((r) => r.id == targetId);
-    if (request != null) {
-      controller.viewRequestDetails(request);
-    } else {
-      // Request not found — may have been approved/rejected already or not assigned to this manager
-      Get.snackbar(
-        tr('request_not_found'),
-        tr('request_may_be_processed'),
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
-    }
-  }
-
-  Widget _buildLeaveBalanceSummary(ApprovalController controller, ThemeService themeService, BuildContext context) {
-    // Collect unique employees from leave requests
-    final seen = <int>{};
-    final uniqueLeaveRequests = controller.leaveRequests
-        .where((r) => seen.add(r.employmentId))
-        .toList();
-
-    return Obx(() {
-      final color = themeService.getPrimaryColor();
-      return Wrap(
+  Widget _attachments(List<String> urls) => Wrap(
         spacing: 8,
-        runSpacing: 6,
-        children: uniqueLeaveRequests.map((request) {
-          final isLoading = controller.loadingBalances.contains(request.employmentId);
-          final balance = controller.leaveBalances[request.employmentId];
-
-          // Label: employee name if multiple, generic if single
-          final label = uniqueLeaveRequests.length > 1
-              ? request.employeeName.split(' ').first
-              : null;
-
-          String balanceText;
-          if (isLoading) {
-            balanceText = '...';
-          } else if (balance == null) {
-            return const SizedBox.shrink();
-          } else {
-            final display = balance % 1 == 0
-                ? balance.toInt().toString()
-                : balance.toStringAsFixed(2);
-            balanceText = '$display ${tr('days')}';
-          }
-
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.25)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.beach_access_outlined, size: 14, color: color),
-                const SizedBox(width: 6),
-                if (label != null) ...[
-                  Text(
-                    '$label · ',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: color,
-                      fontWeight: FontWeight.w500,
-                    ),
+        runSpacing: 8,
+        children: urls.map((url) {
+          final name = url.split('/').last.split('?').first;
+          final c = theme.getActionColor('requests');
+          return GestureDetector(
+            onTap: () => ApUi.openAttachment(url, context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: c.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: c.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.attach_file, size: 14, color: c),
+                  const SizedBox(width: 4),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(name,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11, color: c)),
                   ),
                 ],
-                Text(
-                  '${tr('leave_balance')}: $balanceText',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (isLoading) ...[
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 10, height: 10,
-                    child: CircularProgressIndicator(strokeWidth: 1.5, color: color),
-                  ),
-                ],
-              ],
+              ),
             ),
           );
         }).toList(),
       );
-    });
+
+  // ── Actions ─────────────────────────────────────────────────────────
+
+  Future<bool> _approve(MyApprovalItem r, {int? stepId}) async {
+    final res = await ApUi.textActionDialog(
+      title: tr('ap_approve_title'),
+      message: '${r.employee.name} · ${ApUi.typeLabel(r.type)}',
+      label: tr('ap_comments'),
+      confirmText: tr('ap_approve'),
+      confirmColor: theme.getSuccessColor(),
+      errorField: 'comments',
+      onSubmit: (c) => controller.act(r, 'approved', c, stepId: stepId),
+    );
+    if (res != null) ApUi.ok(res.message);
+    return res != null;
   }
 
-  Widget _buildLeaveBalanceChip(int employmentId, ThemeService themeService, BuildContext context) {
-    final controller = Get.find<ApprovalController>();
-    return Obx(() {
-      final isLoading = controller.loadingBalances.contains(employmentId);
-      final balance = controller.leaveBalances[employmentId];
-
-      if (isLoading) {
-        return Row(
-          children: [
-            Icon(Icons.beach_access_outlined,
-                size: 14, color: themeService.getTextSecondaryColor()),
-            const SizedBox(width: 4),
-            SizedBox(
-              width: 12, height: 12,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: themeService.getTextSecondaryColor(),
-              ),
-            ),
-          ],
-        );
-      }
-
-      if (balance == null) return const SizedBox.shrink();
-
-      final displayBalance = balance % 1 == 0 ? balance.toInt().toString() : balance.toString();
-      final color = themeService.getPrimaryColor();
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.25)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.beach_access_outlined, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              '${tr('leave_balance')}: $displayBalance ${tr('days')}',
-              style: TextStyle(
-                fontSize: ResponsiveUtils.responsiveFontSize(
-                    context, mobile: 12, tablet: 13, desktop: 14),
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+  Future<bool> _reject(MyApprovalItem r, {int? stepId}) async {
+    final res = await ApUi.textActionDialog(
+      title: tr('ap_reject_title'),
+      message: '${r.employee.name} · ${ApUi.typeLabel(r.type)}',
+      label: tr('ap_comments'),
+      confirmText: tr('ap_reject'),
+      confirmColor: theme.getErrorColor(),
+      errorField: 'comments',
+      onSubmit: (c) => controller.act(r, 'rejected', c, stepId: stepId),
+    );
+    if (res != null) ApUi.ok(res.message);
+    return res != null;
   }
 
-  void _openAttachment(String url, BuildContext context) {
-    final lower = url.toLowerCase();
-    final isImage = lower.contains('.jpg') || lower.contains('.jpeg') || lower.contains('.png');
-    final isPdf = lower.contains('.pdf');
-
-    if (isPdf) {
-      _downloadAndOpenPdf(url, context);
+  /// Details sheet: `GET my/approvals/{id}` with steps + attachments.
+  Future<void> _openDetails(int requestId, MyApprovalItem? item) async {
+    Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+    final (detail, err) = await controller.loadDetail(requestId, fallback: item);
+    Get.back();
+    if (detail == null) {
+      ApUi.fail(err ?? tr('ap_request_not_found'));
       return;
     }
+    final r = detail.request.id == 0 && item != null ? item : detail.request;
+    final stepId = detail.actionableStepId;
+    final color = ApUi.typeColor(r.typeKey);
 
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.black,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(
-          children: [
-            Center(
-              child: isImage
-                  ? InteractiveViewer(
-                      child: Image.network(
-                        url,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (_, child, progress) => progress == null
-                            ? child
-                            : const Center(child: CircularProgressIndicator(color: Colors.white)),
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(Icons.broken_image, color: Colors.white, size: 64),
-                        ),
-                      ),
-                    )
-                  : const Center(
-                      child: Icon(Icons.insert_drive_file, color: Colors.white, size: 64),
-                    ),
-            ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                onPressed: () => Navigator.of(context).pop(),
+    await Get.bottomSheet(
+      DraggableScrollableSheet(
+        initialChildSize: 0.8,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scroll) => Container(
+          decoration: BoxDecoration(
+            color: theme.getSurfaceColor(),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.getDividerColor(),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: ListView(
+                  controller: scroll,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Row(
+                      children: [
+                        ApUi.avatar(r.employee.avatar, r.employee.name, color, size: 48),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(r.employee.name,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.getTextPrimaryColor())),
+                              if (r.employee.no != null)
+                                Text('${tr('ap_employee_no')}: ${r.employee.no}',
+                                    style: TextStyle(
+                                        fontSize: 12, color: theme.getTextSecondaryColor())),
+                            ],
+                          ),
+                        ),
+                        ApUi.chip(ApUi.typeLabel(r.type), color),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ApUi.infoRow(tr('ap_request_no'), r.requestNumber),
+                    ApUi.infoRow(tr('ap_request_date'), ApUi.date(r.requestDate)),
+                    ..._typeInfo(r),
+                    if (r.remarks != null) ApUi.infoRow(tr('ap_remarks'), r.remarks),
+                    if (detail.attachments.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(tr('ap_attachments'),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600, color: theme.getTextPrimaryColor())),
+                      const SizedBox(height: 8),
+                      _attachments(detail.attachments),
+                    ],
+                    if (detail.steps.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(tr('ap_steps'),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600, color: theme.getTextPrimaryColor())),
+                      const SizedBox(height: 8),
+                      ...detail.steps.map(_stepTile),
+                    ],
+                  ],
+                ),
+              ),
+              if (stepId != null)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ApUi.actionButton(tr('ap_reject'), theme.getErrorColor(),
+                              () async {
+                            if (await _reject(r, stepId: stepId)) Get.back();
+                          }),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ApUi.actionButton(tr('ap_approve'), theme.getSuccessColor(),
+                              () async {
+                            if (await _approve(r, stepId: stepId)) Get.back();
+                          }, filled: true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
+      isScrollControlled: true,
     );
   }
 
-  Future<void> _downloadAndOpenPdf(String url, BuildContext context) async {
-    try {
-      final fileName = url.split('/').last.split('?').first;
-      final dir = await getApplicationDocumentsDirectory();
-      final filePath = '${dir.path}/$fileName';
-
-      if (!File(filePath).existsSync()) {
-        await Dio().download(url, filePath);
-      }
-      await OpenFile.open(filePath);
-    } catch (_) {}
-  }
-
-  String _formatDate(String dateTimeString) {
-    try {
-      final dateTime = DateTime.parse(dateTimeString);
-      return '${dateTime.day.toString().padLeft(2, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.year}';
-    } catch (e) {
-      return dateTimeString;
-    }
-  }
-
-  String _formatTimeDisplay(String timeString) {
-    try {
-      // Handle different time formats and remove seconds
-      timeString = timeString.trim();
-
-      // If it contains AM/PM (12-hour format)
-      if (timeString.contains('AM') || timeString.contains('PM')) {
-        final isAM = timeString.contains('AM');
-        final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)'), '');
-        final parts = timePart.split(':');
-
-        if (parts.length >= 2) {
-          final hour = int.parse(parts[0]);
-          final minute = int.parse(parts[1]);
-
-          // Format as HH:MM AM/PM without seconds
-          final formattedHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-          final formattedMinute = minute.toString().padLeft(2, '0');
-          return '$formattedHour:$formattedMinute ${isAM ? 'AM' : 'PM'}';
-        }
-      } else {
-        // 24-hour format or contains seconds
-        final parts = timeString.split(':');
-        if (parts.length >= 2) {
-          final hour = int.parse(parts[0]);
-          final minute = int.parse(parts[1]);
-
-          // Format as HH:MM in 24-hour format without seconds
-          final formattedHour = hour.toString().padLeft(2, '0');
-          final formattedMinute = minute.toString().padLeft(2, '0');
-          return '$formattedHour:$formattedMinute';
-        }
-      }
-
-      // If parsing fails, return original string
-      return timeString;
-    } catch (e) {
-      // Return original string if any error occurs
-      return timeString;
-    }
+  Widget _stepTile(MyApprovalStep s) {
+    final st = (s.status ?? '').toLowerCase();
+    final color = st.contains('reject')
+        ? theme.getErrorColor()
+        : st.contains('approv') && !st.contains('for')
+            ? theme.getSuccessColor()
+            : theme.getWarningColor();
+    final icon = st.contains('reject')
+        ? Icons.cancel
+        : st.contains('approv') && !st.contains('for')
+            ? Icons.check_circle
+            : Icons.hourglass_top;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  [s.level, s.approver].whereType<String>().join(' · '),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: theme.getTextPrimaryColor()),
+                ),
+                if (s.status != null)
+                  Text(s.status!, style: TextStyle(fontSize: 12, color: color)),
+                if (s.actedAt != null)
+                  Text(ApUi.dateTime(s.actedAt),
+                      style: TextStyle(fontSize: 12, color: theme.getTextSecondaryColor())),
+                if (s.comments != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(s.comments!,
+                        style: TextStyle(fontSize: 13, color: theme.getTextPrimaryColor())),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

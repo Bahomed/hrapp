@@ -233,6 +233,15 @@ class DocumentUploadScreen extends StatelessWidget {
             firstDate: DateTime.now(),
             themeService: themeService,
           )),
+          Obx(() => controller.expiryError.value.isEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsetsDirectional.only(top: 6, start: 4),
+                  child: Text(
+                    controller.expiryError.value,
+                    style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                  ),
+                )),
 
           SizedBox(height: ResponsiveUtils.responsiveHeight(context, 2.5)),
 

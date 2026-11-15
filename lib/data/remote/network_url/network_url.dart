@@ -5,7 +5,10 @@ final Preferences preferences = Preferences();
 // Keep this as Future<String>
 Future<String> get workspaceBaseUrl async => await preferences.getWorkspaceUrl();
 
-const liveurl = 'https://injazathr.co/api';
+//const liveurl = 'https://injazathr.co/api';
+// TEST BUILD ONLY: local hrsaas server with the Nov 2026 API. Revert before release.
+const liveurl = 'http://newhr.192.168.10.207.nip.io/api';
+
 const baseurl = liveurl;
 
 
@@ -94,3 +97,35 @@ const String taskCountUrl = '$tasksBaseUrl/count';
 const String createTaskUrl = tasksBaseUrl;
 
 String taskStatusUpdateUrl(int id) => '$tasksBaseUrl/$id/status';
+
+// ==================== MY PORTAL (/api/my/...) ====================
+// Same rules as the web "My Portal / My Approvals": signed-in user only.
+const String myBaseUrl = '/api/my';
+const String myHomeUrl = '$myBaseUrl/home';
+const String myAppSettingsUrl = '$myBaseUrl/app-settings';
+const String myContractUrl = '$myBaseUrl/contract';
+const String myLeavesUrl = '$myBaseUrl/leaves';
+const String myEarnedLeaveBalanceUrl = '$myBaseUrl/earned-leave-balance';
+const String myRequestsUrl = '$myBaseUrl/requests';
+const String myRequestOptionsUrl = '$myBaseUrl/requests/options';
+const String myRequestCountDaysUrl = '$myBaseUrl/requests/count-days';
+const String myPendingUrl = '$myBaseUrl/pending';
+const String myApprovalsUrl = '$myBaseUrl/approvals';
+const String myApprovalCountsUrl = '$myBaseUrl/approvals/counts';
+String myRequestUrl(int id) => '$myRequestsUrl/$id';
+String myApprovalUrl(int id) => '$myApprovalsUrl/$id';
+String myApprovalStepUrl(int stepId) => '$myApprovalsUrl/steps/$stepId';
+String myExecutionUrl(int id) => '$myBaseUrl/executions/$id';
+String myExecutionSettlementUrl(int id) => '$myBaseUrl/executions/$id/settlement';
+String myExecutionReturnUrl(int id) => '$myBaseUrl/executions/$id/return';
+String myFinalSettlementPrintUrl(int taskId) => '$myBaseUrl/final-settlements/$taskId/print';
+String myFinalSettlementPayUrl(int taskId) => '$myBaseUrl/final-settlements/$taskId/pay';
+String myFinalSettlementReturnUrl(int taskId) => '$myBaseUrl/final-settlements/$taskId/return';
+String myNotificationAttachmentUrl(int id) => '$myBaseUrl/notifications/attachments/$id';
+String myDocumentRenewUrl(int id) => '$myBaseUrl/documents/$id/renew';
+
+// ==================== ASSIGNED OVERTIME ====================
+const String assignedOvertimeUrl = '/api/assigned-overtime';
+String assignedOvertimeDetailUrl(int id) => '$assignedOvertimeUrl/$id';
+String assignedOvertimeAcceptUrl(int id) => '$assignedOvertimeUrl/$id/accept';
+String assignedOvertimeRejectUrl(int id) => '$assignedOvertimeUrl/$id/reject';

@@ -4,8 +4,8 @@ import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/request_controller.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/widgets/request_widgets.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/my_request_models.dart';
 import '../../services/theme_service.dart';
-import '../../utils/app_theme.dart';
 class RequestHomeScreen extends StatelessWidget {
   const RequestHomeScreen({super.key});
 
@@ -53,7 +53,6 @@ class RequestHomeScreen extends StatelessWidget {
           _buildPermitRequestsTab(context, controller),
           _buildLoanRequestsTab(context, controller),
           _buildLetterRequestsTab(context, controller),
-          _buildOvertimeRequestsTab(context, controller),
           _buildMissingPunchRequestsTab(context, controller),
         ],
       ),
@@ -184,244 +183,98 @@ class RequestHomeScreen extends StatelessWidget {
           Tab(text: '${tr('permission')} (${controller.permissionRequestCount})'),
           Tab(text: '${tr('loan')} (${controller.loanRequestCount})'),
           Tab(text: '${tr('letter')} (${controller.letterRequestCount})'),
-          Tab(text: '${tr('overtime')} (${controller.overtimeRequestCount})'),
           Tab(text: '${tr('missing_punch')} (${controller.missingPunchRequestCount})'),
         ],
       )),
     );
   }
 
-  Widget _buildLeaveRequestsTab(BuildContext context, RequestController controller) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshRequests,
-        color: Theme.of(context).primaryColor,
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.leaveRequests.isEmpty
-              ? 1
-              : controller.leaveRequests.length + (controller.hasMoreDataLeave.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (controller.leaveRequests.isEmpty) {
-              return Column(
-                children: [
-                  _buildEmptyState(
-                    context: context,
-                    icon: Icons.calendar_today,
-                    title: tr('no_leave_requests'),
-                    subtitle: tr('no_leave_requests_subtitle'),
-                    buttonText: tr('create_leave_request'),
-                    color: AppTheme.getActionColor('requests'),
-                    onTap: controller.createLeaveRequest,
-                  ),
-                  if (controller.hasMoreDataLeave.value)
-                    LoadMoreButton(
-                      onPressed: controller.loadMoreLeaveRequests,
-                      isLoading: controller.isLoadingMoreLeave.value,
-                      loadedYears: controller.loadedYearsLeave,
-                    ),
-                ],
-              );
-            }
-
-            if (index == controller.leaveRequests.length && controller.hasMoreDataLeave.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMoreLeaveRequests,
-                isLoading: controller.isLoadingMoreLeave.value,
-                loadedYears: controller.loadedYearsLeave,
-              );
-            }
-
-            final request = controller.leaveRequests[index];
-            return LeaveRequestCard(request: request);
-          },
-        ),
+  Widget _buildLeaveRequestsTab(BuildContext context, RequestController controller) =>
+      _buildMyRequestsTab(
+        context: context,
+        controller: controller,
+        list: controller.leaveRequests,
+        type: MyRequestType.leave,
+        icon: Icons.calendar_today,
+        title: tr('no_leave_requests'),
+        subtitle: tr('no_leave_requests_subtitle'),
+        buttonText: tr('create_leave_request'),
+        color: AppTheme.getActionColor('requests'),
+        onCreate: controller.createLeaveRequest,
       );
-    });
-  }
 
-  Widget _buildPermitRequestsTab(BuildContext context, RequestController controller) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshRequests,
-        color: Theme.of(context).primaryColor,
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.permissionRequests.isEmpty
-              ? 1
-              : controller.permissionRequests.length + (controller.hasMoreDataPermission.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (controller.permissionRequests.isEmpty) {
-              return Column(
-                children: [
-                  _buildEmptyState(
-                    context: context,
-                    icon: Icons.badge_outlined,
-                    title: tr('no_permit_requests'),
-                    subtitle: tr('no_permit_requests_subtitle'),
-                    buttonText: tr('create_permission_request'),
-                    color: AppTheme.getActionColor('profile'),
-                    onTap: controller.createPermissionRequest,
-                  ),
-                  if (controller.hasMoreDataPermission.value)
-                    LoadMoreButton(
-                      onPressed: controller.loadMorePermissionRequests,
-                      isLoading: controller.isLoadingMorePermission.value,
-                      loadedYears: controller.loadedYearsPermission,
-                    ),
-                ],
-              );
-            }
-
-            if (index == controller.permissionRequests.length && controller.hasMoreDataPermission.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMorePermissionRequests,
-                isLoading: controller.isLoadingMorePermission.value,
-                loadedYears: controller.loadedYearsPermission,
-              );
-            }
-
-            final request = controller.permissionRequests[index];
-            return PermissionRequestCard(request: request);
-          },
-        ),
+  Widget _buildPermitRequestsTab(BuildContext context, RequestController controller) =>
+      _buildMyRequestsTab(
+        context: context,
+        controller: controller,
+        list: controller.permissionRequests,
+        type: MyRequestType.permit,
+        icon: Icons.badge_outlined,
+        title: tr('no_permit_requests'),
+        subtitle: tr('no_permit_requests_subtitle'),
+        buttonText: tr('create_permission_request'),
+        color: AppTheme.getActionColor('profile'),
+        onCreate: controller.createPermissionRequest,
       );
-    });
-  }
 
-  Widget _buildLoanRequestsTab(BuildContext context, RequestController controller) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshRequests,
-        color: Theme.of(context).primaryColor,
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.loanRequests.isEmpty
-              ? 1
-              : controller.loanRequests.length + (controller.hasMoreDataLoan.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (controller.loanRequests.isEmpty) {
-              return Column(
-                children: [
-                  _buildEmptyState(
-                    context: context,
-                    icon: Icons.account_balance_wallet,
-                    title: tr('no_loan_requests'),
-                    subtitle: tr('no_loan_requests_subtitle'),
-                    buttonText: tr('create_loan_request'),
-                    color: AppTheme.successColor,
-                    onTap: controller.createLoanRequest,
-                  ),
-                  if (controller.hasMoreDataLoan.value)
-                    LoadMoreButton(
-                      onPressed: controller.loadMoreLoanRequests,
-                      isLoading: controller.isLoadingMoreLoan.value,
-                      loadedYears: controller.loadedYearsLoan,
-                    ),
-                ],
-              );
-            }
-
-            if (index == controller.loanRequests.length && controller.hasMoreDataLoan.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMoreLoanRequests,
-                isLoading: controller.isLoadingMoreLoan.value,
-                loadedYears: controller.loadedYearsLoan,
-              );
-            }
-
-            final request = controller.loanRequests[index];
-            return LoanRequestCard(request: request);
-          },
-        ),
+  Widget _buildLoanRequestsTab(BuildContext context, RequestController controller) =>
+      _buildMyRequestsTab(
+        context: context,
+        controller: controller,
+        list: controller.loanRequests,
+        type: MyRequestType.loan,
+        icon: Icons.account_balance_wallet,
+        title: tr('no_loan_requests'),
+        subtitle: tr('no_loan_requests_subtitle'),
+        buttonText: tr('create_loan_request'),
+        color: AppTheme.successColor,
+        onCreate: controller.createLoanRequest,
       );
-    });
-  }
 
-  Widget _buildLetterRequestsTab(BuildContext context, RequestController controller) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshRequests,
-        color: Theme.of(context).primaryColor,
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.letterRequests.isEmpty
-              ? 1
-              : controller.letterRequests.length + (controller.hasMoreDataLetter.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (controller.letterRequests.isEmpty) {
-              return Column(
-                children: [
-                  _buildEmptyState(
-                    context: context,
-                    icon: Icons.description,
-                    title: tr('no_letter_requests'),
-                    subtitle: tr('no_letter_requests_subtitle'),
-                    buttonText: tr('create_letter_request'),
-                    color: ThemeService.instance.getActionColor('documents'),
-                    onTap: controller.createLetterRequest,
-                  ),
-                  if (controller.hasMoreDataLetter.value)
-                    LoadMoreButton(
-                      onPressed: controller.loadMoreLetterRequests,
-                      isLoading: controller.isLoadingMoreLetter.value,
-                      loadedYears: controller.loadedYearsLetter,
-                    ),
-                ],
-              );
-            }
-
-            if (index == controller.letterRequests.length && controller.hasMoreDataLetter.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMoreLetterRequests,
-                isLoading: controller.isLoadingMoreLetter.value,
-                loadedYears: controller.loadedYearsLetter,
-              );
-            }
-
-            final request = controller.letterRequests[index];
-            return LetterRequestCard(request: request);
-          },
-        ),
+  Widget _buildLetterRequestsTab(BuildContext context, RequestController controller) =>
+      _buildMyRequestsTab(
+        context: context,
+        controller: controller,
+        list: controller.letterRequests,
+        type: MyRequestType.letter,
+        icon: Icons.description,
+        title: tr('no_letter_requests'),
+        subtitle: tr('no_letter_requests_subtitle'),
+        buttonText: tr('create_letter_request'),
+        color: ThemeService.instance.getActionColor('documents'),
+        onCreate: controller.createLetterRequest,
       );
-    });
-  }
 
-  Widget _buildOvertimeRequestsTab(BuildContext context, RequestController controller) {
+  Widget _buildMissingPunchRequestsTab(BuildContext context, RequestController controller) =>
+      _buildMyRequestsTab(
+        context: context,
+        controller: controller,
+        list: controller.missingPunchRequests,
+        type: MyRequestType.missingPunch,
+        icon: Icons.fingerprint,
+        title: tr('no_missing_punch_requests'),
+        subtitle: tr('no_missing_punch_requests_subtitle'),
+        buttonText: tr('create_missing_punch_request'),
+        color: const Color(0xFF6C5CE7),
+        onCreate: controller.createMissingPunchRequest,
+      );
+
+  /// One tab fed by GET my/requests. The create button in the empty state is
+  /// shown only when `types` (my/requests/options) allows [type].
+  Widget _buildMyRequestsTab({
+    required BuildContext context,
+    required RequestController controller,
+    required RxList<MyRequestItem> list,
+    required String type,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String buttonText,
+    required Color color,
+    required VoidCallback onCreate,
+  }) {
     return Obx(() {
-      if (controller.isLoading.value) {
+      if (controller.isLoading.value && list.isEmpty) {
         return Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
@@ -433,90 +286,22 @@ class RequestHomeScreen extends StatelessWidget {
         onRefresh: controller.refreshRequests,
         color: Theme.of(context).primaryColor,
         child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.overtimeRequests.isEmpty
-              ? 1
-              : controller.overtimeRequests.length + (controller.hasMoreDataOvertime.value ? 1 : 0),
+          itemCount: list.isEmpty ? 1 : list.length,
           itemBuilder: (context, index) {
-            if (controller.overtimeRequests.isEmpty) {
+            if (list.isEmpty) {
               return _buildEmptyState(
                 context: context,
-                icon: Icons.access_time_filled,
-                title: tr('no_overtime_requests'),
-                subtitle: tr('no_overtime_requests_subtitle'),
-                buttonText: tr('create_overtime_request'),
-                color: const Color(0xFFFF6B35),
-                onTap: controller.createOvertimeRequest,
+                icon: icon,
+                title: title,
+                subtitle: subtitle,
+                buttonText: buttonText,
+                color: color,
+                onTap: controller.isTypeAllowed(type) ? onCreate : null,
               );
             }
-
-            if (index == controller.overtimeRequests.length && controller.hasMoreDataOvertime.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMoreOvertimeRequests,
-                isLoading: controller.isLoadingMoreOvertime.value,
-                loadedYears: controller.loadedYearsOvertime,
-              );
-            }
-
-            final request = controller.overtimeRequests[index];
-            return OvertimeRequestCard(request: request);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget _buildMissingPunchRequestsTab(BuildContext context, RequestController controller) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshRequests,
-        color: Theme.of(context).primaryColor,
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: controller.missingPunchRequests.isEmpty
-              ? 1
-              : controller.missingPunchRequests.length + (controller.hasMoreDataMissingPunch.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (controller.missingPunchRequests.isEmpty) {
-              return Column(
-                children: [
-                  _buildEmptyState(
-                    context: context,
-                    icon: Icons.fingerprint,
-                    title: tr('no_missing_punch_requests'),
-                    subtitle: tr('no_missing_punch_requests_subtitle'),
-                    buttonText: tr('create_missing_punch_request'),
-                    color: const Color(0xFF6C5CE7),
-                    onTap: controller.createMissingPunchRequest,
-                  ),
-                  if (controller.hasMoreDataMissingPunch.value)
-                    LoadMoreButton(
-                      onPressed: controller.loadMoreMissingPunchRequests,
-                      isLoading: controller.isLoadingMoreMissingPunch.value,
-                      loadedYears: controller.loadedYearsMissingPunch,
-                    ),
-                ],
-              );
-            }
-
-            if (index == controller.missingPunchRequests.length && controller.hasMoreDataMissingPunch.value) {
-              return LoadMoreButton(
-                onPressed: controller.loadMoreMissingPunchRequests,
-                isLoading: controller.isLoadingMoreMissingPunch.value,
-                loadedYears: controller.loadedYearsMissingPunch,
-              );
-            }
-
-            final request = controller.missingPunchRequests[index];
-            return MissingPunchRequestCard(request: request);
+            return MyRequestCard(request: list[index]);
           },
         ),
       );

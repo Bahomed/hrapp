@@ -251,7 +251,7 @@ class PayrollController extends GetxController {
     } catch (e) {
       Get.snackbar(
         tr('error'),
-        'Failed to load employee payroll records: $e',
+        e.toString(),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
         colorText: Colors.white,
@@ -282,7 +282,7 @@ class PayrollController extends GetxController {
     } catch (e) {
       Get.snackbar(
         tr('error'),
-        'Failed to load employee payroll summary: $e',
+        e.toString(),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: _themeService.getErrorColor(),
         colorText: Colors.white,

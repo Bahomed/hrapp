@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../data/remote/response/document_response.dart';
 import '../../repository/documentrepository.dart';
+import '../../repository/my_repository.dart';
 import '../../utils/translation_helper.dart';
 
 void _showSnackbar(String message, {bool isError = true}) {
@@ -61,6 +62,7 @@ class DocumentUploadController extends GetxController {
   // Inline field validation errors
   final RxString documentTypeError = ''.obs;
   final RxString fileError = ''.obs;
+  final RxString expiryError = ''.obs;
 
   File? selectedFile;
   PlatformFile? platformFile;
@@ -225,9 +227,10 @@ class DocumentUploadController extends GetxController {
     return valid;
   }
 
-  /// Upload document
+  /// Upload document (or renew it, in renew mode)
   Future<void> uploadDocument() async {
     if (!_validateForm()) return;
+    if (isRenewMode) return _renew();
 
     try {
       isUploading.value = true;
@@ -258,6 +261,53 @@ class DocumentUploadController extends GetxController {
       }
     } catch (e) {
       _showSnackbar(tr('error_uploading_document'));
+    } finally {
+      isUploading.value = false;
+    }
+  }
+
+  /// `POST my/documents/{id}/renew` (multipart). The new expiry must be
+  /// after the old one; the server answers 422 with `errors` otherwise.
+  Future<void> _renew() async {
+    final doc = renewDocument!;
+    expiryError.value = '';
+
+    final oldExpiry = DateTime.tryParse(doc.expiryDate ?? '');
+    if (oldExpiry != null &&
+        (dateExpire.value == null || !dateExpire.value!.isAfter(oldExpiry))) {
+      expiryError.value = tr('new_expiry_after_old');
+      return;
+    }
+
+    try {
+      isUploading.value = true;
+      final r = await MyRepository().renewDocument(
+        doc.id,
+        {
+          'doc_id': selectedDocumentType.value!.value,
+          'doc_no': documentNoController.text.trim(),
+          'country_id': selectedCountry.value?.value,
+          'city_issued': selectedCity.value?.value,
+          'dateissued_g': dateIssued.value != null ? _formatDate(dateIssued.value!) : null,
+          'dateexpire_g': dateExpire.value != null ? _formatDate(dateExpire.value!) : null,
+        },
+        filePath: selectedFile?.path,
+      );
+
+      if (r.ok) {
+        _showSnackbar(r.message.isNotEmpty ? r.message : tr('document_renewed'),
+            isError: false);
+        _resetForm();
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.back(result: true);
+        return;
+      }
+
+      // Field errors under their fields; the rest in the snackbar.
+      expiryError.value = r.errorFor('dateexpire_g') ?? '';
+      fileError.value = r.errorFor('file') ?? '';
+      documentTypeError.value = r.errorFor('doc_id') ?? '';
+      _showSnackbar(r.allErrors(tr('error_uploading_document')));
     } finally {
       isUploading.value = false;
     }

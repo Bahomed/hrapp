@@ -12,6 +12,9 @@ import '../chat/chat_screen.dart';
 import '../chat/conversations_screen.dart';
 import '../tasks/tasks_screen.dart';
 
+import 'package:co.injazathr.injazathr/view/overtime/assigned_overtime_screen.dart';
+import 'package:co.injazathr.injazathr/view/schedule/manager_weekly_shift_schedule_screen.dart';
+
 class NotificationController extends GetxController {
   final NotificationRepository _repository = NotificationRepository();
   
@@ -80,6 +83,10 @@ class NotificationController extends GetxController {
         return 'schedule';
       case NotificationType.task:
         return 'task';
+      // Not offered as filter chips (the server has no such filter type).
+      case NotificationType.overtime:
+      case NotificationType.overtimeAnswer:
+        return 'general';
     }
   }
 
@@ -118,6 +125,20 @@ class NotificationController extends GetxController {
     if (requestType != null) {
       selectedFilter.value = NotificationType.requestStatus;
     }
+    loadNotifications();
+  }
+
+  /// A type / request-type / unread filter is hiding part of the list.
+  bool get hasActiveFilter =>
+      selectedFilter.value != null ||
+      selectedRequestType.value != null ||
+      showOnlyUnread.value;
+
+  /// Back to "All" with every filter off.
+  void clearFilters() {
+    selectedFilter.value = null;
+    selectedRequestType.value = null;
+    showOnlyUnread.value = false;
     loadNotifications();
   }
 
@@ -175,6 +196,14 @@ class NotificationController extends GetxController {
         break;
       case NotificationType.task:
         _navigateToTaskScreen(notification);
+        break;
+      // HR assigned me overtime → accept / reject it in My Overtime.
+      case NotificationType.overtime:
+        Get.to(() => const AssignedOvertimeScreen());
+        break;
+      // My assignment was accepted / rejected → the team's shift schedule.
+      case NotificationType.overtimeAnswer:
+        Get.to(() => const ManagerWeeklyShiftScheduleScreen());
         break;
       case NotificationType.general:
         _navigateToGeneralScreen(notification);

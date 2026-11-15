@@ -1,31 +1,147 @@
-// File: lib/view/create_request/create_leave_request_screen.dart
+// File: lib/view/request_leave/create_request/create_leave_request_screen.dart
+//
+// New leave request → POST my/requests (request_type = Leave).
+// Leave types and balances come from GET my/requests/options; the number of
+// days from GET my/requests/count-days whenever the type or dates change.
 
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:co.injazathr.injazathr/data/remote/response/base_response.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
+import '../my_request_models.dart';
+import '../request_controller.dart';
+import 'request_form_widgets.dart';
 
-import '../request_controller.dart'; // For RequestTypeOption
-
-class CreateLeaveRequestScreen extends StatelessWidget {
+class CreateLeaveRequestScreen extends StatefulWidget {
   const CreateLeaveRequestScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<RequestController>();
-    final themeService = ThemeService.instance;
-    final formKey = GlobalKey<FormState>();
+  State<CreateLeaveRequestScreen> createState() => _CreateLeaveRequestScreenState();
+}
 
-    final startDateController = TextEditingController();
-    final endDateController = TextEditingController();
-    final reasonController = TextEditingController();
-    final selectedLeaveType = Rx<RequestTypeOption?>(null);
-    final ticketChecked = false.obs;
-    final exitPermitChecked = false.obs;
-    final selectedFiles = <File>[].obs;
+class _CreateLeaveRequestScreenState extends State<CreateLeaveRequestScreen> {
+  final controller = Get.find<RequestController>();
+  final formKey = GlobalKey<FormState>();
+  final startDateController = TextEditingController();
+  final endDateController = TextEditingController();
+  final reasonController = TextEditingController();
+
+  MyLeaveType? leaveType;
+  DateTime? startDate;
+  DateTime? endDate;
+  bool ticket = false;
+  bool exitReentry = false;
+  File? attachment;
+
+  // count-days
+  num? days;
+  bool countingDays = false;
+  String? daysError;
+  int _countToken = 0;
+
+  Map<String, List<String>> fieldErrors = const {};
+
+  @override
+  void dispose() {
+    startDateController.dispose();
+    endDateController.dispose();
+    reasonController.dispose();
+    super.dispose();
+  }
+
+  String? _serverError(String field) {
+    final l = fieldErrors[field];
+    return (l == null || l.isEmpty) ? null : l.first;
+  }
+
+  /// GET my/requests/count-days when type + both dates are set.
+  Future<void> _countDays() async {
+    final t = leaveType;
+    final s = startDate;
+    final e = endDate;
+    setState(() {
+      days = null;
+      daysError = null;
+    });
+    if (t == null || s == null || e == null || e.isBefore(s)) return;
+
+    final token = ++_countToken;
+    setState(() => countingDays = true);
+    final r = await controller.countLeaveDays(leaveTypeId: t.id, from: s, to: e);
+    if (!mounted || token != _countToken) return;
+    setState(() {
+      countingDays = false;
+      if (r.ok) {
+        final v = r.json['days'];
+        days = v is num ? v : num.tryParse('$v');
+        if (days == null) daysError = tr('could_not_count_days');
+      } else {
+        daysError = r.displayMessage(tr('could_not_count_days'));
+      }
+    });
+  }
+
+  /// Message when the days are over the balance and sending must be blocked.
+  String? get _overLimitMessage {
+    final t = leaveType;
+    final d = days;
+    if (t == null || d == null || !t.blocks(d)) return null;
+    return trParams('leave_days_over_limit', {
+      'days': formatNumber(d),
+      'limit': formatNumber(t.limit),
+    });
+  }
+
+  /// Sending is blocked while counting and when over the allowed days.
+  bool get _blocked => countingDays || _overLimitMessage != null;
+
+  Future<void> _submit() async {
+    setState(() => fieldErrors = const {});
+    if (!formKey.currentState!.validate()) return;
+    final t = leaveType!;
+    if (t.requiresAttachment && attachment == null) {
+      Get.snackbar(tr('error'), tr('attachment_required_for_leave_type'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getErrorColor(),
+          colorText: Colors.white);
+      return;
+    }
+    if (countingDays) return;
+    final blockMsg = _overLimitMessage ?? daysError;
+    if (blockMsg != null || days == null) {
+      Get.snackbar(tr('error'), blockMsg ?? tr('could_not_count_days'),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getErrorColor(),
+          colorText: Colors.white);
+      return;
+    }
+
+    final r = await controller.submitMyRequest({
+      'request_type': MyRequestType.leave,
+      'request_type_id': t.id,
+      'start_date_g': toApiDate(startDate!),
+      'end_date_g': toApiDate(endDate!),
+      'no_of_days': days,
+      'remarks': reasonController.text.trim(),
+      if (t.requiresTicket) 'ticket': ticket ? 1 : 0,
+      if (t.requiresExitReentry) 'exit_reentry': exitReentry ? 1 : 0,
+    }, attachmentPath: attachment?.path);
+
+    if (!mounted) return;
+    if (r.ok) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => fieldErrors = r.fieldErrors);
+      formKey.currentState!.validate();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeService = ThemeService.instance;
+    final color = themeService.getActionColor('requests');
 
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
@@ -52,589 +168,207 @@ class CreateLeaveRequestScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: themeService.getActionColor('requests').withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: themeService.getActionColor('requests'),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(Icons.calendar_today, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr('leave_request'),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: themeService.getActionColor('requests'),
-                            ),
-                          ),
-                          Text(
-                            tr('leave_request_description'),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: themeService.getTextSecondaryColor(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              RequestFormHeader(
+                icon: Icons.calendar_today,
+                title: tr('leave_request'),
+                subtitle: tr('leave_request_description'),
+                color: color,
               ),
-
               const SizedBox(height: 24),
 
-              // Leave Type Dropdown with API data
-              _buildApiDropdownField(
-                label: tr('leave_type'),
-                selectedValue: selectedLeaveType,
-                options: controller.leaveTypes,
-                isLoading: controller.isLoadingTypes,
-                validator: (value) {
-                  if (value == null) {
-                    return tr('please_select_leave_type');
-                  }
-                  return null;
-                },
-                onChanged: (_) {
-                  ticketChecked.value = false;
-                  exitPermitChecked.value = false;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Start Date Field
-              _buildDateField(
-                label: tr('start_date'),
-                controller: startDateController,
-                context: context,
-                firstDate: controller.firstAllowedDate,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_select_start_date');
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // End Date Field
-              _buildDateField(
-                label: tr('end_date'),
-                controller: endDateController,
-                context: context,
-                firstDate: controller.firstAllowedDate,
-                lastDateBuilder: () {
-                  final leaveType = selectedLeaveType.value;
-                  if (leaveType?.notAllowedToIncreaseFromLeaveDuration == 'Y' &&
-                      (leaveType?.leaveDuration ?? 0) > 0 &&
-                      startDateController.text.isNotEmpty) {
-                    try {
-                      final startDate = DateTime.parse(startDateController.text);
-                      return startDate.add(Duration(days: leaveType!.leaveDuration - 1));
-                    } catch (_) {}
-                  }
-                  return null;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_select_end_date');
-                  }
-                  if (startDateController.text.isNotEmpty && value.isNotEmpty) {
-                    try {
-                      final startDate = DateTime.parse(startDateController.text);
-                      final endDate = DateTime.parse(value);
-                      if (endDate.isBefore(startDate)) {
-                        return tr('end_date_after_start_date');
-                      }
-                      final leaveType = selectedLeaveType.value;
-                      if (leaveType?.notAllowedToIncreaseFromLeaveDuration == 'Y' &&
-                          (leaveType?.leaveDuration ?? 0) > 0) {
-                        final days = endDate.difference(startDate).inDays + 1;
-                        if (days > leaveType!.leaveDuration) {
-                          return '${tr('max_leave_duration')} ${leaveType.leaveDuration} ${tr('days')}';
-                        }
-                      }
-                    } catch (e) {
-                      return tr('invalid_date_format');
-                    }
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Reason Field
-              _buildTextAreaField(
-                label: tr('reason'),
-                controller: reasonController,
-              ),
-
-              // Ticket & Exit Permit Checkboxes (only shown when ticket_exit_permit == 'Y')
+              // Leave type (label shows the balance)
               Obx(() {
-                if (selectedLeaveType.value?.ticketExitPermit != 'Y') {
-                  return const SizedBox.shrink();
-                }
-                return Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: themeService.getCardColor(),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Obx(() => CheckboxListTile(
-                            value: ticketChecked.value,
-                            onChanged: (val) => ticketChecked.value = val ?? false,
-                            title: Text(
-                              tr('ticket'),
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: themeService.getTextPrimaryColor(),
-                              ),
-                            ),
-                            activeColor: themeService.getActionColor('requests'),
-                            checkColor: Colors.white,
-                            contentPadding: EdgeInsets.zero,
-                            controlAffinity: ListTileControlAffinity.leading,
-                          )),
-                          Obx(() => CheckboxListTile(
-                            value: exitPermitChecked.value,
-                            onChanged: (val) => exitPermitChecked.value = val ?? false,
-                            title: Text(
-                              tr('exit_permit'),
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: themeService.getTextPrimaryColor(),
-                              ),
-                            ),
-                            activeColor: themeService.getActionColor('requests'),
-                            checkColor: Colors.white,
-                            contentPadding: EdgeInsets.zero,
-                            controlAffinity: ListTileControlAffinity.leading,
-                          )),
-                        ],
-                      ),
-                    ),
-                  ],
+                final types = controller.options.value?.leaveTypes ?? const <MyLeaveType>[];
+                return RequestDropdownField<MyLeaveType>(
+                  label: tr('leave_type'),
+                  value: leaveType == null
+                      ? null
+                      : types.firstWhereOrNull((t) => t.id == leaveType!.id),
+                  items: types,
+                  itemLabel: controller.leaveTypeLabel,
+                  isLoading: controller.isLoadingTypes.value,
+                  color: color,
+                  validator: (v) =>
+                      v == null ? tr('please_select_leave_type') : _serverError('request_type_id'),
+                  onChanged: (v) {
+                    setState(() {
+                      leaveType = v;
+                      ticket = false;
+                      exitReentry = false;
+                    });
+                    _countDays();
+                  },
                 );
               }),
 
               const SizedBox(height: 20),
 
-              // Attachments
-              Obx(() => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr('attachments'),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeService.getTextPrimaryColor(),
+              RequestDateField(
+                label: tr('start_date'),
+                controller: startDateController,
+                color: color,
+                firstDate: controller.firstAllowedDate,
+                validator: (v) => (v == null || v.isEmpty)
+                    ? tr('please_select_start_date')
+                    : _serverError('start_date_g'),
+                onPicked: (d) {
+                  startDate = d;
+                  if (endDate != null && endDate!.isBefore(d)) {
+                    endDate = null;
+                    endDateController.clear();
+                  }
+                  _countDays();
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              RequestDateField(
+                label: tr('end_date'),
+                controller: endDateController,
+                color: color,
+                firstDate: startDate ?? controller.firstAllowedDate,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return tr('please_select_end_date');
+                  if (startDate != null && endDate != null && endDate!.isBefore(startDate!)) {
+                    return tr('end_date_after_start_date');
+                  }
+                  return _serverError('end_date_g');
+                },
+                onPicked: (d) {
+                  endDate = d;
+                  _countDays();
+                },
+              ),
+
+              const SizedBox(height: 16),
+              _buildDaysInfo(themeService, color),
+              const SizedBox(height: 20),
+
+              RequestTextAreaField(
+                label: tr('reason'),
+                controller: reasonController,
+                color: color,
+                validator: (_) => _serverError('remarks'),
+              ),
+
+              if (leaveType != null &&
+                  (leaveType!.requiresTicket || leaveType!.requiresExitReentry)) ...[
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: themeService.getCardColor(),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: themeService.getTextSecondaryColor().withValues(alpha: 0.3),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Selected files list
-                  if (selectedFiles.isNotEmpty) ...[
-                    ...selectedFiles.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final file = entry.value;
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: themeService.getCardColor(),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: themeService.getActionColor('requests').withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.attach_file, size: 18, color: themeService.getActionColor('requests')),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                file.path.split('/').last,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: themeService.getTextPrimaryColor(),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close, size: 18, color: themeService.getErrorColor()),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () => selectedFiles.removeAt(index),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-                  ],
-                  // Pick file button
-                  if (selectedFiles.length < 3)
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      final remaining = 3 - selectedFiles.length;
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-                        allowMultiple: remaining > 1,
-                      );
-                      if (result != null) {
-                        final files = result.files
-                            .where((f) => f.path != null && (f.size ?? 0) <= 5 * 1024 * 1024)
-                            .map((f) => File(f.path!))
-                            .take(remaining)
-                            .toList();
-                        final rejected = result.files.where((f) => f.path != null && (f.size ?? 0) > 5 * 1024 * 1024).length;
-                        if (rejected > 0) {
-                          Get.snackbar(
-                            tr('error'),
-                            '$rejected ${tr('file_size_exceeded')}',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: ThemeService.instance.getErrorColor(),
-                            colorText: Colors.white,
-                          );
-                        }
-                        selectedFiles.addAll(files);
-                      }
-                    },
-                    icon: Icon(Icons.upload_file, color: themeService.getActionColor('requests')),
-                    label: Text(
-                      tr('upload_attachment'),
-                      style: TextStyle(color: themeService.getActionColor('requests')),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: themeService.getActionColor('requests')),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
+                  child: Column(
+                    children: [
+                      if (leaveType!.requiresTicket)
+                        _checkbox(tr('ticket'), ticket, (v) => setState(() => ticket = v), color),
+                      if (leaveType!.requiresExitReentry)
+                        _checkbox(tr('exit_reentry'), exitReentry,
+                            (v) => setState(() => exitReentry = v), color),
+                    ],
                   ),
-                ],
-              )),
+                ),
+              ],
+
+              const SizedBox(height: 20),
+
+              RequestAttachmentPicker(
+                file: attachment,
+                required: leaveType?.requiresAttachment ?? false,
+                color: color,
+                errorText: _serverError('attachment'),
+                onChanged: (f) => setState(() => attachment = f),
+              ),
 
               const SizedBox(height: 32),
 
-              // Submit Button
-              Obx(() => SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () async {
-                    if (formKey.currentState!.validate() && selectedLeaveType.value != null) {
-                      final success = await controller.createLeaveRequestWithData(
-                        startDate: startDateController.text,
-                        endDate: endDateController.text,
-                        leaveTypeId: selectedLeaveType.value!.id,
-                        reason: reasonController.text,
-                        ticket: ticketChecked.value,
-                        exitPermit: exitPermitChecked.value,
-                        attachments: selectedFiles.isEmpty ? null : selectedFiles.toList(),
-                      );
-                      
-                      // Only navigate if request was successful
-                      if (success) {
-                        // Small delay to show success message then navigate back
-                        await Future.delayed(const Duration(milliseconds: 1500));
-                        
-                        // Try multiple navigation methods
-                        if (context.mounted) {
-                          if (Navigator.of(context).canPop()) {
-                            Navigator.of(context).pop();
-                          } else {
-                            // Fallback: Use Get navigation
-                            Get.back();
-                          }
-                        }
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: themeService.getActionColor('requests'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: controller.isLoading.value
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    tr('submit_leave_request'),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              )),
+              Obx(() => RequestSubmitButton(
+                    label: tr('submit_leave_request'),
+                    color: color,
+                    loading: controller.isSubmitting.value,
+                    onPressed: _blocked ? null : _submit,
+                  )),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-// Helper widget for API-driven dropdowns
-Widget _buildApiDropdownField({
-  required String label,
-  required Rx<RequestTypeOption?> selectedValue,
-  required RxList<RequestTypeOption> options,
-  required RxBool isLoading,
-  String? Function(RequestTypeOption?)? validator,
-  void Function(RequestTypeOption?)? onChanged,
-}) {
-  final themeService = ThemeService.instance;
-  
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
+  Widget _checkbox(String title, bool value, ValueChanged<bool> onChanged, Color color) {
+    final themeService = ThemeService.instance;
+    return CheckboxListTile(
+      value: value,
+      onChanged: (v) => onChanged(v ?? false),
+      title: Text(
+        title,
         style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
           color: themeService.getTextPrimaryColor(),
         ),
       ),
-      const SizedBox(height: 8),
-      Obx(() => DropdownButtonFormField<RequestTypeOption>(
-        value: selectedValue.value,
-        validator: validator,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
+      activeColor: color,
+      checkColor: Colors.white,
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+    );
+  }
+
+  /// "3 days" (+ balance), a spinner while counting, or the block message.
+  Widget _buildDaysInfo(ThemeService themeService, Color color) {
+    if (countingDays) {
+      return Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getActionColor('requests')),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getErrorColor()),
-          ),
-          contentPadding: const EdgeInsets.all(16),
-          suffixIcon: isLoading.value
-              ? SizedBox(
-            width: 20,
-            height: 20,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(themeService.getActionColor('requests')),
-              ),
-            ),
-          )
-              : null,
-        ),
-        hint: Text(
-          trParams('select_field', {'field': label}),
-          style: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        dropdownColor: themeService.getCardColor(),
-        items: options.map((RequestTypeOption option) {
-          return DropdownMenuItem<RequestTypeOption>(
-            value: option,
+          const SizedBox(width: 10),
+          Text(tr('counting_days'),
+              style: TextStyle(color: themeService.getTextSecondaryColor())),
+        ],
+      );
+    }
+    final over = _overLimitMessage;
+    final err = daysError;
+    if (days == null && err == null) return const SizedBox.shrink();
+
+    final isError = over != null || err != null;
+    final c = isError ? themeService.getErrorColor() : color;
+    final text = err ??
+        over ??
+        trParams('leave_days_count', {'days': formatNumber(days)}) +
+            (leaveType?.available != null
+                ? ' • ${trParams('days_available', {'days': formatNumber(leaveType!.available)})}'
+                : '');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: c.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: c.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(isError ? Icons.error_outline : Icons.event_available, color: c, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
             child: Text(
-              option.name,
-              style: TextStyle(color: themeService.getTextPrimaryColor()),
+              text,
+              style: TextStyle(color: c, fontSize: 14, fontWeight: FontWeight.w600),
             ),
-          );
-        }).toList(),
-        onChanged: isLoading.value
-            ? null
-            : (RequestTypeOption? value) {
-          selectedValue.value = value;
-          onChanged?.call(value);
-        },
-      )),
-    ],
-  );
-}
-
-// Helper widget for text area fields
-Widget _buildTextAreaField({
-  required String label,
-  required TextEditingController controller,
-  String? Function(String?)? validator,
-}) {
-  final themeService = ThemeService.instance;
-  
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: themeService.getTextPrimaryColor(),
-        ),
+          ),
+        ],
       ),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: controller,
-        validator: validator,
-        maxLines: 4,
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getActionColor('requests')),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getErrorColor()),
-          ),
-          contentPadding: const EdgeInsets.all(16),
-          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-      ),
-    ],
-  );
-}
-
-// Helper widget for date fields
-Widget _buildDateField({
-  required String label,
-  required TextEditingController controller,
-  required BuildContext context,
-  String? Function(String?)? validator,
-  DateTime? Function()? lastDateBuilder,
-  DateTime? firstDate,
-}) {
-  final themeService = ThemeService.instance;
-  
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: themeService.getTextPrimaryColor(),
-        ),
-      ),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: controller,
-        validator: validator,
-        readOnly: true,
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getActionColor('requests')),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: themeService.getErrorColor()),
-          ),
-          contentPadding: const EdgeInsets.all(16),
-          suffixIcon: Icon(
-            Icons.calendar_today,
-            color: themeService.getTextSecondaryColor(),
-          ),
-          hintText: trParams('select_field', {'field': label}),
-          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: firstDate ?? DateTime.now(),
-            lastDate: lastDateBuilder?.call() ?? DateTime.now().add(const Duration(days: 365)),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: themeService.isDarkMode 
-                    ? ColorScheme.dark(
-                        primary: themeService.getActionColor('requests'),
-                        onPrimary: Colors.white,
-                        surface: themeService.getCardColor(),
-                        onSurface: themeService.getTextPrimaryColor(),
-                      )
-                    : ColorScheme.light(
-                        primary: themeService.getActionColor('requests'),
-                        onPrimary: Colors.white,
-                        surface: themeService.getCardColor(),
-                        onSurface: themeService.getTextPrimaryColor(),
-                      ),
-                ),
-                child: child!,
-              );
-            },
-          );
-          if (picked != null) {
-            controller.text = picked.toIso8601String().split('T')[0];
-          }
-        },
-      ),
-    ],
-  );
+    );
+  }
 }

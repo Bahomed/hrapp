@@ -4,6 +4,8 @@ import 'package:co.injazathr.injazathr/view/scan/AutoRecognitionScreen.dart';
 import 'package:co.injazathr.injazathr/view/scan/AutoRegisterScreen.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
+import 'package:co.injazathr.injazathr/view/home_screen/app_settings_controller.dart';
+
 class ClockingController extends GetxController {
   final Preferences preferences = Preferences();
 
@@ -89,6 +91,10 @@ class ClockingController extends GetxController {
   }) async {
     if (!canClockIn()) {
       return false; // No embedding registered
+    }
+    // Settings › Mobile › Allow Mobile Clock-In is off for this branch.
+    if (!AppSettingsController.to.allowClockIn.value) {
+      return {'success': false, 'error': true, 'message': tr('clock_in_not_allowed')};
     }
 
     final result = await Get.to(

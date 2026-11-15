@@ -22,13 +22,21 @@ class SaveEmployeeAttendanceResponse {
   });
 
   factory SaveEmployeeAttendanceResponse.fromJson(Map<String, dynamic> json) => SaveEmployeeAttendanceResponse(
-    error: json["error"] ?? false,
-    message: json["message"] ?? "",
-    validationMessage: json["validation_message"] ?? "",
+    error: json["error"] == true || json["success"] == false || json["status"] == false,
+    message: json["message"]?.toString() ?? "",
+    validationMessage: json["validation_message"]?.toString() ?? "",
     data: json["data"] != null && json["data"] is Map<String, dynamic> && (json["data"] as Map<String, dynamic>).isNotEmpty 
         ? Data.fromJson(json["data"]) 
         : null,
   );
+
+  /// A punch counts as recorded only when `error` is false AND there is no
+  /// `validation_message` (e.g. wrong location now answers `error: true`).
+  bool get isSuccess => !error && validationMessage.trim().isEmpty;
+
+  /// What to show in red when [isSuccess] is false.
+  String get errorText =>
+      validationMessage.trim().isNotEmpty ? validationMessage : message;
 
   Map<String, dynamic> toJson() => {
     "error": error,

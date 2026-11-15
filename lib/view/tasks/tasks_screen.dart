@@ -28,10 +28,13 @@ class TasksScreen extends StatelessWidget {
       TaskBoardType.all: tr('all_tasks'),
       TaskBoardType.team: tr('team_tasks'),
     };
-    final initialIndex = TasksController.boards.indexOf(initialBoard);
+    return Obx(() {
+    final boards = c.availableBoards.toList();
+    final initialIndex = boards.indexOf(initialBoard);
 
     return DefaultTabController(
-      length: TasksController.boards.length,
+      key: ValueKey(boards.length),
+      length: boards.length,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
       child: Scaffold(
         backgroundColor: theme.getPageBackgroundColor(),
@@ -54,7 +57,7 @@ class TasksScreen extends StatelessWidget {
               builder: (context) => IconButton(
                 icon: Icon(Icons.refresh, color: theme.getTextPrimaryColor()),
                 onPressed: () => c.refreshBoard(
-                  TasksController.boards[DefaultTabController.of(context).index],
+                  boards[DefaultTabController.of(context).index],
                 ),
               ),
             ),
@@ -67,7 +70,7 @@ class TasksScreen extends StatelessWidget {
             labelStyle:
                 const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
             tabs: [
-              for (final b in TasksController.boards) Tab(text: tabs[b]),
+              for (final b in boards) Tab(text: tabs[b]),
             ],
           ),
         ),
@@ -81,10 +84,11 @@ class TasksScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            for (final b in TasksController.boards) TaskBoardView(boardType: b),
+            for (final b in boards) TaskBoardView(boardType: b),
           ],
         ),
       ),
     );
+    });
   }
 }

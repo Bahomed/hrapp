@@ -10,6 +10,32 @@ enum NotificationType {
   attendance,
   schedule,
   task,
+  /// Overtime HR assigned to me (session_overtime_assigned) → My Overtime.
+  overtime,
+  /// My assigned overtime was accepted / rejected (to the assigner).
+  overtimeAnswer,
+}
+
+/// A file of a broadcast sent to me: `{ id, name, size, mime, ext, url }`.
+/// Opened with GET my/notifications/attachments/{id}.
+class NotificationFile {
+  final int id;
+  final String name;
+  final int size;
+  final String? mime;
+  final String? ext;
+
+  NotificationFile({required this.id, required this.name, this.size = 0, this.mime, this.ext});
+
+  factory NotificationFile.fromJson(Map<String, dynamic> j) => NotificationFile(
+        id: j['id'] is int ? j['id'] : int.tryParse('${j['id']}') ?? 0,
+        name: (j['name'] ?? 'file').toString(),
+        size: j['size'] is int ? j['size'] : int.tryParse('${j['size']}') ?? 0,
+        mime: j['mime']?.toString(),
+        ext: j['ext']?.toString(),
+      );
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'size': size, 'mime': mime, 'ext': ext};
 }
 
 class AppNotification {
@@ -22,6 +48,7 @@ class AppNotification {
   final bool isRead;
   final String? imageUrl;
   final String? actionUrl;
+  final List<NotificationFile> attachments;
 
   AppNotification({
     required this.id,
@@ -33,6 +60,7 @@ class AppNotification {
     this.isRead = false,
     this.imageUrl,
     this.actionUrl,
+    this.attachments = const [],
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
@@ -46,6 +74,13 @@ class AppNotification {
       isRead: json['is_read'] ?? false,
       imageUrl: json['image_url'],
       actionUrl: json['action_url'],
+      attachments: (json['attachments'] is List)
+          ? (json['attachments'] as List)
+              .whereType<Map>()
+              .map((e) => NotificationFile.fromJson(Map<String, dynamic>.from(e)))
+              .where((f) => f.id > 0)
+              .toList()
+          : const [],
     );
   }
 
@@ -60,6 +95,7 @@ class AppNotification {
       'is_read': isRead,
       'image_url': imageUrl,
       'action_url': actionUrl,
+      'attachments': attachments.map((f) => f.toJson()).toList(),
     };
   }
 
@@ -84,11 +120,19 @@ class AppNotification {
       isRead: isRead ?? this.isRead,
       imageUrl: imageUrl ?? this.imageUrl,
       actionUrl: actionUrl ?? this.actionUrl,
+      attachments: attachments,
     );
   }
 
   static NotificationType _parseNotificationType(String typeString) {
     switch (typeString.toLowerCase()) {
+      case 'session_overtime_assigned':
+      case 'overtime_assigned':
+      case 'assigned_overtime':
+        return NotificationType.overtime;
+      case 'session_overtime_accepted':
+      case 'session_overtime_rejected':
+        return NotificationType.overtimeAnswer;
       case 'general':
         return NotificationType.general;
       case 'payroll':
@@ -138,6 +182,9 @@ class AppNotification {
         return tr('work_schedule');
       case NotificationType.task:
         return tr('tasks');
+      case NotificationType.overtime:
+      case NotificationType.overtimeAnswer:
+        return tr('my_overtime');
     }
   }
 
@@ -159,6 +206,9 @@ class AppNotification {
         return '📅';
       case NotificationType.task:
         return '📌';
+      case NotificationType.overtime:
+      case NotificationType.overtimeAnswer:
+        return '⏱️';
     }
   }
 }

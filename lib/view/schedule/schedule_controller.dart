@@ -38,7 +38,7 @@ class ScheduleController extends GetxController {
         _showErrorSnackbar(tr('no_schedules_available'));
       }
     } catch (e) {
-      _showErrorSnackbar('${tr('error_loading_schedules')}: $e');
+      _showErrorSnackbar(e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -58,7 +58,7 @@ class ScheduleController extends GetxController {
         _showErrorSnackbar(tr('no_schedules_available'));
       }
     } catch (e) {
-      _showErrorSnackbar('${tr('error_loading_schedules')}: $e');
+      _showErrorSnackbar(e.toString());
     } finally {
       isLoading.value = false;
     }

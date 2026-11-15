@@ -4,6 +4,7 @@ import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/widgets/request_widgets.dart';
 import 'package:co.injazathr.injazathr/view/request_leave/loan_details_screen.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/my_request_models.dart';
 import 'request_detail_controller.dart';
 
 class RequestDetailScreen extends StatelessWidget {
@@ -133,6 +134,10 @@ class RequestDetailScreen extends StatelessWidget {
                 ],
                 const SizedBox(height: 16),
                 _buildDatesCard(controller, theme),
+                if (controller.steps.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _buildStepsCard(controller, theme),
+                ],
                 if (controller.rejectedReason?.isNotEmpty == true) ...[
                   const SizedBox(height: 16),
                   _buildRejectionReasonCard(controller, theme),
@@ -140,6 +145,32 @@ class RequestDetailScreen extends StatelessWidget {
                 if (controller.attachments.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   _buildAttachmentsCard(controller, theme),
+                ],
+                if (controller.canDelete) ...[
+                  const SizedBox(height: 16),
+                  Obx(() => SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: controller.isDeleting.value ? null : controller.deleteRequest,
+                          icon: controller.isDeleting.value
+                              ? SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: theme.getErrorColor()),
+                                )
+                              : const Icon(Icons.delete_outline),
+                          label: Text(tr('delete_request')),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: theme.getErrorColor(),
+                            side: BorderSide(color: theme.getErrorColor()),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      )),
                 ],
                 const SizedBox(height: 32),
               ],
@@ -243,6 +274,10 @@ class RequestDetailScreen extends StatelessWidget {
   }
 
   Widget _buildTypeSpecificDetails(RequestDetailController controller, ThemeService theme) {
+    // Only my/requests/{id} answered: show its summary.
+    if (controller.detail.value == null) {
+      return _buildGenericDetails(controller, theme);
+    }
     switch (controller.detectedType.value) {
       case RequestDetailType.leave:
         return _buildLeaveDetails(controller, theme);
@@ -259,6 +294,109 @@ class RequestDetailScreen extends StatelessWidget {
       case RequestDetailType.unknown:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildGenericDetails(RequestDetailController controller, ThemeService theme) {
+    final r = controller.myRequest.value;
+    if (r == null) return const SizedBox.shrink();
+    final start = displayFromApi(r.startDate);
+    final end = displayFromApi(r.endDate);
+    return _buildInfoCard(theme, tr('request_details'), Icons.assignment_outlined, [
+      _infoRow(theme, tr('type'), r.title),
+      if (start.isNotEmpty) _infoRow(theme, tr('start_date'), start),
+      if (end.isNotEmpty) _infoRow(theme, tr('end_date'), end),
+      if (r.noOfDays != null) _infoRow(theme, tr('days'), formatNumber(r.noOfDays)),
+      if (r.amountRequired != null) _infoRow(theme, tr('amount'), formatNumber(r.amountRequired)),
+      if (r.remarks?.isNotEmpty == true) _infoRow(theme, tr('reason'), r.remarks!),
+    ]);
+  }
+
+  /// Approval steps from GET my/requests/{id}: who, when, comments.
+  Widget _buildStepsCard(RequestDetailController controller, ThemeService theme) {
+    final steps = controller.steps;
+    return _buildInfoCard(
+      theme,
+      tr('approval_steps'),
+      Icons.how_to_reg_outlined,
+      [
+        for (var i = 0; i < steps.length; i++)
+          _buildStepRow(theme, steps[i], isLast: i == steps.length - 1),
+      ],
+    );
+  }
+
+  Widget _buildStepRow(ThemeService theme, MyApprovalStep step, {required bool isLast}) {
+    final status = (step.status ?? '').toLowerCase();
+    final Color c = status.startsWith('approv')
+        ? theme.getSuccessColor()
+        : status.startsWith('reject')
+            ? theme.getErrorColor()
+            : theme.getWarningColor();
+    final title = [
+      if (step.level != null) '${tr('level')} ${step.level}',
+      if (step.approver != null) step.approver!,
+    ].join(' • ');
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                margin: const EdgeInsets.only(top: 3),
+                decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(width: 2, color: theme.getDividerColor()),
+                ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title.isEmpty ? '—' : title,
+                          style: TextStyle(
+                            color: theme.getTextPrimaryColor(),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (step.status != null) RequestStatusChip(statusString: step.status!),
+                    ],
+                  ),
+                  if (step.date != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(step.date!),
+                      style: TextStyle(color: theme.getTextSecondaryColor(), fontSize: 12),
+                    ),
+                  ],
+                  if (step.comments != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      step.comments!,
+                      style: TextStyle(color: theme.getTextPrimaryColor(), fontSize: 13),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLeaveDetails(RequestDetailController controller, ThemeService theme) {
@@ -346,7 +484,7 @@ class RequestDetailScreen extends StatelessWidget {
       final date = DateTime.parse(dateString).toLocal();
       final day = date.day.toString().padLeft(2, '0');
       final month = date.month.toString().padLeft(2, '0');
-      return '$day/$month/${date.year}';
+      return '$day-$month-${date.year}';
     } catch (_) {
       return dateString;
     }

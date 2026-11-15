@@ -1,25 +1,78 @@
+// New missing punch request → POST my/requests (request_type = MissingPunch):
+// start_date_g (the day), permit_from (in time), permit_to (out time), reason.
+
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
+import '../my_request_models.dart';
 import '../request_controller.dart';
+import 'request_form_widgets.dart';
 
-class CreateMissingPunchRequestScreen extends StatelessWidget {
+class CreateMissingPunchRequestScreen extends StatefulWidget {
   const CreateMissingPunchRequestScreen({super.key});
 
+  @override
+  State<CreateMissingPunchRequestScreen> createState() =>
+      _CreateMissingPunchRequestScreenState();
+}
+
+class _CreateMissingPunchRequestScreenState extends State<CreateMissingPunchRequestScreen> {
   static const _color = Color(0xFF6C5CE7);
+
+  final controller = Get.find<RequestController>();
+  final formKey = GlobalKey<FormState>();
+  final dateController = TextEditingController();
+  final inController = TextEditingController();
+  final outController = TextEditingController();
+  final reasonController = TextEditingController();
+  DateTime? date;
+  File? attachment;
+  Map<String, List<String>> fieldErrors = const {};
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    inController.dispose();
+    outController.dispose();
+    reasonController.dispose();
+    super.dispose();
+  }
+
+  String? _err(String field) => fieldErrors[field]?.firstOrNull;
+
+  int? _minutes(String hhmm) {
+    final p = hhmm.split(':');
+    if (p.length != 2) return null;
+    final h = int.tryParse(p[0]);
+    final m = int.tryParse(p[1]);
+    return (h == null || m == null) ? null : h * 60 + m;
+  }
+
+  Future<void> _submit() async {
+    setState(() => fieldErrors = const {});
+    if (!formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
+    final r = await controller.submitMyRequest({
+      'request_type': MyRequestType.missingPunch,
+      'start_date_g': toApiDate(date!),
+      if (inController.text.isNotEmpty) 'permit_from': inController.text,
+      if (outController.text.isNotEmpty) 'permit_to': outController.text,
+      'reason': reasonController.text.trim(),
+    }, attachmentPath: attachment?.path);
+    if (!mounted) return;
+    if (r.ok) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => fieldErrors = r.fieldErrors);
+      formKey.currentState!.validate();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<RequestController>();
     final themeService = ThemeService.instance;
-    final formKey = GlobalKey<FormState>();
-
-    final dateController = TextEditingController();
-    final checkInController = TextEditingController();
-    final checkOutController = TextEditingController();
-    final reasonController = TextEditingController();
 
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
@@ -46,312 +99,73 @@ class CreateMissingPunchRequestScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: _color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: _color,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.fingerprint, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr('missing_punch_request'),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: _color,
-                            ),
-                          ),
-                          Text(
-                            tr('missing_punch_request_description'),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: themeService.getTextSecondaryColor(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              RequestFormHeader(
+                icon: Icons.fingerprint,
+                title: tr('missing_punch_request'),
+                subtitle: tr('missing_punch_request_description'),
+                color: _color,
               ),
-
               const SizedBox(height: 24),
-
-              _buildDateField(
+              RequestDateField(
                 label: tr('date'),
                 controller: dateController,
-                context: context,
+                color: _color,
                 firstDate: controller.firstAllowedDate,
-                validator: (v) => (v == null || v.isEmpty) ? tr('please_select_date') : null,
+                lastDate: DateTime.now(),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? tr('please_select_date') : _err('start_date_g'),
+                onPicked: (d) => date = d,
               ),
-
               const SizedBox(height: 20),
-
-              _buildTimeField(
+              RequestTimeField(
                 label: tr('check_in'),
-                controller: checkInController,
-                context: context,
-                accentColor: _color,
-              ),
-
-              const SizedBox(height: 20),
-
-              _buildTimeField(
-                label: tr('check_out'),
-                controller: checkOutController,
-                context: context,
-                accentColor: _color,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return null;
-                  if (checkInController.text.isNotEmpty) {
-                    final inTime = _parseTimeOfDay(checkInController.text);
-                    final outTime = _parseTimeOfDay(value);
-                    if (inTime != null && outTime != null) {
-                      if (outTime.hour * 60 + outTime.minute <= inTime.hour * 60 + inTime.minute) {
-                        return tr('to_time_after_from_time');
-                      }
-                    }
+                controller: inController,
+                color: _color,
+                validator: (v) {
+                  if ((v == null || v.isEmpty) && outController.text.isEmpty) {
+                    return tr('enter_check_in_or_out');
                   }
-                  return null;
+                  return _err('permit_from');
                 },
               ),
-
               const SizedBox(height: 20),
-
-              _buildTextAreaField(
+              RequestTimeField(
+                label: tr('check_out'),
+                controller: outController,
+                color: _color,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return _err('permit_to');
+                  final i = _minutes(inController.text);
+                  final o = _minutes(v);
+                  if (i != null && o != null && o <= i) return tr('to_time_after_from_time');
+                  return _err('permit_to');
+                },
+              ),
+              const SizedBox(height: 20),
+              RequestTextAreaField(
                 label: tr('reason'),
                 controller: reasonController,
+                color: _color,
+                validator: (_) => _err('reason'),
               ),
-
+              const SizedBox(height: 20),
+              RequestAttachmentPicker(
+                file: attachment,
+                color: _color,
+                errorText: _err('attachment'),
+                onChanged: (f) => setState(() => attachment = f),
+              ),
               const SizedBox(height: 32),
-
-              Obx(() => SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () async {
-                          if (!formKey.currentState!.validate()) return;
-                          FocusScope.of(context).unfocus();
-                          final navigator = Navigator.of(context);
-                          final success = await controller.createMissingPunchRequestWithData(
-                            date: dateController.text,
-                            checkIn: checkInController.text.isNotEmpty ? checkInController.text : null,
-                            checkOut: checkOutController.text.isNotEmpty ? checkOutController.text : null,
-                            reason: reasonController.text.isNotEmpty ? reasonController.text : null,
-                          );
-                          if (success) {
-                            navigator.pop();
-                            Fluttertoast.showToast(
-                              msg: tr('missing_punch_request_created_successfully'),
-                              backgroundColor: ThemeService.instance.getSuccessColor(),
-                              textColor: Colors.white,
-                              toastLength: Toast.LENGTH_LONG,
-                            );
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _color,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: controller.isLoading.value
-                      ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      : Text(
-                          tr('submit_missing_punch_request'),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-                        ),
-                ),
-              )),
+              Obx(() => RequestSubmitButton(
+                    label: tr('submit_missing_punch_request'),
+                    color: _color,
+                    loading: controller.isSubmitting.value,
+                    onPressed: _submit,
+                  )),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-Widget _buildDateField({
-  required String label,
-  required TextEditingController controller,
-  required BuildContext context,
-  String? Function(String?)? validator,
-  DateTime? firstDate,
-}) {
-  final themeService = ThemeService.instance;
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: controller,
-        validator: validator,
-        readOnly: true,
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF6C5CE7))),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getErrorColor())),
-          contentPadding: const EdgeInsets.all(16),
-          suffixIcon: const Icon(Icons.calendar_today, color: Color(0xFF6C5CE7)),
-          hintText: trParams('select_field', {'field': label}),
-          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-        onTap: () async {
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: firstDate ?? DateTime.now(),
-            lastDate: DateTime.now(),
-          );
-          if (picked != null) {
-            controller.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-          }
-        },
-      ),
-    ],
-  );
-}
-
-Widget _buildTimeField({
-  required String label,
-  required TextEditingController controller,
-  required BuildContext context,
-  required Color accentColor,
-  String? Function(String?)? validator,
-}) {
-  final themeService = ThemeService.instance;
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: controller,
-        validator: validator,
-        readOnly: true,
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: accentColor)),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: ThemeService.instance.getErrorColor())),
-          contentPadding: const EdgeInsets.all(16),
-          suffixIcon: Icon(Icons.access_time, color: accentColor),
-          hintText: trParams('select_field', {'field': label}),
-          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-        onTap: () async {
-          TimeOfDay initial = TimeOfDay.now();
-          if (controller.text.isNotEmpty) {
-            final parsed = _parseTimeOfDay(controller.text);
-            if (parsed != null) initial = parsed;
-          }
-          final themeService = ThemeService.instance;
-          final picked = await showTimePicker(
-            context: context,
-            initialTime: initial,
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: themeService.isDarkMode
-                      ? ColorScheme.dark(
-                          primary: accentColor,
-                          onPrimary: Colors.white,
-                          surface: themeService.getCardColor(),
-                          onSurface: themeService.getTextPrimaryColor(),
-                        )
-                      : ColorScheme.light(
-                          primary: accentColor,
-                          onPrimary: Colors.white,
-                          surface: themeService.getCardColor(),
-                          onSurface: themeService.getTextPrimaryColor(),
-                        ),
-                ),
-                child: child!,
-              );
-            },
-          );
-          if (picked != null) {
-            controller.text = picked.format(context);
-          }
-        },
-      ),
-    ],
-  );
-}
-
-Widget _buildTextAreaField({
-  required String label,
-  required TextEditingController controller,
-}) {
-  final themeService = ThemeService.instance;
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: themeService.getTextPrimaryColor())),
-      const SizedBox(height: 8),
-      TextFormField(
-        controller: controller,
-        maxLines: 4,
-        style: TextStyle(color: themeService.getTextPrimaryColor()),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: themeService.getCardColor(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF6C5CE7))),
-          contentPadding: const EdgeInsets.all(16),
-          hintText: trParams('enter_field', {'field': label}),
-          hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-      ),
-    ],
-  );
-}
-
-TimeOfDay? _parseTimeOfDay(String timeString) {
-  try {
-    timeString = timeString.trim();
-    if (timeString.contains('AM') || timeString.contains('PM')) {
-      final isAM = timeString.toUpperCase().contains('AM');
-      final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)', caseSensitive: false), '').trim();
-      final parts = timePart.split(':');
-      if (parts.length >= 2) {
-        int hour = int.parse(parts[0]);
-        final minute = int.parse(parts[1]);
-        if (!isAM && hour != 12) hour += 12;
-        if (isAM && hour == 12) hour = 0;
-        return TimeOfDay(hour: hour, minute: minute);
-      }
-    } else {
-      final parts = timeString.split(':');
-      if (parts.length >= 2) {
-        return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-      }
-    }
-  } catch (_) {}
-  return null;
 }

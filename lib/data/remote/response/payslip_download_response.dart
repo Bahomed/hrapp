@@ -14,7 +14,7 @@ class PayslipDownloadResponse {
 
   factory PayslipDownloadResponse.fromJson(Map<String, dynamic> json) {
     return PayslipDownloadResponse(
-      success: json['success'] ?? false,
+      success: json['success'] ?? (json['error'] == false || json['status'] == true || json['status'] == 'success'),
       data: PayslipDownload.fromJson(json['data'] ?? {}),
       message: json['message'] ?? '',
     );

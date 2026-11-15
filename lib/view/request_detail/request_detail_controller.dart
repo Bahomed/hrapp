@@ -10,7 +10,10 @@ import 'package:co.injazathr.injazathr/data/remote/response/loan_request_respons
 import 'package:co.injazathr.injazathr/data/remote/response/letter_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/missing_punch_request_response.dart';
 import 'package:co.injazathr.injazathr/data/remote/response/overtime_request_response.dart';
+import 'package:co.injazathr.injazathr/repository/my_repository.dart';
 import 'package:co.injazathr.injazathr/repository/requestrepository.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/my_request_models.dart';
+import 'package:co.injazathr.injazathr/view/request_leave/request_controller.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
@@ -18,6 +21,7 @@ enum RequestDetailType { leave, permit, loan, letter, missingPunch, overtime, un
 
 class RequestDetailController extends GetxController {
   final RequestRepository _repository = RequestRepository();
+  final MyRepository _my = MyRepository();
 
   final int requestId;
   final String? requestType;
@@ -30,6 +34,11 @@ class RequestDetailController extends GetxController {
   final Rxn<dynamic> detail = Rxn();
   final detectedType = RequestDetailType.unknown.obs;
 
+  /// GET my/requests/{id}: summary, approval steps and `can_delete`.
+  final Rxn<MyRequestItem> myRequest = Rxn<MyRequestItem>();
+  final RxList<MyApprovalStep> steps = <MyApprovalStep>[].obs;
+  final isDeleting = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -41,17 +50,93 @@ class RequestDetailController extends GetxController {
   Future<void> _loadDetail() async {
     isLoading.value = true;
     error.value = null;
+    detail.value = null;
+    myRequest.value = null;
+    steps.clear();
     try {
       final type = _parseType(requestType);
-      if (type != RequestDetailType.unknown) {
-        await _fetchByType(type);
-      } else {
-        await _tryAllTypes();
+      // Old overtime requests are not part of my/requests.
+      final myFuture = type == RequestDetailType.overtime ? null : _loadMyRequest();
+      Object? typedError;
+      try {
+        if (type != RequestDetailType.unknown) {
+          await _fetchByType(type);
+        } else {
+          await _tryAllTypes();
+        }
+      } catch (e) {
+        typedError = e;
+      }
+      final myError = myFuture == null ? null : await myFuture;
+
+      // Nothing to show at all → error.
+      if (detail.value == null && myRequest.value == null) {
+        error.value = (myError ?? typedError ?? tr('request_not_found')).toString();
+      } else if (detail.value == null && myRequest.value != null) {
+        detectedType.value = _parseType(myRequest.value!.type);
       }
     } catch (e) {
       error.value = e.toString();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Loads GET my/requests/{id}. Returns an error message, or null when ok.
+  Future<String?> _loadMyRequest() async {
+    final r = await _my.request(requestId);
+    if (!r.ok) return r.displayMessage(tr('request_not_found'));
+    final json = r.json;
+    final map = extractRequestMap(json);
+    if (map['id'] != null) myRequest.value = MyRequestItem.fromJson(map);
+    steps.value = parseApprovalSteps(json);
+    return null;
+  }
+
+  bool get canDelete => myRequest.value?.canDelete ?? false;
+
+  /// DELETE my/requests/{id} (only offered when `can_delete`).
+  Future<void> deleteRequest() async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(tr('delete_request')),
+        content: Text(tr('confirm_delete_request')),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(tr('cancel'),
+                style: TextStyle(color: ThemeService.instance.getTextSecondaryColor())),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text(tr('delete'), style: TextStyle(color: ThemeService.instance.getErrorColor())),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    isDeleting.value = true;
+    try {
+      final r = await _my.deleteRequest(requestId);
+      if (r.ok) {
+        if (Get.isRegistered<RequestController>()) {
+          Get.find<RequestController>().loadMyRequests();
+        }
+        Get.back();
+        Get.snackbar(
+          tr('deleted'),
+          r.displayMessage(tr('request_deleted_successfully')),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: ThemeService.instance.getSuccessColor(),
+          colorText: Colors.white,
+        );
+      } else {
+        _showError(r.displayMessage(tr('failed_to_delete_request')));
+      }
+    } finally {
+      isDeleting.value = false;
     }
   }
 
@@ -290,10 +375,14 @@ class RequestDetailController extends GetxController {
     if (letterDetail != null) return letterDetail!.requestNumber;
     if (missingPunchDetail != null) return missingPunchDetail!.requestNumber;
     if (overtimeDetail != null) return overtimeDetail!.requestNumber;
+    final n = myRequest.value?.requestNumber;
+    if (n != null && n.isNotEmpty) return n;
     return '#$requestId';
   }
 
   String get status {
+    final my = myRequest.value;
+    if (my != null && my.displayStatus.isNotEmpty) return my.displayStatus;
     if (leaveDetail != null) return leaveDetail!.status;
     if (permitDetail != null) return permitDetail!.status;
     if (loanDetail != null) return loanDetail!.status;
@@ -310,7 +399,7 @@ class RequestDetailController extends GetxController {
     if (letterDetail != null) return letterDetail!.submittedDate;
     if (missingPunchDetail != null) return missingPunchDetail!.submittedDate;
     if (overtimeDetail != null) return overtimeDetail!.submittedDate;
-    return '';
+    return myRequest.value?.requestDate ?? '';
   }
 
   String? get approvedDate {

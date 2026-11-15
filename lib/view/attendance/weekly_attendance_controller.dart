@@ -64,7 +64,7 @@ class WeeklyAttendanceController extends GetxController {
         currentWeekData.clear();
       }
     } catch (e) {
-      _showErrorMessage('Error loading attendance data: $e');
+      _showErrorMessage(e.toString());
       currentWeekData.clear();
     } finally {
       isLoading.value = false;

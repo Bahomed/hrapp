@@ -10,6 +10,8 @@ import '../tasks_controller.dart';
 /// One task card. In an actionable column it can expand to reveal a notes
 /// field and one "Mark as {status}" button per other status. In a terminal
 /// column it is read-only and shows completion details.
+import 'package:co.injazathr.injazathr/view/unexecuted_requests/unexecuted_requests_screen.dart';
+
 class TaskCard extends StatelessWidget {
   final TaskItem task;
   final TaskColumn column;
@@ -154,6 +156,26 @@ class TaskCard extends StatelessWidget {
     if (!task.canChangeStatus) {
       return _NotResponsibleNote(theme: theme);
     }
+    // Loan / leave settlement / final settlement tasks are paid or returned
+    // from My Approvals; `tasks/{id}/status` refuses them (422).
+    if (isPaymentTask(task)) {
+      return Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: TextButton.icon(
+          onPressed: () async {
+            await Get.to(() => const UnexecutedRequestsScreen());
+            controller.refreshBoard(boardType);
+          },
+          icon: const Icon(Icons.payments_outlined, size: 18),
+          label: Text(tr('pay_or_return')),
+          style: TextButton.styleFrom(
+            foregroundColor: theme.getPrimaryColor(),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+      );
+    }
     return Obx(() {
       // Touch both observables up front so Obx always registers a dependency,
       // even on the early-return paths below.
@@ -189,6 +211,13 @@ class TaskCard extends StatelessWidget {
     });
   }
 }
+
+/// Payment tasks: paid / returned from My Approvals, never moved here
+/// (backend Task::TYPE_LOAN / TYPE_LEAVE_SETTLEMENT / TYPE_FINAL_SETTLEMENT).
+const paymentTaskCodes = {'loan', 'leave_settlement', 'final_settlement'};
+
+bool isPaymentTask(TaskItem task) =>
+    paymentTaskCodes.contains(task.taskTypeCode.toLowerCase());
 
 class _NotResponsibleNote extends StatelessWidget {
   final ThemeService theme;

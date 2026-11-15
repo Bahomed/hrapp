@@ -10,6 +10,7 @@ import '../data/remote/response/saveemployeeattendanceresponse.dart';
 import '../data/remote/response/attendance_response.dart';
 import '../data/remote/response/weekly_attendance_response.dart';
 import '../utils/exceptionhandler.dart';
+import '../utils/api_result.dart';
 import '../utils/translation_helper.dart';
 
 class AttendanceRepository {
@@ -128,6 +129,17 @@ class AttendanceRepository {
 
       return SaveEmployeeAttendanceResponse.fromJson(response.data);
     } on DioException catch (e) {
+      // 4xx with a body (403 clock-in not allowed, 422 ...) → error result
+      // carrying the server message, so the screen shows it in red.
+      if (e.response != null) {
+        final r = ApiResult.fromException(e);
+        final body = r.json;
+        return SaveEmployeeAttendanceResponse(
+          error: true,
+          message: r.displayMessage(tr('an_error_occurred')),
+          validationMessage: body['validation_message']?.toString() ?? '',
+        );
+      }
       throw exceptionHandler(e);
     } catch (e) {
       rethrow;
@@ -157,6 +169,17 @@ class AttendanceRepository {
 
       return SaveEmployeeAttendanceResponse.fromJson(response.data);
     } on DioException catch (e) {
+      // 4xx with a body (403 clock-in not allowed, 422 ...) → error result
+      // carrying the server message, so the screen shows it in red.
+      if (e.response != null) {
+        final r = ApiResult.fromException(e);
+        final body = r.json;
+        return SaveEmployeeAttendanceResponse(
+          error: true,
+          message: r.displayMessage(tr('an_error_occurred')),
+          validationMessage: body['validation_message']?.toString() ?? '',
+        );
+      }
       throw exceptionHandler(e);
     } catch (e) {
       rethrow;

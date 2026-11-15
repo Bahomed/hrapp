@@ -6,6 +6,11 @@ import 'profile_controller.dart';
 import '../../services/theme_service.dart';
 import '../settings/settings_screen.dart';
 
+import 'package:co.injazathr.injazathr/view/approval/approval_screen.dart';
+import 'package:co.injazathr.injazathr/view/my_portal/my_pending_requests_screen.dart';
+import 'package:co.injazathr.injazathr/view/tasks/tasks_screen.dart';
+import 'package:co.injazathr.injazathr/view/home_screen/app_settings_controller.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -71,6 +76,15 @@ class ProfileScreen extends StatelessWidget {
             icon: Icon(Icons.more_vert, color: themeService.getTextPrimaryColor()),
             onSelected: (value) {
               switch (value) {
+                case 'my_pending_approvals':
+                  Get.to(() => const ApprovalScreen());
+                  break;
+                case 'my_pending_requests':
+                  Get.to(() => const MyPendingRequestsScreen());
+                  break;
+                case 'my_tasks':
+                  Get.to(() => const TasksScreen());
+                  break;
                 case 'refresh':
                   controller.refreshProfile();
                   break;
@@ -80,6 +94,46 @@ class ProfileScreen extends StatelessWidget {
               }
             },
             itemBuilder: (context) => [
+              // Same personal pages as the web user menu.
+              PopupMenuItem(
+                value: 'my_pending_approvals',
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, color: themeService.getPrimaryColor()),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Obx(() {
+                        final n = AppSettingsController.to.approvalsCount.value;
+                        return Text(n > 0
+                            ? '${tr('my_pending_approvals')} ($n)'
+                            : tr('my_pending_approvals'));
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'my_pending_requests',
+                child: Row(
+                  children: [
+                    Icon(Icons.hourglass_top_outlined, color: themeService.getPrimaryColor()),
+                    const SizedBox(width: 12),
+                    Text(tr('my_pending_requests')),
+                  ],
+                ),
+              ),
+              if (AppSettingsController.to.hasTasksAccess.value)
+                PopupMenuItem(
+                  value: 'my_tasks',
+                  child: Row(
+                    children: [
+                      Icon(Icons.task_alt_outlined, color: themeService.getPrimaryColor()),
+                      const SizedBox(width: 12),
+                      Text(tr('my_tasks')),
+                    ],
+                  ),
+                ),
+              const PopupMenuDivider(),
               PopupMenuItem(
                 value: 'refresh',
                 child: Row(

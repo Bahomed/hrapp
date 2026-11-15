@@ -848,7 +848,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       }
 
       if (result != null) {
-        if (result.error) {
+        if (!result.isSuccess) {
           if (mounted) {
             showDialog(
               context: context,
@@ -876,7 +876,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        result.message.isNotEmpty ? result.message : tr('an_error_occurred'),
+                        result.errorText.isNotEmpty ? result.errorText : tr('an_error_occurred'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -896,7 +896,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
               Navigator.of(context).pop({
                 'success': false,
                 'error': true,
-                'message': result.message,
+                'message': result.errorText,
               });
             }
           });
@@ -1133,12 +1133,12 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
       Navigator.of(context).pop();
 
       if (result != null) {
-        if (result.error) {
+        if (!result.isSuccess) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
               title: Text(tr('error')),
-              content: Text(result.message.isNotEmpty ? result.message : tr('an_error_occurred')),
+              content: Text(result.errorText.isNotEmpty ? result.errorText : tr('an_error_occurred')),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -1146,7 +1146,7 @@ class _AutoRecognitionScreenState extends State<AutoRecognitionScreen> {
                     Navigator.of(context).pop({
                       'success': false,
                       'error': true,
-                      'message': result.message,
+                      'message': result.errorText,
                     });
                   },
                   child: Text(tr('ok')),

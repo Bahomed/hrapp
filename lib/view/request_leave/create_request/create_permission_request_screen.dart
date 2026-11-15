@@ -1,32 +1,75 @@
-// File: lib/view/create_request/create_permit_request_screen.dart
+// New permit request → POST my/requests (request_type = Permit):
+// permit_date, permit_from (HH:mm), permit_to (HH:mm), reason, attachment.
 
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
-
+import '../my_request_models.dart';
 import '../request_controller.dart';
+import 'request_form_widgets.dart';
 
-class CreatePermissionRequestScreen extends StatelessWidget {
+class CreatePermissionRequestScreen extends StatefulWidget {
   const CreatePermissionRequestScreen({super.key});
 
   @override
+  State<CreatePermissionRequestScreen> createState() => _CreatePermissionRequestScreenState();
+}
+
+class _CreatePermissionRequestScreenState extends State<CreatePermissionRequestScreen> {
+  final controller = Get.find<RequestController>();
+  final formKey = GlobalKey<FormState>();
+  final reasonController = TextEditingController();
+  final dateController = TextEditingController(text: toDisplayDate(DateTime.now()));
+  final fromController = TextEditingController();
+  final toController = TextEditingController();
+  DateTime date = DateTime.now();
+  File? attachment;
+  Map<String, List<String>> fieldErrors = const {};
+
+  @override
+  void dispose() {
+    reasonController.dispose();
+    dateController.dispose();
+    fromController.dispose();
+    toController.dispose();
+    super.dispose();
+  }
+
+  String? _err(String field) => fieldErrors[field]?.firstOrNull;
+
+  int? _minutes(String hhmm) {
+    final p = hhmm.split(':');
+    if (p.length != 2) return null;
+    final h = int.tryParse(p[0]);
+    final m = int.tryParse(p[1]);
+    return (h == null || m == null) ? null : h * 60 + m;
+  }
+
+  Future<void> _submit() async {
+    setState(() => fieldErrors = const {});
+    if (!formKey.currentState!.validate()) return;
+    final r = await controller.submitMyRequest({
+      'request_type': MyRequestType.permit,
+      'permit_date': toApiDate(date),
+      'permit_from': fromController.text,
+      'permit_to': toController.text,
+      'reason': reasonController.text.trim(),
+    }, attachmentPath: attachment?.path);
+    if (!mounted) return;
+    if (r.ok) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => fieldErrors = r.fieldErrors);
+      formKey.currentState!.validate();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<RequestController>();
     final themeService = ThemeService.instance;
-    final formKey = GlobalKey<FormState>();
-
-    final now = DateTime.now();
-    final todayFormatted =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-    final purposeController = TextEditingController();
-    final dateController = TextEditingController(text: todayFormatted);
-    final fromTimeController = TextEditingController();
-    final toTimeController = TextEditingController();
-    final selectedFiles = <File>[].obs;
+    final color = themeService.getActionColor('profile');
 
     return Scaffold(
       backgroundColor: themeService.getPageBackgroundColor(),
@@ -53,589 +96,72 @@ class CreatePermissionRequestScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: themeService.getActionColor('profile').withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: themeService.getActionColor('profile'),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(Icons.badge_outlined, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr('permission_request'),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: themeService.getActionColor('profile'),
-                            ),
-                          ),
-                          Text(
-                            tr('permission_request_description'),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: themeService.getTextSecondaryColor(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              RequestFormHeader(
+                icon: Icons.badge_outlined,
+                title: tr('permission_request'),
+                subtitle: tr('permission_request_description'),
+                color: color,
               ),
-
               const SizedBox(height: 24),
-
-              // Purpose Field
-              _buildTextAreaField(
-                label: tr('purpose'),
-                controller: purposeController,
+              RequestTextAreaField(
+                label: tr('reason'),
+                controller: reasonController,
+                color: color,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? tr('please_enter_reason')
+                    : _err('reason'),
               ),
-
               const SizedBox(height: 20),
-
-              // Date Field
-              _buildDateField(
+              RequestDateField(
                 label: tr('permit_date'),
                 controller: dateController,
-                context: context,
+                color: color,
                 firstDate: controller.firstAllowedDate,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_select_date');
-                  }
-                  return null;
-                },
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? tr('please_select_date') : _err('permit_date'),
+                onPicked: (d) => date = d,
               ),
-
               const SizedBox(height: 20),
-
-              // From Time Field
-              _buildTimeField(
+              RequestTimeField(
                 label: tr('from_time'),
-                controller: fromTimeController,
-                context: context,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_select_from_time');
-                  }
-                  return null;
-                },
+                controller: fromController,
+                color: color,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? tr('please_select_from_time') : _err('permit_from'),
               ),
-
               const SizedBox(height: 20),
-
-              // To Time Field
-              _buildTimeField(
+              RequestTimeField(
                 label: tr('to_time'),
-                controller: toTimeController,
-                context: context,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return tr('please_select_to_time');
+                controller: toController,
+                color: color,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return tr('please_select_to_time');
+                  final from = _minutes(fromController.text);
+                  final to = _minutes(v);
+                  if (from != null && to != null && to <= from) {
+                    return tr('to_time_after_from_time');
                   }
-                  if (fromTimeController.text.isNotEmpty && value.isNotEmpty) {
-                    try {
-                      final fromTime = _parseTime(fromTimeController.text);
-                      final toTime = _parseTime(value);
-                      if (fromTime != null && toTime != null) {
-                        // Convert times to minutes for comparison
-                        final fromMinutes = fromTime.hour * 60 + fromTime.minute;
-                        final toMinutes = toTime.hour * 60 + toTime.minute;
-                        if (toMinutes <= fromMinutes) {
-                          return tr('to_time_after_from_time');
-                        }
-                      }
-                    } catch (e) {
-                      return tr('invalid_time_format');
-                    }
-                  }
-                  return null;
+                  return _err('permit_to');
                 },
               ),
-
               const SizedBox(height: 20),
-
-              // Attachments
-              Obx(() => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr('attachments'),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeService.getTextPrimaryColor(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (selectedFiles.isNotEmpty) ...[
-                    ...selectedFiles.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final file = entry.value;
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: themeService.getCardColor(),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: themeService.getActionColor('profile').withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.attach_file, size: 18, color: themeService.getActionColor('profile')),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                file.path.split('/').last,
-                                style: TextStyle(fontSize: 13, color: themeService.getTextPrimaryColor()),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close, size: 18, color: themeService.getErrorColor()),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () => selectedFiles.removeAt(index),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-                  ],
-                  if (selectedFiles.length < 3)
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      final remaining = 3 - selectedFiles.length;
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-                        allowMultiple: remaining > 1,
-                      );
-                      if (result != null) {
-                        final files = result.files
-                            .where((f) => f.path != null && (f.size ?? 0) <= 5 * 1024 * 1024)
-                            .map((f) => File(f.path!))
-                            .take(remaining)
-                            .toList();
-                        final rejected = result.files.where((f) => f.path != null && (f.size ?? 0) > 5 * 1024 * 1024).length;
-                        if (rejected > 0) {
-                          Get.snackbar(
-                            tr('error'),
-                            '$rejected ${tr('file_size_exceeded')}',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: ThemeService.instance.getErrorColor(),
-                            colorText: Colors.white,
-                          );
-                        }
-                        selectedFiles.addAll(files);
-                      }
-                    },
-                    icon: Icon(Icons.upload_file, color: themeService.getActionColor('profile')),
-                    label: Text(
-                      tr('upload_attachment'),
-                      style: TextStyle(color: themeService.getActionColor('profile')),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: themeService.getActionColor('profile')),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                  ),
-                ],
-              )),
-
+              RequestAttachmentPicker(
+                file: attachment,
+                color: color,
+                errorText: _err('attachment'),
+                onChanged: (f) => setState(() => attachment = f),
+              ),
               const SizedBox(height: 32),
-
-              // Submit Button
-              Obx(() => SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () async {
-                    if (formKey.currentState!.validate()) {
-                      final success = await controller.createPermissionRequestWithData(
-                        purpose: purposeController.text,
-                        date: dateController.text,
-                        fromTime: fromTimeController.text,
-                        toTime: toTimeController.text,
-                        attachments: selectedFiles.isEmpty ? null : selectedFiles.toList(),
-                      );
-                      
-                      // Only navigate if request was successful
-                      if (success) {
-                        // Small delay to show success message then navigate back
-                        await Future.delayed(const Duration(milliseconds: 1500));
-                        
-                        // Try multiple navigation methods
-                        if (context.mounted) {
-                          if (Navigator.of(context).canPop()) {
-                            Navigator.of(context).pop();
-                          } else {
-                            // Fallback: Use Get navigation
-                            Get.back();
-                          }
-                        }
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: themeService.getActionColor('profile'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: controller.isLoading.value
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    tr('submit_permission_request'),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              )),
+              Obx(() => RequestSubmitButton(
+                    label: tr('submit_permission_request'),
+                    color: color,
+                    loading: controller.isSubmitting.value,
+                    onPressed: _submit,
+                  )),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    String? Function(String?)? validator,
-  }) {
-    final themeService = ThemeService.instance;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          style: TextStyle(color: themeService.getTextPrimaryColor()),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: themeService.getCardColor(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getActionColor('profile')),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getErrorColor()),
-            ),
-            contentPadding: const EdgeInsets.all(16),
-            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextAreaField({
-    required String label,
-    required TextEditingController controller,
-    String? Function(String?)? validator,
-  }) {
-    final themeService = ThemeService.instance;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          maxLines: 4,
-          style: TextStyle(color: themeService.getTextPrimaryColor()),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: themeService.getCardColor(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getActionColor('profile')),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getErrorColor()),
-            ),
-            contentPadding: const EdgeInsets.all(16),
-            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildDateField({
-    required String label,
-    required TextEditingController controller,
-    required BuildContext context,
-    String? Function(String?)? validator,
-    DateTime? firstDate,
-  }) {
-    final themeService = ThemeService.instance;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          readOnly: true,
-          style: TextStyle(color: themeService.getTextPrimaryColor()),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: themeService.getCardColor(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getActionColor('profile')),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getErrorColor()),
-            ),
-            contentPadding: const EdgeInsets.all(16),
-            suffixIcon: Icon(
-              Icons.calendar_today,
-              color: themeService.getTextSecondaryColor(),
-            ),
-            hintText: trParams('select_field', {'field': label}),
-            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-          ),
-          onTap: () async {
-            final today = DateTime.now();
-            final DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: today,
-              firstDate: firstDate ?? today,
-              lastDate: DateTime(2100),
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: themeService.isDarkMode
-                        ? ColorScheme.dark(
-                            primary: themeService.getActionColor('profile'),
-                            onPrimary: Colors.white,
-                            surface: themeService.getCardColor(),
-                            onSurface: themeService.getTextPrimaryColor(),
-                          )
-                        : ColorScheme.light(
-                            primary: themeService.getActionColor('profile'),
-                            onPrimary: Colors.white,
-                            surface: themeService.getCardColor(),
-                            onSurface: themeService.getTextPrimaryColor(),
-                          ),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-            if (picked != null) {
-              controller.text =
-                  '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeField({
-    required String label,
-    required TextEditingController controller,
-    required BuildContext context,
-    String? Function(String?)? validator,
-  }) {
-    final themeService = ThemeService.instance;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: themeService.getTextPrimaryColor(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          readOnly: true,
-          style: TextStyle(color: themeService.getTextPrimaryColor()),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: themeService.getCardColor(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getTextSecondaryColor().withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getActionColor('profile')),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: themeService.getErrorColor()),
-            ),
-            contentPadding: const EdgeInsets.all(16),
-            suffixIcon: Icon(
-              Icons.access_time,
-              color: themeService.getTextSecondaryColor(),
-            ),
-            hintText: trParams('select_field', {'field': label}),
-            hintStyle: TextStyle(color: themeService.getTextSecondaryColor()),
-          ),
-          onTap: () async {
-            final TimeOfDay? picked = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: themeService.isDarkMode 
-                      ? ColorScheme.dark(
-                          primary: themeService.getActionColor('profile'),
-                          onPrimary: Colors.white,
-                          surface: themeService.getCardColor(),
-                          onSurface: themeService.getTextPrimaryColor(),
-                        )
-                      : ColorScheme.light(
-                          primary: themeService.getActionColor('profile'),
-                          onPrimary: Colors.white,
-                          surface: themeService.getCardColor(),
-                          onSurface: themeService.getTextPrimaryColor(),
-                        ),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-            if (picked != null) {
-              controller.text = picked.format(context);
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  TimeOfDay? _parseTime(String timeString) {
-    try {
-      // Handle different time formats: "2:30 PM", "14:30", etc.
-      timeString = timeString.trim();
-      
-      // Check if it's 12-hour format with AM/PM
-      if (timeString.contains('AM') || timeString.contains('PM')) {
-        final isAM = timeString.contains('AM');
-        final timePart = timeString.replaceAll(RegExp(r'\s*(AM|PM)'), '');
-        final parts = timePart.split(':');
-        
-        if (parts.length == 2) {
-          int hour = int.parse(parts[0]);
-          final minute = int.parse(parts[1]);
-          
-          // Convert to 24-hour format
-          if (!isAM && hour != 12) hour += 12;
-          if (isAM && hour == 12) hour = 0;
-          
-          return TimeOfDay(hour: hour, minute: minute);
-        }
-      } else {
-        // 24-hour format
-        final parts = timeString.split(':');
-        if (parts.length == 2) {
-          final hour = int.parse(parts[0]);
-          final minute = int.parse(parts[1]);
-          return TimeOfDay(hour: hour, minute: minute);
-        }
-      }
-    } catch (e) {
-      // Return null if parsing fails
-    }
-    return null;
   }
 }

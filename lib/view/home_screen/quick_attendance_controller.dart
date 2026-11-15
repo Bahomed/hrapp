@@ -16,6 +16,8 @@ import '../../utils/translation_helper.dart';
 import '../attendance/clocking_screen.dart';
 import '../scan/AutoRecognitionScreen.dart';
 
+import 'package:co.injazathr.injazathr/view/home_screen/app_settings_controller.dart';
+
 class QuickAttendanceController extends GetxController {
   final Preferences _preferences = Preferences();
   final AttendanceRepository _attendanceRepository = AttendanceRepository();
@@ -131,6 +133,11 @@ class QuickAttendanceController extends GetxController {
 
   Future<void> performQuickAttendance() async {
     if (isProcessing.value) return;
+    // Settings › Mobile › Allow Mobile Clock-In is off for this branch.
+    if (!AppSettingsController.to.allowClockIn.value) {
+      _showErrorSnackbar(tr('clock_in_not_allowed'));
+      return;
+    }
     isProcessing.value = true;
 
     try {

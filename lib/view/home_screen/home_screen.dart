@@ -147,20 +147,23 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           bottomNavigationBar: CurvedNavigationBar(
+            // Rebuild when Mobile Settings hide/show a tab.
+            key: ValueKey(model.visibleTabs.join(',')),
             animationCurve: Curves.linear,
             animationDuration: const Duration(milliseconds: 300),
             backgroundColor: Colors.transparent,
             color: Theme.of(context).cardColor,
-            index: model.bottomNavIndex.value,
+            index: model.bottomNavIndexValue,
             height: 60,
             buttonBackgroundColor: Theme.of(context).primaryColor,
             items: <Widget>[
-              // Calendar Icon
+              // Calendar Icon (holidays)
+              if (model.visibleTabs.contains('holidays'))
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Icon(
                   Icons.calendar_month,
-                  color: model.bottomNavIndex.value == 0
+                  color: model.currentTab.value == 'holidays'
                       ? Colors.white
                       : Theme.of(context).iconTheme.color,
                   size: 30,
@@ -172,7 +175,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(10.0),
                 child: Icon(
                     Icons.home,
-                    color: model.bottomNavIndex.value == 1
+                    color: model.currentTab.value == 'home'
                         ? Colors.white
                         : Theme.of(context).primaryColor,
                     size: 30
@@ -180,9 +183,10 @@ class HomeScreen extends StatelessWidget {
               ),
 
               // Chat Icon with unread badge
+              if (model.visibleTabs.contains('chat'))
               Obx(() {
                 final count = chatUnread.unread.value;
-                final iconColor = model.bottomNavIndex.value == 2
+                final iconColor = model.currentTab.value == 'chat'
                     ? Colors.white
                     : Theme.of(context).iconTheme.color;
                 return Stack(
@@ -224,7 +228,7 @@ class HomeScreen extends StatelessWidget {
               // Notifications Icon with badge
               Obx(() {
                 final count = notifController.unreadCount;
-                final iconColor = model.bottomNavIndex.value == 3
+                final iconColor = model.currentTab.value == 'notifications'
                     ? Colors.white
                     : Theme.of(context).iconTheme.color;
                 return Stack(
@@ -264,12 +268,12 @@ class HomeScreen extends StatelessWidget {
               }),
             ],
             onTap: (value) {
-              model.bottomNavIndex.value = value;
-              if (value == 2) chatUnread.reload();
+              model.selectTabIndex(value);
+              if (model.currentTab.value == 'chat') chatUnread.reload();
             },
           ),
 
-          body: model.pages[model.bottomNavIndex.value],
+          body: model.pageFor(model.currentTab.value),
         )
     );
   }

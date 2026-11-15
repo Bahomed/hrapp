@@ -18,6 +18,8 @@ import '../../repository/dashboardrepository.dart';
 import '../profile/profile_screen.dart';
 import '../document/document_upload_controller.dart';
 import '../Manager/subordinates/subordinates_data_screen.dart';
+import 'app_settings_controller.dart';
+import 'widget/portal_home_summary.dart';
 
 class HomeScreenController extends SuperController {
   final repository = DashboardRepository();
@@ -50,6 +52,12 @@ class HomeScreenController extends SuperController {
 
     // Load user data
     await loadUserData();
+
+    // Mobile Settings (home tiles, clock-in) — every time the home opens.
+    final settings = AppSettingsController.to;
+    ever(settings.homeItems, (_) => _clampNavIndex());
+    settings.reload();
+    PortalHomeController.to.reload();
 
     // Load greeting
     await loadGreeting();
@@ -116,14 +124,52 @@ class HomeScreenController extends SuperController {
   }
 
 
-  RxInt bottomNavIndex = 1.obs;
+  /// Bottom bar tabs. `holidays` and `chat` follow Mobile Settings
+  /// (home_items); `home` and `notifications` are always shown.
+  static const allTabs = ['holidays', 'home', 'chat', 'notifications'];
 
-  final pages = [
-    const HolidayScreen(),
-    const HomeScreenWidget(),
-    const ConversationsScreen(embedded: true),
-    const NotificationScreen(),
-  ];
+  /// Selected tab key (index-free so hiding a tab never shifts the selection).
+  final RxString currentTab = 'home'.obs;
+
+  List<String> get visibleTabs {
+    final s = AppSettingsController.to;
+    return allTabs
+        .where((t) => (t != 'holidays' && t != 'chat') || s.isOn(t))
+        .toList();
+  }
+
+  /// Index of [currentTab] in [visibleTabs] (for the curved bar).
+  int get bottomNavIndexValue {
+    final i = visibleTabs.indexOf(currentTab.value);
+    return i < 0 ? visibleTabs.indexOf('home') : i;
+  }
+
+  void selectTabIndex(int index) {
+    final tabs = visibleTabs;
+    if (index < 0 || index >= tabs.length) return;
+    currentTab.value = tabs[index];
+    if (currentTab.value == 'home') {
+      AppSettingsController.to.reload();
+      PortalHomeController.to.reload();
+    }
+  }
+
+  void _clampNavIndex() {
+    if (!visibleTabs.contains(currentTab.value)) currentTab.value = 'home';
+  }
+
+  Widget pageFor(String tab) {
+    switch (tab) {
+      case 'holidays':
+        return const HolidayScreen();
+      case 'chat':
+        return const ConversationsScreen(embedded: true);
+      case 'notifications':
+        return const NotificationScreen();
+      default:
+        return const HomeScreenWidget();
+    }
+  }
 
 
 
@@ -180,6 +226,10 @@ class HomeScreenController extends SuperController {
   @override
   void onResumed() {
     _checkTokenOnResume();
+    if (currentTab.value == 'home') {
+      AppSettingsController.to.reload();
+      PortalHomeController.to.reload();
+    }
   }
 
   void _checkTokenOnResume() async {
