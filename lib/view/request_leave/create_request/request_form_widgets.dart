@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 import '../my_request_models.dart';
+import 'package:co.injazathr.injazathr/widgets/searchable_dropdown.dart';
 
 InputDecoration requestInputDecoration(Color color, {Widget? suffixIcon, String? hint}) {
   final t = ThemeService.instance;
@@ -153,44 +154,17 @@ class RequestDropdownField<T> extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _label(label),
-        DropdownButtonFormField<T>(
-          // ignore: deprecated_member_use
+        SearchableDropdownField<T>(
           value: value,
-          isExpanded: true,
+          items: items,
+          itemLabel: itemLabel,
+          onChanged: onChanged,
+          isLoading: isLoading,
           validator: validator,
-          decoration: requestInputDecoration(
-            color,
-            suffixIcon: isLoading
-                ? Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-          hint: Text(
-            trParams('select_field', {'field': label}),
-            style: TextStyle(color: t.getTextSecondaryColor()),
-          ),
+          title: label,
+          hint: trParams('select_field', {'field': label}),
           style: TextStyle(color: t.getTextPrimaryColor()),
-          dropdownColor: t.getCardColor(),
-          items: items
-              .map((o) => DropdownMenuItem<T>(
-                    value: o,
-                    child: Text(
-                      itemLabel(o),
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: t.getTextPrimaryColor()),
-                    ),
-                  ))
-              .toList(),
-          onChanged: isLoading ? null : onChanged,
+          decoration: requestInputDecoration(color),
         ),
       ],
     );

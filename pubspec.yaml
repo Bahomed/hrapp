@@ -85,6 +85,7 @@ dependencies:
   shimmer: ^3.0.0
   webview_flutter: ^4.10.0
   printing: ^5.13.0
+  local_auth: ^3.0.2
 
   # Face recognition and camera dependencies
  #google_mlkit_face_detection: ^0.10.0

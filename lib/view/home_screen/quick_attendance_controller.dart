@@ -13,6 +13,7 @@ import '../../data/remote/response/attendance_status_response.dart';
 import '../../repository/attendancerepository.dart';
 import '../../services/theme_service.dart';
 import '../../utils/translation_helper.dart';
+import '../../utils/location_service.dart';
 import '../attendance/clocking_screen.dart';
 import '../scan/AutoRecognitionScreen.dart';
 
@@ -148,7 +149,13 @@ class QuickAttendanceController extends GetxController {
         return;
       }
 
-      // 2. Wait briefly for location if still loading
+      // 2. GPS off → show the system "Turn on location" popup (like Uber/Careem)
+      if (!isLocationReady.value) {
+        if (!await LocationService.ensureGpsOn()) return;
+        unawaited(_collectLocation());
+      }
+
+      // Wait briefly for location if still loading
       bool dialogOpen = false;
       if (!isLocationReady.value) {
         dialogOpen = true;

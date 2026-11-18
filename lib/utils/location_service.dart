@@ -3,6 +3,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:location/location.dart' as loc;
+import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 
 class LocationService {
   static LocationService? _instance;
@@ -131,6 +135,43 @@ class LocationService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Makes sure the phone's GPS (Location services) is ON.
+  ///
+  /// Android: shows the system "Turn on location" popup (same as Uber/Careem)
+  /// so the user can enable GPS with one tap without leaving the app.
+  /// iOS (or if the popup is declined): shows a dialog that opens Settings.
+  /// Returns true only when GPS is on.
+  static Future<bool> ensureGpsOn() async {
+    if (await Geolocator.isLocationServiceEnabled()) return true;
+
+    if (Platform.isAndroid) {
+      try {
+        if (await loc.Location().requestService()) return true;
+      } catch (_) {}
+    }
+
+    final openSettings = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(tr('turn_on_gps_title')),
+        content: Text(tr('turn_on_gps_message')),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(tr('cancel')),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text(tr('open_location_settings')),
+          ),
+        ],
+      ),
+    );
+    if (openSettings == true) {
+      await Geolocator.openLocationSettings();
+    }
+    return false;
   }
 
   /// Quick location check without full data

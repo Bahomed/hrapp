@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/widgets/searchable_dropdown.dart';
 
 class InputWidgets {
   
@@ -208,9 +209,14 @@ class InputWidgets {
               color: enabled ? themeService.getDividerColor() : themeService.getDividerColor().withValues(alpha: 0.5),
             ),
           ),
-          child: DropdownButtonFormField<T>(
+          child: SearchableDropdownField<T>(
             value: value,
-            onChanged: enabled ? onChanged : null,
+            items: items,
+            itemLabel: itemLabel,
+            onChanged: onChanged,
+            enabled: enabled,
+            title: label,
+            hint: hint,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -234,12 +240,6 @@ class InputWidgets {
                 vertical: 16,
               ),
             ),
-            items: items.map((item) {
-              return DropdownMenuItem<T>(
-                value: item,
-                child: Text(itemLabel(item)),
-              );
-            }).toList(),
             validator: (value) {
               if (isRequired && value == null) {
                 return 'Please select $label';

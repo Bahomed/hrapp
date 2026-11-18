@@ -35,7 +35,7 @@ class AppSettingsController extends GetxController {
   final RxInt executionsCount = 0.obs;
   final RxInt finalSettlementsCount = 0.obs;
 
-  /// `GET assigned-overtime?status=pending` → `data.pending_count`.
+  /// `GET my/home` → `overtime_pending` (set by PortalHomeController).
   final RxInt overtimePendingCount = 0.obs;
 
   bool _loading = false;
@@ -45,16 +45,31 @@ class AppSettingsController extends GetxController {
 
   int get notExecutedCount => executionsCount.value + finalSettlementsCount.value;
 
+  /// Forget the previous user's values (this controller outlives logout).
+  void reset() {
+    homeItems.clear();
+    allowClockIn.value = true;
+    hasTasksAccess.value = true;
+    earnedLeaveEnabled.value = true;
+    approvalsCount.value = 0;
+    payrollsCount.value = 0;
+    executionsCount.value = 0;
+    finalSettlementsCount.value = 0;
+    overtimePendingCount.value = 0;
+  }
+
+  /// Settings first (they decide what else is needed), then only the checks
+  /// for tiles that are on. Overtime pending comes from `my/home`
+  /// (PortalHomeController), not a separate `assigned-overtime` call.
   Future<void> reload() async {
     if (_loading) return;
     _loading = true;
     try {
+      await _loadSettings();
       await Future.wait([
-        _loadSettings(),
-        _loadTasksAccess(),
-        _loadEarnedLeave(),
-        _loadApprovalCounts(),
-        _loadOvertimePending(),
+        if (isOn('tasks')) _loadTasksAccess(),
+        if (isOn('earned_leave_balance')) _loadEarnedLeave(),
+        _loadApprovalCounts(), // tiles + profile menu badge
       ]);
     } finally {
       _loading = false;
@@ -103,12 +118,7 @@ class AppSettingsController extends GetxController {
     finalSettlementsCount.value = _int(j['final_settlements']);
   }
 
-  Future<void> _loadOvertimePending() async {
-    final r = await _my.assignedOvertime(status: 'pending');
-    if (!r.ok) return;
-    final data = r.json['data'];
-    if (data is Map) overtimePendingCount.value = _int(data['pending_count']);
-  }
+
 
   static bool _bool(dynamic v, bool fallback) {
     if (v == null) return fallback;

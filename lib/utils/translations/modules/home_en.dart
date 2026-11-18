@@ -49,4 +49,5 @@ const Map<String, String> homeEnTranslations = {
   'no_notifications_for_filter': 'No notifications match this filter',
   'no_notifications_for_filter_hint': 'Your other notifications are hidden by the filter.',
   'show_all_notifications': 'Show all',
+  'select': 'Select',
 };

@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/background_location_disclosure.dart';
+import 'package:co.injazathr.injazathr/utils/location_service.dart';
 import 'clocking_controller.dart';
 import '../../repository/attendancerepository.dart';
 import '../../data/remote/response/attendance_status_response.dart';
@@ -84,6 +85,10 @@ class _ClockingScreenState extends State<ClockingScreen> with WidgetsBindingObse
       // App came back to foreground — refresh attendance status
       // in case the user was away overnight or forgot to clock out
       _loadAttendanceStatus();
+      // User may have just turned GPS on from Settings — retry location
+      if (_currentLat == null && !_isLocationLoading && _hasLocationPermission) {
+        _getCurrentLocation();
+      }
     }
   }
 
@@ -324,7 +329,9 @@ class _ClockingScreenState extends State<ClockingScreen> with WidgetsBindingObse
       });
 
       // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      // GPS off → show the system "Turn on location" popup (like Uber/Careem)
+      bool serviceEnabled = await LocationService.ensureGpsOn();
+      if (!mounted) return;
       if (!serviceEnabled) {
         setState(() {
           _isLocationLoading = false;

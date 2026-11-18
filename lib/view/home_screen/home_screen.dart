@@ -269,7 +269,6 @@ class HomeScreen extends StatelessWidget {
             ],
             onTap: (value) {
               model.selectTabIndex(value);
-              if (model.currentTab.value == 'chat') chatUnread.reload();
             },
           ),
 

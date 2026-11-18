@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/utils/screen_themes.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/services/app_lock_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -259,7 +260,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               
               const SizedBox(height: 24),
-              
+
+              // Security Section — fingerprint / Face ID app lock
+              ScreenThemes.buildSettingsSection(
+                title: tr('security'),
+                icon: Icons.fingerprint,
+                iconColor: AppTheme.primaryColor,
+                child: Obx(() => SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(tr('app_lock')),
+                  subtitle: Text(tr('app_lock_desc'), style: AppTheme.bodySmall),
+                  value: AppLockService.to.isEnabled.value,
+                  onChanged: (v) => AppLockService.to.setEnabled(v),
+                )),
+              ),
+
+              const SizedBox(height: 24),
+
               // Privacy & Legal Section
               Container(
                 padding: const EdgeInsets.all(20),

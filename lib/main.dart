@@ -4,6 +4,7 @@ import 'package:co.injazathr.injazathr/services/true_time_service.dart';
 import 'package:co.injazathr.injazathr/utils/language_service.dart';
 import 'package:co.injazathr.injazathr/utils/app_theme.dart';
 import 'package:co.injazathr.injazathr/services/theme_service.dart';
+import 'package:co.injazathr.injazathr/services/app_lock_service.dart';
 import 'package:co.injazathr.injazathr/services/fcm_service.dart';
 import 'package:co.injazathr.injazathr/services/notification_service.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ void main() async {
   // Initialize services
   await initLanguageService();
   Get.put(ThemeService());
+  Get.put(AppLockService(), permanent: true);
   try {
     cameras = await availableCameras();
   } catch (_) {
@@ -75,6 +77,9 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeService.themeMode,
       
+      // Fingerprint / Face ID lock screen on top of every page
+      builder: (context, child) => AppLockOverlay(child: child ?? const SizedBox()),
+
       home: UpdateService.wrapWithUpgrader(const SplashScreen()),
     ));
   }

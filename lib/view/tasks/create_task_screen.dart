@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../services/theme_service.dart';
 import '../../utils/translation_helper.dart';
 import 'create_task_controller.dart';
+import 'package:co.injazathr.injazathr/widgets/searchable_dropdown.dart';
 
 /// Create a manual task: type picker → debounced employee search → optional
 /// title/description → submit. A 422 from the API surfaces as a snackbar.
@@ -102,48 +103,17 @@ class _TypeField extends StatelessWidget {
   final ThemeService theme;
   const _TypeField({required this.controller, required this.theme});
 
-  void _openPicker(BuildContext context) {
-    showModalBottomSheet(
+  Future<void> _openPicker(BuildContext context) async {
+    if (controller.loadingTypes.value || controller.types.isEmpty) return;
+    final picked = await showSearchablePicker(
       context: context,
-      backgroundColor: theme.getSurfaceColor(),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (_) => SafeArea(
-        child: Obx(() {
-          if (controller.loadingTypes.value) {
-            return const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (controller.types.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(child: Text(tr('no_results'))),
-            );
-          }
-          return ListView(
-            shrinkWrap: true,
-            children: [
-              const SizedBox(height: 8),
-              for (final t in controller.types)
-                ListTile(
-                  title: Text(t.name),
-                  trailing: controller.selectedType.value?.code == t.code
-                      ? Icon(Icons.check, color: theme.getPrimaryColor())
-                      : null,
-                  onTap: () {
-                    controller.selectType(t);
-                    Navigator.pop(context);
-                  },
-                ),
-              const SizedBox(height: 8),
-            ],
-          );
-        }),
-      ),
+      title: tr('select_task_type'),
+      items: controller.types.toList(),
+      itemLabel: (t) => t.name,
+      selected: controller.selectedType.value,
+      isSelected: (a, b) => a.code == b.code,
     );
+    if (picked != null) controller.selectType(picked);
   }
 
   @override

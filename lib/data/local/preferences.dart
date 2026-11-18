@@ -234,6 +234,8 @@ class Preferences {
     // Clear only user session data, preserve workspace and other core settings
     await clearUserData();
     await clearToken();
+    // App lock is per user — next person to log in starts with it off
+    await datacount.remove('APP_LOCK_ENABLED');
   }
 
   Future<void> clearUserSessionOnly() async {

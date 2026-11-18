@@ -8,6 +8,7 @@ import 'package:co.injazathr.injazathr/utils/translation_helper.dart';
 import '../../../services/theme_service.dart';
 
 import '../request_controller.dart';
+import 'package:co.injazathr.injazathr/widgets/searchable_dropdown.dart';
 
 class EditLetterRequestScreen extends StatelessWidget {
   final LetterRequest request;
@@ -270,11 +271,15 @@ Widget _buildApiDropdownField({
         ),
       ),
       const SizedBox(height: 8),
-      Obx(() => DropdownButtonFormField<RequestTypeOption>(
+      Obx(() => SearchableDropdownField<RequestTypeOption>(
         value: selectedValue.value,
+        items: options.toList(),
+        itemLabel: (o) => o.name,
         validator: validator,
+        isLoading: isLoading.value,
+        title: label,
+        hint: trParams('select_field', {'field': label}),
         style: TextStyle(color: themeService.getTextPrimaryColor()),
-        dropdownColor: themeService.getCardColor(),
         decoration: InputDecoration(
           filled: true,
           fillColor: themeService.getCardColor(),
@@ -309,24 +314,7 @@ Widget _buildApiDropdownField({
           )
               : null,
         ),
-        hint: Text(
-          trParams('select_field', {'field': label}),
-          style: TextStyle(color: themeService.getTextSecondaryColor()),
-        ),
-        items: options.map((RequestTypeOption option) {
-          return DropdownMenuItem<RequestTypeOption>(
-            value: option,
-            child: Text(
-              option.name,
-              style: TextStyle(color: themeService.getTextPrimaryColor()),
-            ),
-          );
-        }).toList(),
-        onChanged: isLoading.value
-            ? null
-            : (RequestTypeOption? value) {
-          selectedValue.value = value;
-        },
+        onChanged: (v) => selectedValue.value = v,
       )),
     ],
   );

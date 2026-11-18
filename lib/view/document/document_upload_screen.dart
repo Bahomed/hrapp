@@ -5,6 +5,7 @@ import 'package:co.injazathr.injazathr/utils/responsive_utils.dart';
 import '../../data/remote/response/document_response.dart';
 import '../../services/theme_service.dart';
 import 'document_upload_controller.dart';
+import 'package:co.injazathr.injazathr/widgets/searchable_dropdown.dart';
 
 class DocumentUploadScreen extends StatelessWidget {
   /// Pass an existing document to open the screen in renew mode
@@ -463,7 +464,8 @@ class DocumentUploadScreen extends StatelessWidget {
 
   // ─── Searchable bottom sheet ─────────────────────────────────────────────────
 
-  void _openSearchPicker<T>(
+  /// Shared searchable picker (lib/widgets/searchable_dropdown.dart).
+  Future<void> _openSearchPicker<T>(
     BuildContext context, {
     required String title,
     required List<T> items,
@@ -471,20 +473,18 @@ class DocumentUploadScreen extends StatelessWidget {
     required T? selectedItem,
     required ValueChanged<T?> onSelected,
     required ThemeService themeService,
-  }) {
-    Get.bottomSheet(
-      _SearchPickerSheet<T>(
-        title: title,
-        items: items,
-        itemText: itemText,
-        selectedItem: selectedItem,
-        onSelected: onSelected,
-        themeService: themeService,
-      ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+  }) async {
+    final picked = await showSearchablePicker<T>(
+      context: context,
+      title: title,
+      items: items,
+      itemLabel: itemText,
+      selected: selectedItem,
+      isSelected: (a, b) => itemText(a) == itemText(b),
     );
+    if (picked != null) onSelected(picked);
   }
+
 
   // ─── Input field ─────────────────────────────────────────────────────────────
 
@@ -827,218 +827,6 @@ class DocumentUploadScreen extends StatelessWidget {
         color: themeService.isDarkMode
             ? themeService.getDividerColor().withValues(alpha: 0.2)
             : themeService.getDividerColor().withValues(alpha: 0.1),
-      ),
-    );
-  }
-}
-
-// ─── Searchable picker bottom sheet ──────────────────────────────────────────
-
-class _SearchPickerSheet<T> extends StatefulWidget {
-  final String title;
-  final List<T> items;
-  final String Function(T) itemText;
-  final T? selectedItem;
-  final ValueChanged<T?> onSelected;
-  final ThemeService themeService;
-
-  const _SearchPickerSheet({
-    required this.title,
-    required this.items,
-    required this.itemText,
-    required this.selectedItem,
-    required this.onSelected,
-    required this.themeService,
-  });
-
-  @override
-  State<_SearchPickerSheet<T>> createState() => _SearchPickerSheetState<T>();
-}
-
-class _SearchPickerSheetState<T> extends State<_SearchPickerSheet<T>> {
-  late List<T> _filtered;
-  final TextEditingController _searchCtrl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _filtered = List.from(widget.items);
-    _searchCtrl.addListener(_onSearch);
-  }
-
-  @override
-  void dispose() {
-    _searchCtrl.removeListener(_onSearch);
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  void _onSearch() {
-    final q = _searchCtrl.text.toLowerCase();
-    setState(() {
-      _filtered = q.isEmpty
-          ? List.from(widget.items)
-          : widget.items
-              .where((item) => widget.itemText(item).toLowerCase().contains(q))
-              .toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ts = widget.themeService;
-
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
-      decoration: BoxDecoration(
-        color: ts.getSurfaceColor(),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          // Handle
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: ts.getDividerColor(),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: ts.getTextPrimaryColor(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Search field
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              controller: _searchCtrl,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: tr('search'),
-                hintStyle: TextStyle(color: ts.getTextSecondaryColor()),
-                prefixIcon: Icon(Icons.search, color: ts.getPrimaryColor()),
-                suffixIcon: _searchCtrl.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.clear, color: ts.getTextSecondaryColor()),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: ts.isDarkMode
-                    ? ts.getBackgroundColor()
-                    : ts.getBackgroundColor().withValues(alpha: 0.5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ts.getDividerColor()),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ts.getDividerColor()),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ts.getPrimaryColor(), width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              style: TextStyle(color: ts.getTextPrimaryColor()),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Results count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '${_filtered.length} ${tr('results')}',
-                style: TextStyle(fontSize: 12, color: ts.getTextSecondaryColor()),
-              ),
-            ),
-          ),
-
-          const Divider(height: 1),
-
-          // List
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off, size: 48, color: ts.getDividerColor()),
-                        const SizedBox(height: 12),
-                        Text(
-                          tr('no_results_found'),
-                          style: TextStyle(color: ts.getTextSecondaryColor(), fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _filtered.length,
-                    itemBuilder: (_, i) {
-                      final item = _filtered[i];
-                      final label = widget.itemText(item);
-                      final isSelected = widget.selectedItem != null &&
-                          widget.itemText(widget.selectedItem!) == label;
-
-                      return InkWell(
-                        onTap: () {
-                          widget.onSelected(item);
-                          Get.back();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? ts.getPrimaryColor().withValues(alpha: 0.08)
-                                : Colors.transparent,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  label,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: isSelected
-                                        ? ts.getPrimaryColor()
-                                        : ts.getTextPrimaryColor(),
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(Icons.check_circle, size: 20, color: ts.getPrimaryColor()),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
       ),
     );
   }

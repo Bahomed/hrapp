@@ -24,12 +24,21 @@ class PortalHomeController extends GetxController {
   final Rxn<Map<String, dynamic>> data = Rxn<Map<String, dynamic>>();
   bool _loading = false;
 
+  /// Forget the previous user's summary (this controller outlives logout).
+  void reset() => data.value = null;
+
   Future<void> reload() async {
     if (_loading) return;
     _loading = true;
     try {
       final r = await _my.home();
-      if (r.ok) data.value = r.json;
+      if (r.ok) {
+        data.value = r.json;
+        // tile badge: the same number (no separate assigned-overtime call)
+        final ot = r.json['overtime_pending'];
+        AppSettingsController.to.overtimePendingCount.value =
+            ot is num ? ot.toInt() : int.tryParse('${ot ?? ''}') ?? 0;
+      }
     } finally {
       _loading = false;
     }

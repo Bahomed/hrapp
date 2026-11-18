@@ -19,6 +19,8 @@ import '../profile/profile_screen.dart';
 import '../document/document_upload_controller.dart';
 import '../Manager/subordinates/subordinates_data_screen.dart';
 import 'app_settings_controller.dart';
+import '../chat/conversations_controller.dart';
+import '../chat/chat_unread_controller.dart';
 import 'widget/portal_home_summary.dart';
 
 class HomeScreenController extends SuperController {
@@ -55,6 +57,9 @@ class HomeScreenController extends SuperController {
 
     // Mobile Settings (home tiles, clock-in) — every time the home opens.
     final settings = AppSettingsController.to;
+    // New session (login / another user): never show the last user's data.
+    settings.reset();
+    PortalHomeController.to.reset();
     ever(settings.homeItems, (_) => _clampNavIndex());
     settings.reload();
     PortalHomeController.to.reload();
@@ -147,7 +152,17 @@ class HomeScreenController extends SuperController {
   void selectTabIndex(int index) {
     final tabs = visibleTabs;
     if (index < 0 || index >= tabs.length) return;
+    final previous = currentTab.value;
     currentTab.value = tabs[index];
+    // The embedded chat list is not a route, so GetX never disposes it:
+    // delete it on leaving the tab, or it keeps polling every 15 s.
+    if (previous == 'chat' && currentTab.value != 'chat' &&
+        Get.isRegistered<ConversationsController>()) {
+      Get.delete<ConversationsController>();
+    }
+    if (Get.isRegistered<ChatUnreadController>()) {
+      Get.find<ChatUnreadController>().setChatOpen(currentTab.value == 'chat');
+    }
     if (currentTab.value == 'home') {
       AppSettingsController.to.reload();
       PortalHomeController.to.reload();

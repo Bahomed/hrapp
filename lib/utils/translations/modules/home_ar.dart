@@ -49,4 +49,5 @@ const Map<String, String> homeArTranslations = {
   'no_notifications_for_filter': 'لا توجد إشعارات لهذا التصنيف',
   'no_notifications_for_filter_hint': 'باقي إشعاراتك مخفية بسبب التصفية.',
   'show_all_notifications': 'عرض الكل',
+  'select': 'اختر',
 };

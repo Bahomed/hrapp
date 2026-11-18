@@ -247,7 +247,7 @@ class HomeScreenWidget extends StatelessWidget {
           'setting': 'my_overtime',
           'badge': settings.overtimePendingCount.value,
           'onTap': () => Get.to(const AssignedOvertimeScreen())
-              ?.then((_) => settings.reload()),
+              ?.then((_) => PortalHomeController.to.reload()),
         },
         {
           'icon': Icons.task_alt_outlined,
