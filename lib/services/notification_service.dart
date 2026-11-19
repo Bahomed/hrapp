@@ -64,7 +64,12 @@ class NotificationService {
     });
 
     // Terminated state tap: navigator does NOT exist yet — store for later
-    RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+    // Timeout: with the iOS UIScene lifecycle, firebase_messaging 16.0.0 registers
+    // after UIApplicationDidFinishLaunching and getInitialMessage() never completes,
+    // which blocked runApp() (white screen).
+    RemoteMessage? initialMessage = await _firebaseMessaging
+        .getInitialMessage()
+        .timeout(const Duration(seconds: 3), onTimeout: () => null);
     if (initialMessage != null) {
       final notification = _createAppNotificationFromFCM(initialMessage);
       final exists = _notifications.any((n) => n.id == notification.id);
